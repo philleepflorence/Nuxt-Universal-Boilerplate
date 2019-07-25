@@ -1,0 +1,271 @@
+html
+{
+	body
+	{
+		form.form
+		{
+			@height: 40px;
+			
+			.form-group
+			{
+				position: relative;
+				padding-bottom: 1.8rem;
+				margin-bottom: 0;
+				
+				label
+				{
+					color: @colorsecondary;
+					font-size: 0.75rem;
+					font-weight: 500;
+					line-height: 1.5rem;
+					
+					&:before, &:after
+					{
+						border-radius: 0;
+					}
+				}
+				
+				.form-preview
+				{
+					display: none;
+				}
+				
+				.form-label
+				{
+					color: @colorsecondary;
+					font-family: @fontmain;
+					font-size: 0.75rem;
+					font-weight: 500;
+					line-height: 1rem;
+				}
+				
+				.custom-file-label {
+					background: white;
+					border-width: 2px;
+					color: @colorsecondary !important;
+					font-family: @fontmain;
+					font-size: 0.875rem;
+					font-weight: 500;
+					outline: none !important;
+					box-shadow: none !important;
+					height: @height !important;
+					margin: 0 !important;
+					padding-bottom: 0 !important;
+					padding-top: 0 !important;
+					line-height: @height !important;
+					
+					&:after {
+						color: white;
+						background: @colorprimary;
+						height: @height !important;
+						line-height: @height !important;
+						padding: 0 1rem !important;
+						cursor: pointer;
+						.transition();
+					}
+					
+					&:hover, &:active {
+						&:after {
+							background: @colorsecondary;
+						}
+					}
+				}
+				
+				.custom-file-input {
+					cursor: pointer !important;
+					
+					&:hover, &:active {
+						& ~ .custom-file-label:after {
+							background: @colorsecondary;
+						}
+					}
+				}
+				
+				.form-control
+				{
+					background: white;
+					border-width: 2px;
+					color: @colorsecondary;
+					font-family: @fontmain;
+					font-size: 0.875rem;
+					font-weight: 500;
+					outline: none !important;
+					box-shadow: none !important;
+					height: @height;
+					
+					.placeholder({
+						color: fade(@colorsecondary, 80) !important;
+					});
+					
+					&:focus, &.focus
+					{
+						border-color: @colorsecondary;
+						
+						& ~ .form-text
+						{
+							color: @colorsecondary !important;
+							opacity: 1;
+						}
+					}
+					
+					&.error
+					{
+						border-color: @colordanger !important;
+						
+						& + .form-text
+						{
+							color: @colordanger;
+						}
+					}
+					
+					&.success
+					{
+						border-color: @colorsuccess;
+						
+						& + .form-text
+						{
+							color: @colorsuccess !important;
+						}
+					}
+					
+					&.form-textarea
+					{
+						height: @height * 5;
+						resize: none;
+						overflow: hidden;
+						
+						&.form-sm
+						{
+							height: @height * 3 !important;
+							min-height: @height * 3 !important;
+							max-height: @height * 3 !important;
+						}
+					}
+					
+					&.form-dropzone
+					{
+						height: @height * 8;
+						
+						&.form-sm
+						{
+							height: @height * 5 !important;
+							min-height: @height * 5 !important;
+							max-height: @height * 5 !important;
+						}
+					}
+					
+					.custom-file-label {
+						background: transparent !important;
+					}
+					
+					&[required] 
+					{
+						.placeholder({
+							color: fade(@colorsecondary, 90);
+						});
+					}
+				}
+				
+				.form-text
+				{
+					position: absolute;
+					bottom: 0.6rem;
+					opacity: 0;
+					font-family: @fontaccent;
+					font-size: 10px;
+					font-weight: 500;
+					text-transform: uppercase;
+					line-height: 20px;
+					margin: 0;
+				}
+			}
+			
+			.form-button
+			{
+				width: 100%;
+				height: @height;
+				font-family: @fontaccent;
+				font-size: 0.875rem;
+				font-weight: 500;
+				text-transform: uppercase;
+				
+				&.form-button-inline
+				{
+					width: auto;
+				}
+				
+				&[disabled] {
+					background: @colorsecondary !important;
+					border: none !important;
+					color: lighten(@colorsecondary, 15) !important;
+					cursor: not-allowed !important;
+				}
+			}
+			
+			&.form-preview
+			{
+				.form-preview 
+				{
+					display: block !important;
+				}
+				
+				.form-select
+				{
+					&:before, &:after
+					{
+						display: none !important;
+					}
+				}
+				
+				.form-control, .form-text, .form-footer, 
+				{
+					display: none !important;
+				}
+			}
+			
+			&.form-slim
+			{
+				.form-group
+				{
+					padding-bottom: 0.6rem;
+					
+					.form-text
+					{
+						display: none !important;
+					}
+					
+					.form-no-label 
+					{
+						label {
+							display: none !important;
+						}
+					}
+					
+					label.custom-file-label {
+						display: block !important;
+					}
+				}
+			}
+			
+			&.form-expanded
+			{
+				.form-group
+				{
+					padding-bottom: 0.875rem;
+					
+					.form-text
+					{
+						display: block !important;
+					}
+					
+					.form-no-label 
+					{
+						label {
+							display: block !important;
+						}
+					}
+				}
+			}
+		}
+	}
+}

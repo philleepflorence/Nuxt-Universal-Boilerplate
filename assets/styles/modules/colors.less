@@ -1,0 +1,256 @@
+.bootstrapcolors(@n:length(@bootstrapcolors), @i:1) when (@i <= @n)
+{
+	@pair: extract(@bootstrapcolors, @i);
+	@selector: extract(@pair, 1);
+	@color: extract(@pair, 2);
+	@textcolor: extract(@pair, 3);
+	@gradientcolor: extract(@pair, 4);
+	@darken: 10%;
+	@lighten: 10%;
+	
+	.table-hover
+	{
+		.table-@{selector}
+		{
+			&:hover, & > td, & > th
+			{
+				background-color: @color;		
+			}
+		}
+	}
+		
+	.btn-@{selector} 
+	{
+		background-color: @color;
+		border-color: @color;
+		
+		&:hover, 
+		&:focus, 
+		&.active,
+		&.focus
+		{
+			box-shadow: none;				
+			background-color: darken(@color, @darken);
+			border-color: darken(@color, @darken);
+		}
+		
+		&.disabled, 
+		&:disabled
+		{
+			background-color: lighten(@color, @lighten);
+			border-color: lighten(@color, @lighten);
+		}
+	}
+	
+	.btn-outline-@{selector}
+	{
+		color: @color;
+		border-color: @color;
+		
+		&:hover, 
+		&:focus, 
+		&.active
+		{
+			box-shadow: none;	
+			color: white;			
+			background-color: @color;
+			border-color: @color;
+			
+			i {
+				color: white;
+			}
+		}
+		
+		&.disabled, 
+		&:disabled
+		{
+			color: lighten(@color, @lighten);
+		}
+	}
+	
+	.badge-@{selector}
+	{
+		background-color: @color;
+		
+		&[href]:hover,
+		&[href]:focus,
+		&[href]active,
+		&[href]focus,
+		&[type]:hover,
+		&[type]:focus,
+		&[type]active,
+		&[type]focus
+		{
+			background-color: darken(@color, @darken);
+		}
+	}
+	
+	.alert-@{selector}
+	{
+		color: fade(@textcolor, 95);
+		background-color: @color;
+		border-color: @color;
+		
+		hr
+		{
+			border-top-color: darken(@color, @darken);
+		}
+		
+		a, 
+		em,
+		strong,
+		.alert-link
+		{
+			color: darken(@color, (@darken * 2));
+		}
+		
+		.alert-timer
+		{
+			background-color: darken(@color, (@darken * 3));
+		}
+	    
+	    button[data-dismiss="alert"]
+	    {
+		    *, &:hover, &:focus, &:active 
+		    {
+			    color: fade(@textcolor, 50);
+				text-shadow: none;
+		    }
+	    }
+	    
+	    &:hover, &:focus, &:active
+	    {
+		    background-color: darken(@color, 5%);
+	    }
+	}
+	
+	.list-group-item-@{selector}
+	{
+		color: darken(@color, @darken);
+		background-color: lighten(@color, @lighten);
+		
+		&.list-group-item-action
+		{
+			&:hover, 
+			&:focus, 
+			&.active,
+			&.focus
+			{
+				background-color: darken(@color, (@darken * 1.5));
+			}
+		}
+	}
+	
+	.bg-@{selector}
+	{
+		background-color: @color !important;
+		
+		&[href]:hover,
+		&[href]:focus,
+		&[href]active,
+		&[href]focus,
+		&[type]:hover,
+		&[type]:focus,
+		&[type]active,
+		&[type]focus
+		{
+			background-color: @gradientcolor !important;
+		}
+	}
+	
+	.bg-@{selector}-hover
+	{
+		&:hover, &:active
+		{
+			background-color: @color !important;
+		}
+	}
+	
+	.bg-@{selector}-active
+	{
+		&:focus, &:active, &.active
+		{
+			background-color: @color !important;
+		}
+	}
+	
+	.bg-@{selector}-gradient
+	{
+		background: @color;
+	    background: -webkit-linear-gradient(to left, @color ,@gradientcolor);
+	    background: linear-gradient(to left, @color ,@gradientcolor);
+	}
+	
+	.border-@{selector}
+	{
+		border-color: @color !important;
+	}
+	
+	.border-@{selector}-hover
+	{
+		&:hover, &:active
+		{
+			border-color: @color !important;
+		}
+	}
+	
+	.border-@{selector}-active
+	{
+		&:focus, &:active, &.active
+		{
+			border-color: @color !important;
+		}
+	}
+	
+	.text-@{selector}
+	{
+		color: @color !important;
+		
+		&[href]:hover,
+		&[href]:focus,
+		&[href]active,
+		&[href]focus,
+		&[type]:hover,
+		&[type]:focus,
+		&[type]active,
+		&[type]focus
+		{
+			color: @gradientcolor !important;
+		}
+	}
+	
+	.text-@{selector}-hover
+	{
+		&:hover, &:active
+		{
+			&, * {
+				color: @color !important;
+			}
+		}
+	}
+	
+	.text-@{selector}-active
+	{
+		&:focus, &:active, &.active
+		{
+			&, * {
+				color: @color !important;
+			}
+		}
+	}
+	
+	.bootstrapcolors(@n, (@i + 1));
+}
+
+html
+{
+	body
+	{
+		.bootstrapcolors();
+		
+		.text-primary-bg
+		{
+			color: @colortextprimary !important;
+		}
+	}
+}

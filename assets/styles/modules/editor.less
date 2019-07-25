@@ -1,0 +1,224 @@
+html {
+	body {
+		.medium-editor-element
+		{
+			min-height: 200px !important;
+			
+			&[data-after-content]
+			{
+				&:after
+				{
+					display: none !important;
+				}
+				
+				&:empty:after
+				{
+					display: block !important;
+					position: relative !important;
+					content: attr(data-after-content) !important;
+					white-space: pre-wrap !important;
+					font-style: normal !important;
+					margin-top: 1rem;
+				}
+			}
+						
+			p
+			{
+				margin-bottom: 0.5rem;
+				
+				&:last-child, &:last-of-type
+				{
+					margin-bottom: 0;
+				}
+			}
+		}
+		
+		.medium-editor-toolbar-form
+		{
+			background: @colorgraydark;
+			
+			.medium-editor-toolbar-input
+			{
+				font-family: @fontaccent;
+				font-size: 0.875rem;
+				font-weight: 500;
+				width: ~"calc(100% - 85px)" !important;
+				height: 42px !important;
+				background: @colorgraydark;
+			}
+			
+			.medium-editor-toolbar-save, 
+			.medium-editor-toolbar-close
+			{
+				position: relative;
+				color: @colorgraydark !important;
+				width: 42px !important;
+				height: 42px !important;
+				padding: 0 !important;
+				margin: 0 !important;
+				
+				&:before
+				{
+					color: white;
+					position: absolute;
+					.materialicon();
+					.aligncenter();
+				}
+				
+				&:hover, &:active
+				{
+					&:before
+					{
+						color: @colorprimary;
+					}
+				}
+			}
+			
+			.medium-editor-toolbar-save
+			{
+				&:before
+				{
+					content: '\f12c';
+				}
+			}
+			
+			.medium-editor-toolbar-close
+			{
+				&:before
+				{
+					content: '\f156';
+				}
+			}
+		}			
+		
+		.medium-editor-toolbar
+		{
+			background: none !important;
+			.animation(fadeIn 600ms @ease);			
+			
+			&:after
+			{
+				display: none !important;
+			}
+			
+			.medium-editor-toolbar-actions
+			{	
+				text-align: center;
+				
+				li 
+				{
+					float: none;
+					display: inline-block;
+				}
+						
+				.medium-editor-action
+				{
+					position: relative;
+					width: 45px !important;
+					height: 45px !important;
+					border-radius: 50% !important;
+					background: @colorgraydark;
+					padding: 0 !important;
+					overflow: hidden;
+					margin: 0 3px;
+					color: white !important;
+					
+					b
+					{
+						display: none;
+					}
+					
+					&:after
+					{
+						position: absolute;
+						.materialicon();
+						.aligncenter();
+					}
+					
+					&[data-action="bold"]:after
+					{
+						content: '\f264';
+					}
+					
+					&[data-action="italic"]:after
+					{
+						content: '\f277';
+					}
+					
+					&[data-action="underline"]:after
+					{
+						content: '\f287';
+					}
+					
+					&[data-action="createLink"]:after
+					{
+						content: '\f337';
+					}
+					
+					&[data-action="append-h1"]:after
+					{
+						content: '\f26b';
+					}
+					
+					&[data-action="append-h2"]:after
+					{
+						content: '\f26c';
+					}
+					
+					&[data-action="append-h3"]:after
+					{
+						content: '\f26d';
+					}
+					
+					&[data-action="append-h4"]:after
+					{
+						content: '\f26e';
+					}
+					
+					&[data-action="append-h5"]:after
+					{
+						content: '\f26f';
+					}
+					
+					&[data-action="append-h6"]:after
+					{
+						content: '\f270';
+					}
+					
+					&[data-action="insertorderedlist"]:after
+					{
+						content: '\f27b';
+					}
+					
+					&[data-action="insertunorderedlist"]:after
+					{
+						content: '\f279';
+					}
+					
+					&[data-action="image"]:after
+					{
+						content: '\f8cb';
+					}
+					
+					&.medium-editor-button-active
+					{
+						background: @colorprimary !important;
+					}
+				}
+			}
+		}
+		
+		[data-editor-container]
+		{
+			position: relative;
+			
+			.medium-editor-toolbar 
+			{
+				position: absolute;
+				top: -42px;
+				left: 0;
+				min-width: 100%;
+			}
+		}
+	}
+}

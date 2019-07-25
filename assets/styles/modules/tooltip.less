@@ -1,0 +1,73 @@
+html
+{
+	body
+	{
+		.tooltip[role="tooltip"]
+	    {		    
+		    z-index: 999999;
+		    opacity: 1;	
+		    .animation(fadeIn 1s @ease);
+		    pointer-events: none;
+		    
+		    @color: fade(@colorprimary, 50);
+		    		    		    
+		    .tooltip-inner
+		    {
+			    position: relative;
+			    color: @colortextprimary;
+			    background: @colorprimary;
+			    font-family: @fontmain;
+			    font-size: 0.875rem;
+			    font-weight: @fontweightbook;
+			    padding: 0.6rem 0.9rem;
+			    max-width: 480px;
+			    box-sizing: border-box;
+			    opacity: 1;
+			    box-shadow: 0 1rem 3rem fade(black, 10) !important;
+			    
+			    a 
+			    {
+				    display: inline-block;
+				    padding: 0.33rem 0.9rem;
+				    background-color: fade(black, 10);
+				    vertical-align: middle;
+			    }
+		    }
+		    
+		    .arrow
+		    {
+			    display: none;
+		    }
+		    
+		    &.bs-tooltip-right
+		    {			    	
+			    margin-left: -6px;	    
+		    }
+		    
+		    &.bs-tooltip-bottom
+		    {			    	
+			    margin-top: -6px;	
+		    }
+		    
+		    &.bs-tooltip-top
+		    {			    	
+			    margin-bottom: -6px;	
+		    }
+		    
+		    &.bs-tooltip-left
+		    {			    	
+			    margin-right: -6px;
+		    }
+	    }
+	    
+	    [data-module="tooltip"]
+	    {
+		    .tooltip
+		    {
+			    position: relative;
+			    opacity: 1;
+			    .animation(fadeIn 1s @ease);
+		    }
+	    }
+	}
+}

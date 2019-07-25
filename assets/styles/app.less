@@ -1,0 +1,155 @@
+html
+{
+    overflow: auto;
+    max-width: 100%;
+    -webkit-text-size-adjust: none;
+    background: @mainbackgroundcolor;
+    
+    .mobile({
+	    font-size: 0.75rem !important;
+    });
+    
+    * {
+	    -webkit-font-smoothing: antialiased;
+	    -moz-osx-font-smoothing: grayscale;
+	    border-radius: 0 !important;
+	    .border-box();
+	    .animation-timing-function(@ease);
+    }
+
+	body
+	{
+		color: @maintextcolor;
+		font-family: @fontmain;
+	    max-width: 100%;
+	    overflow-x: hidden;
+	    background: @mainbackgroundcolor;
+	    
+	    /*
+		    _sizing Normalizer!
+	    */
+	    
+	    .vh-100 {
+		    height: auto !important;
+	    }
+	    
+	    .vw-100 {
+		    width: auto !important;
+	    }
+	
+	    /*
+	        Global Classes
+	    */
+	
+	    h1, h2, h3, h4, h5, h6, .font-accent 
+	    {
+	        font-family: @fontaccent;
+	    }
+	
+	    h1, h2, h3, h4, h5, h6 
+	    {
+	        font-weight: 400;
+	        position: relative;
+	        text-transform: uppercase;
+	        line-height: 1.3em;
+	        letter-spacing: 1px;
+	        
+	        &[role="page headline"]
+	        {
+		        font-size: 3vh;
+	        }
+	    }
+	    
+	    h1, h2, h3 
+	    {
+	        font-weight: 300;
+	    }
+	    
+	    small, .small {
+		    font-size: 0.875em;
+	    }
+	    
+	    .font-main
+	    {
+		    font-family: @fontmain !important;
+	    }
+	    
+	    .p {
+		    p:not(:last-child) {
+			    margin-bottom: 0.75rem;
+		    }
+	    }
+			
+		.mx-spacer
+		{
+			@imgspacer: @spacer * 2;
+			
+			figure
+			{
+				margin-left: -@spacer;
+				margin-right: -@spacer;
+				width: ~"calc(100% + @{imgspacer})";
+			}
+		
+			img
+			{
+				margin-left: -@spacer;
+				margin-right: -@spacer;
+				margin-bottom: @spacer;
+				max-width: ~"calc(100% + @{imgspacer})";
+			}
+			
+			pre
+			{
+				margin-left: -@spacer;
+				margin-right: -@spacer;
+				padding: @spacer;
+			}
+		}
+	    
+	    .spacer
+	    {
+		    padding: @spacer;
+			
+			&.spacer-row
+			{
+				margin: -@spacer;
+			}
+			
+			&.sm
+			{
+				padding: @spacer * 0.5;
+			}
+			
+			&.lg
+			{
+				padding: @spacer * 2 @spacer;
+			}
+	    }
+		
+		[role="legacy browser"]
+		{
+			display: none !important;
+		}
+		
+		.nuxt-progress {
+			.transition-duration(@duration:400ms);
+		}	
+	}
+	
+	&.leagacy-browser
+	{
+		body
+		{
+			&:before, &:after
+			{
+				content: '';				
+			}
+			
+			[role="legacy browser"]
+			{
+				display: flex !important;
+			}
+		}
+	}
+}

@@ -1,0 +1,74 @@
+
+@keyframes cluster-animation {
+	0%,100% {
+		transform:scale(1.3) rotate(0deg)
+	}
+	50% {
+		transform:scale(1.5) rotate(90deg)
+	}
+}
+
+html {
+	body {
+		[data-map-container] {
+			.cluster {
+				@size: 40px;
+				
+				width: @size !important;
+				height: @size !important;
+				.animation(fadeIn 1200ms @ease);
+				
+				img {
+					display: none !important;
+				}
+				
+				div {
+					text-align: center;
+					font-size: 14px !important;
+					color: white !important;
+					border-radius: 50% !important;
+					width: @size !important;
+					height: @size !important;
+					line-height: @size !important;
+					background-color: @colorsecondary;
+					margin: (54 - @size) * 0.5;
+					
+					&:before {
+						border: 7px solid @colorsecondary;
+						opacity: 0.2;
+						box-shadow: inset 0 0 0 4px @colorsecondary;
+						content: '';
+						position:absolute;
+						border-radius: 50% !important;
+						top: 0;
+						left: 0;
+						width: 100%;
+						height: 100%;
+						animation: cluster-animation 2.5s infinite;
+					}
+				}
+			}
+			.gm-style {
+				div[title] {
+					img {
+						.animation(fadeIn 1200ms @ease);
+					}
+				}
+				.gm-bundled-control {
+					button.gm-control-active {
+						background: @colorsecondary !important;
+						.transition();
+						
+						img {
+							.filter(@blur:0, @grayscale:0, @sepia:0, @saturate:0, @hue-rotate:0, @invert:0, @opacity:100%, @brightness:10000%, @contrast:100%);
+						}
+						
+						&:hover, &:active {
+							background: darken(@colorsecondary, 10) !important;
+						}
+					}
+				}
+			}
+		}
+	}
+}
