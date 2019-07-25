@@ -13,7 +13,7 @@
 import _ from 'lodash';
 
 module.exports = {
-	method: 'POST',
+	method: 'GET',
 	/*
 		Actual Method to run - REQUIRED
 	*/
@@ -24,12 +24,16 @@ module.exports = {
 		const admin = req.query.debug === 'test' && req.query.token === process.env.APP_TOKEN;
 		
 		const debug = req.query.debug;
-		let form = req.me;
-		let redirect = req.body.redirect || _.get(__app.data, 'redirects.route.logout.url');
+		const usercookie = await __app.helpers.core.cookie.get('user', req, res);
 		
+		let form = req.session.user || { id: usercookie };
+		let redirect = req.query.redirect || _.get(__app.data, 'redirects.route.logout.url');
+						
 		const test = await this.test(req, res);
 		
 		if (admin && !form) form = test.body.user;	
+		
+		if (!form.id) return res.redirect(redirect);
 		
 		let endpoint = __app.helpers.core.api.endpoint('auth.logout');
 		
@@ -42,17 +46,14 @@ module.exports = {
 			result: 'body'
 		}, req);
 		
-		if (response.error) return res.status(400).json({
-			error: response.error
-		}); 
+		if (response.error) {
+			res.session.error = response.error;			
+			return res.status(400).redirect(redirect);
+		}
 		
 		const user = await __app.helpers.core.logout.user(form.id, req, res);
 		
-		return res.json({
-			user: user,
-			redirect: redirect,
-			response: response
-		});
+		return res.redirect(redirect);
 	},
 	/*
 		Testing Parameters - req.header, req.query, or req.body
@@ -62,9 +63,7 @@ module.exports = {
 		return {
 			query: {
 				debug: "test",
-				token: process.env.APP_TOKEN
-			},
-			body: {
+				token: process.env.APP_TOKEN,
 				user: {
 					id: 1,
 					email: "email@philleepflorence.com"

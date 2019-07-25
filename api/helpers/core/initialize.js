@@ -1,9 +1,9 @@
 /**
  * Initialization Helper
  *
- * @author :: Philleep Florence
- * @module      :: Initialization Helper
- * @description :: Initialization Helper - Processes and normalizes incoming initialization data
+ * @author 			:: Philleep Florence
+ * @module      	:: Initialization Helper
+ * @description 	:: Initialization Helper - Processes and normalizes incoming initialization data
  *
  */
  

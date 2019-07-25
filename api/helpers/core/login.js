@@ -16,9 +16,10 @@ module.exports = {
 	async user (user, req, res, curruser) {		
 		__app.debugger.info('api.helpers.core.login.user - User ID: `%s` - Current User: `%s`', user, typeof curruser);
 		
+		const expires = Number(_.get(__app.data, 'configuration.auth.login.cookie.expires', process.env.APP_COOKIES_EXPIRE));
+		
 		if (!curruser) {
-			const endpoint = __app.helpers.core.api.endpoint('item', { collection: 'users.rows', id: user });
-			const expires = Number(_.get(__app.data, 'configuration.auth.login.cookie.expires', process.env.APP_COOKIES_EXPIRE));
+			const endpoint = __app.helpers.core.api.endpoint('item', { collection: 'users.rows', id: user });			
 			const response = await __app.helpers.core.api.connect({
 				method: 'get',
 				url: endpoint,

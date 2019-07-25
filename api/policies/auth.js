@@ -17,9 +17,9 @@ export default async function (req, res, next)
 			
 	__app.debugger.info('api.policies.auth');
 	
-	let user = _.get(req.session, 'user', {});
+	let user = req.session.user || {};
 	
-	__app.debugger.info('api.policies.auth - Session User: %s', user.username);
+	__app.debugger.info('api.policies.auth - Session User: %s', user.username || "Not Authenticated!");
 	
 	req.me = user;
 	
@@ -35,7 +35,7 @@ export default async function (req, res, next)
 	
 	const usercookie = await __app.helpers.core.cookie.get('user', req, res);
 	
-	__app.debugger.info('api.policies.auth - Cookie User ID: %s', usercookie);
+	__app.debugger.info('api.policies.auth - Cookie User ID: %s', usercookie || "No Cookie!");
 	
 	if (!usercookie) return next();
 	

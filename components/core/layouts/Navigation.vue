@@ -34,43 +34,47 @@
 		<nav id="navigation-container" class="navigation-container position-fixed position-full bg-white transform">
 			<CustomScroll name="navigation">
 				<div class="row no-gutters vh-100 navigation-row">
-					<div class="col-lg-4 col-md-4 vh-100 navigation-column">
+					
+					<div class="col-lg-4 col-md-5 vh-100 navigation-column">
 						<div class="d-flex flex-column align-items-center vh-100 pt-10">
 							<section v-for="(section, index) in navigation" v-bind:key="index" class="text-secondary navigation-section spacer w-100">
 								<h4 class="navigation-header fancy fancy-left fancy-sm fs-1rem font-weight-book text-primary">
 									<span class="text-primary">{{ index }}</span>
 								</h4>
 								<nav class="navigation-group">
-									<nuxt-link 
-										v-for="(nav, key) in section" 
-										v-bind:to="nav.path" 
+									<NavLink
+										v-for="(nav, key) in section"
+										v-bind:nav="nav" 
 										v-bind:key="nav.slug" 
-										v-bind:data-index="`${index}.${key}`"
-										v-bind="attributes(nav)" 
+										v-bind:index="`${index}.${key}`"
 										class="navigation-item d-flex align-items-center mb-2 position-relative text-primary-hover text-primary-active">
 										<span 
 											class="navigation-text lead font-weight-book" 
 											v-on:mouseover.stop="onMouseover" 
 											v-on:mouseleave.stop="onMouseleave"
-											v-bind:data-index="`${index}.${key}`">{{ nav.title }}</span>
-									</nuxt-link>
+											v-bind:data-index="`${index}.${key}`">
+											{{ nav.title }}
+										</span>
+									</NavLink>
 								</nav>
 							</section>
 						</div>
 					</div>
-					<div class="col-lg-5 col-md-5 vh-100 border-md-left navigation-column">
+					
+					<div class="col-lg-5 col-md-7 vh-100 border-lg-right navigation-column navigation-details d-none d-md-block">
 						<div class="d-flex align-items-center vh-100">
-							<div class="lead navigation-message text-center w-100 animated fadeIn" v-show="options.nav.id">
+							<div class="lead navigation-message text-center w-100" v-show="options.nav.id">
 								<span 
-									class="navigation-icon d-inline-flex justify-content-center align-items-center h-80px w-80px rounded-circle text-white" 
+									class="navigation-icon d-inline-flex justify-content-center align-items-center h-80px w-80px rounded-circle text-white animated fadeIn" 
 									v-html="options.nav.icon.icon" 
 									v-bind:style="style(options.nav, 'background-color')">
 								</span>
-								<p class="navigation-description spacer" v-html="options.nav.description"></p>
+								<p class="navigation-description spacer animated fadeIn" v-html="options.nav.description"></p>
 							</div>
 						</div>
 					</div>
-					<div class="col-lg-3 col-md-3 vh-100 border-md-left navigation-column">
+					
+					<div class="col-lg-3 col-md-7 vh-100 border-md-left navigation-column">
 						<div class="d-flex align-items-end flex-column vh-100 position-relative">
 							<footer class="navigation-footer mt-auto w-100 text-secondary bg-white">
 								<p class="p small spacer m-0">{{ configuration.application.tagline }}</p>
@@ -86,17 +90,22 @@
 
 <script>
 	import moment from 'moment';
+	import CustomScroll from "~/components/core/ui/CustomScroll.vue";	
+	import NavLink from "~/components/core/ui/NavLink.vue";
 	import Page from "~/helpers/core/page.js";
-	import CustomScroll from "~/components/core/ui/CustomScroll.vue";
 	
 	export default {
 		name: "Navigation",
 		components: {
-			CustomScroll
+			CustomScroll,
+			NavLink
 		},
 		computed: {
 			configuration () {
 				return this.$store.state.api.config;
+			},
+			domain () {
+				return process.env.SERVER_DOMAIN || window.location.origin;
 			},
 			icons () {
 				return this.$store.state.api.icons;
@@ -134,7 +143,13 @@
 			attributes (nav) {
 				let attributes = {};
 				
-				if (nav.internal) attributes['to'] = nav.path;
+				if (nav.internal) {
+					attributes['to'] = nav.path;
+				}
+				else if (nav.path.indexOf(this.domain) === 0) {
+					attributes['href'] = nav.path;
+					attributes['target'] = "_self";
+				}
 				else {
 					attributes['href'] = nav.path;
 					attributes['target'] = "_blank";
@@ -420,11 +435,35 @@
 	
     @media (min-width: @breakpoint-md)
     {
+	    .navigation-details {
+		    position: fixed;
+		    height: 100vh;
+		    width: 58.33333333% !important;
+	        left: 41.666667% !important;
+	    }
+	    
         footer.navigation-footer {
 	        position: fixed;
 	        bottom: 0;
 	        right: 0;
-	        width: ~"calc(25% - 1px)" !important;
+	        width: ~"calc(58.33333333% - 1px)" !important;
+        }
+    }
+	
+    @media (min-width: @breakpoint-lg)
+    {
+	    .navigation-details {
+		    position: fixed;
+		    height: 100vh;
+		    left: ~"calc(33.333333% - 1px)" !important;
+	        width: ~"calc(41.666667% - 1px)" !important;
+	    }
+	    
+        footer.navigation-footer {
+	        position: fixed;
+	        bottom: 0;
+	        right: 0;
+	        width: ~"calc(25% + 2px)" !important;
         }
     }	
 </style>

@@ -1,11 +1,11 @@
 /**
  * App Server Middleware - Application Boot
  *
- * @author 		:: Philleep Florence
- * @module      :: Middleware
- * @description :: App Server Middleware - Initialize global and process
- * @docs        :: https://nuxtjs.org/api/configuration-servermiddleware
- * @directory 	:: api/policies
+ * @author 			:: Philleep Florence
+ * @module      	:: Middleware
+ * @description 	:: App Server Middleware - Initialize global and process
+ * @docs        	:: https://nuxtjs.org/api/configuration-servermiddleware
+ * @directory 		:: api/policies
  *
  */
 

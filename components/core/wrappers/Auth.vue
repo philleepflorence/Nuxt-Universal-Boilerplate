@@ -15,7 +15,14 @@
 					<slot></slot>
 				</div>
 				<footer class="my-4 text-center transition auth-navigation">
-					<nuxt-link v-for="nav in navigation" v-bind:key="nav.slug" v-bind:to="nav.path" class="auth-navigation text-primary-hover mx-2 fs-12px font-weight-book">{{ nav.title }}</nuxt-link>
+					<NavLink 
+						v-for="nav in navigation" 
+						v-bind:nav="nav"
+						v-bind:key="nav.slug"
+						v-bind:index="nav.slug"
+						classname="auth-navigation text-primary-hover mx-2 fs-12px font-weight-book">
+						{{ nav.title }}
+					</NavLink>
 				</footer>
 			</section>
 		</div>		
@@ -25,13 +32,15 @@
 <script>
 	import _ from 'lodash';	
 	import ImageLoader from "~/components/core/ui/ImageLoader.vue";
+	import NavLink from "~/components/core/ui/NavLink.vue";
 	import Page from "~/helpers/core/page.js";
 	
 	export default {
 		name: "AuthCoreWrapper",
 		props: ['content'],
 		components: {
-			ImageLoader
+			ImageLoader,
+			NavLink
 		},
 		computed: {
 			configuration () {

@@ -21,5 +21,10 @@ module.exports = {
 		credentials: {
 			access_token: process.env.API_TOKEN
 		}
+	},
+	initialize: {
+		/*
+			Override the default Initialization Configuration or extend it.
+		*/
 	}
 }

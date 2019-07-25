@@ -1,13 +1,13 @@
 /**
  * Express Controller
  *
- * @author 		:: Philleep Florence
- * @module      :: Express Controller
- * @description :: Express Server Controller - Sync Nuxt Boilerplate Directories and Files.
- * @disclaimer	:: Blocking Process - Only run on a development server!
- * @docs        :: https://nuxtjs.org/api/configuration-servermiddleware
- * @directory 	:: api/controllers/app
- * @method 		:: GET
+ * @author 			:: Philleep Florence
+ * @module      	:: Express Controller
+ * @description 	:: Express Server Controller - Sync Nuxt Boilerplate Directories and Files.
+ * @disclaimer		:: Blocking Process - Only run on a development server!
+ * @docs        	:: https://nuxtjs.org/api/configuration-servermiddleware
+ * @directory 		:: api/controllers/app
+ * @method 			:: GET
  *
  */
 

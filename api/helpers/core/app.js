@@ -1,11 +1,11 @@
 /**
  * App Helper
  *
- * @author 		:: Philleep Florence
- * @module      :: App Helper
- * @description :: App Helper - Wrapper for global App methods and Configuration
- * @docs        :: https://nuxtjs.org/guide/plugins
- * @directory 	:: api/helpers/core
+ * @author 			:: Philleep Florence
+ * @module      	:: App Helper
+ * @description 	:: App Helper - Wrapper for global App methods and Configuration
+ * @docs        	:: https://nuxtjs.org/guide/plugins
+ * @directory 		:: api/helpers/core
  *
  */
  
@@ -36,6 +36,9 @@ module.exports = {
 		const debug = req.query.debug;
 	
 		const endpoint = __app.helpers.core.api.endpoint('compile');
+		
+		let initialize = _.cloneDeep(__app.config.initialize);		
+		initialize = {...initialize, ...__app.config.app.initialize};
 				
 		const response = await __app.helpers.core.api.connect({
 			method: 'post',

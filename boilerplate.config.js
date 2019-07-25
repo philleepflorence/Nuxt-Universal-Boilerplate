@@ -1,9 +1,9 @@
 /**
  * Boilerplate.js
  *
- * @author 		:: Philleep Florence
- * @description :: Nuxt Universal Boilerplate Configuration - syncs core folders and files across projects.
- * @directory 	:: api/config
+ * @author 			:: Philleep Florence
+ * @description 	:: Nuxt Universal Boilerplate Configuration - syncs core folders and files across projects.
+ * @directory 		:: api/config
  */
 
 const pkg = require('./package');
@@ -30,9 +30,6 @@ module.exports = {
 		},
 		{
 			path: "api/index.js"
-		},
-		{
-			path: "api/config"
 		},
 		{
 			path: "api/config/api.js"
