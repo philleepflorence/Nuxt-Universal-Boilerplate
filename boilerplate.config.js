@@ -38,15 +38,7 @@ module.exports = {
 			path: "api/config/api.js"
 		},
 		{
-			path: "api/config/app.js",
-			output: "api/config/__app.js"
-		},
-		{
-			path: "api/config/form.js",
-			output: "api/config/form.js"
-		},
-		{
-			path: "api/config/initialize.js"
+			path: "api/config/form.js"
 		},
 		{
 			path: "api/config/router.js"
