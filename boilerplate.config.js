@@ -18,12 +18,20 @@ module.exports = {
 	},
 	paths: [
 		{
+			path: "COMMIT.md",
+			create: true,
+			content: "# Change Log"
+		},
+		{
 			path: "package.json",
 			output: "__package.json"
 		},
 		{
 			path: "nuxt.config.js",
 			output: "__nuxt.config.js"
+		},
+		{
+			path: "__.env"
 		},
 		{
 			path: "boilerplate.config.js"

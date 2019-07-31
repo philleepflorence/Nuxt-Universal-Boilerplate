@@ -1,5 +1,5 @@
 <template>
-	<div id="error" class="v-100 bg-secondary text-white" v-if="error">
+	<div id="error" class="v-100 bg-dark text-white" v-if="error">
 		<div class="d-flex vh-100 align-items-center">
 			<section class="mx-auto max-w-640px spacer text-center animated fadeInUpSmall">
 				<header class="py-4">

@@ -1,5 +1,22 @@
-html
-{
+html {
+	@motion: cubic-bezier(0.455, 0.03, 0.427, 0.964);
+    
+    .helpers-app();
+    .helpers-animated();
+    .helpers-backgrounds();
+    .helpers-backgrounds-bootstrap();
+    .helpers-backgrounds-gradients();
+    .helpers-borders();
+	.helpers-fancy(@color: @mainbordercolor);
+    .helpers-fonts(@loop: 50);
+    .helpers-opacity(1);
+    .helpers-positions();
+    .helpers-text(); 
+    .helpers-transitions(@transition-duration: 0, @transition-delay: 10, @animation-duration: 0, @animation-delay: 20, @delay-step: 80, @duration-step: 80);
+    .helpers-sizing(@loop: 100);
+    .helpers-spacing();
+    .helpers-zindex(@loop: 30);
+    
     overflow: auto;
     max-width: 100%;
     -webkit-text-size-adjust: none;

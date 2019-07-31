@@ -28,178 +28,63 @@ module.exports = {
 		extendRoutes (routes, resolve) {
 			
 			/*
-				Articles - Feed, Filters, and Item
+				Poetry - Feed and Post Item
 			*/
 			routes.push({
-				path: '/articles',
-				component: resolve(__dirname, 'pages/articles/feed.vue'),
-				name: 'articles',
+				path: '/',
+				component: resolve(__dirname, 'pages/posts/posts.vue'),
+				name: 'posts',
 				children: [
 					{
-						path: ':id?/:slug?',
-						component: resolve(__dirname, 'pages/articles/article.vue'),
-						name: 'article'
+						path: 'posts/:slug?',
+						component: resolve(__dirname, 'pages/posts/post.vue'),
+						name: 'post'
 					}
 				]
 			});
 			
 			/*
-				Beverages - Feed, Filters, Sections, and Item
+				Categories, Category and Category Post Item
 			*/
+			
 			routes.push({
-				path: '/beverages',
-				component: resolve(__dirname, 'pages/beverages/feed.vue'),
-				name: 'beverages'
+				path: '/categories',
+				component: resolve(__dirname, 'pages/categories/categories.vue'),
+				name: 'categories'
 			});
+			
 			routes.push({
-				path: '/beverages/brands',
-				component: resolve(__dirname, 'pages/beverages/section.vue'),
-				name: 'brands',
+				path: '/categories/:category',
+				component: resolve(__dirname, 'pages/categories/category.vue'),
+				name: 'category',
 				children: [
 					{
-						path: ':id?/:slug?',
-						component: resolve(__dirname, 'pages/beverages/beverage.vue'),
-						name: 'brand'
-					}
-				]
-			});
-			routes.push({
-				path: '/beverages/cocktails',
-				component: resolve(__dirname, 'pages/beverages/section.vue'),
-				name: 'cocktails',
-				children: [
-					{
-						path: ':id?/:slug?',
-						component: resolve(__dirname, 'pages/beverages/beverage.vue'),
-						name: 'cocktail'
-					}
-				]
-			});
-			routes.push({
-				path: '/beverages/condiments',
-				component: resolve(__dirname, 'pages/beverages/section.vue'),
-				name: 'condiments',
-				children: [
-					{
-						path: ':id?/:slug?',
-						component: resolve(__dirname, 'pages/beverages/beverage.vue'),
-						name: 'condiment'
-					}
-				]
-			});
-			routes.push({
-				path: '/beverages/countries',
-				component: resolve(__dirname, 'pages/beverages/section.vue'),
-				name: 'countries',
-				children: [
-					{
-						path: ':id?/:slug?',
-						component: resolve(__dirname, 'pages/beverages/beverage.vue'),
-						name: 'country'
-					}
-				]
-			});
-			routes.push({
-				path: '/beverages/factories',
-				component: resolve(__dirname, 'pages/beverages/section.vue'),
-				name: 'factories',
-				children: [
-					{
-						path: ':id?/:slug?',
-						component: resolve(__dirname, 'pages/beverages/beverage.vue'),
-						name: 'factory'
-					}
-				]
-			});
-			routes.push({
-				path: '/beverages/garnishes',
-				component: resolve(__dirname, 'pages/beverages/section.vue'),
-				name: 'garnishes',
-				children: [
-					{
-						path: ':id?/:slug?',
-						component: resolve(__dirname, 'pages/beverages/beverage.vue'),
-						name: 'garnish'
-					}
-				]
-			});
-			routes.push({
-				path: '/beverages/manufacturers',
-				component: resolve(__dirname, 'pages/beverages/section.vue'),
-				name: 'manufacturers',
-				children: [
-					{
-						path: ':id?/:slug?',
-						component: resolve(__dirname, 'pages/beverages/beverage.vue'),
-						name: 'manufacturer'
-					}
-				]
-			});
-			routes.push({
-				path: '/beverages/products',
-				component: resolve(__dirname, 'pages/beverages/section.vue'),
-				name: 'products',
-				children: [
-					{
-						path: ':id?/:slug?',
-						component: resolve(__dirname, 'pages/beverages/beverage.vue'),
-						name: 'product'
-					}
-				]
-			});
-			routes.push({
-				path: '/beverages/regions',
-				component: resolve(__dirname, 'pages/beverages/section.vue'),
-				name: 'regions',
-				children: [
-					{
-						path: ':id?/:slug?',
-						component: resolve(__dirname, 'pages/beverages/beverage.vue'),
-						name: 'region'
-					}
-				]
-			});
-			routes.push({
-				path: '/beverages/sources',
-				component: resolve(__dirname, 'pages/beverages/section.vue'),
-				name: 'sources',
-				children: [
-					{
-						path: ':id?/:slug?',
-						component: resolve(__dirname, 'pages/beverages/beverage.vue'),
-						name: 'source'
+						path: 'posts/:slug?',
+						component: resolve(__dirname, 'pages/categories/post.vue'),
+						name: 'category-post'
 					}
 				]
 			});
 			
 			/*
-				Events - Feed, Filters, and Item
+				Tags, Tag and Tag Post Item
 			*/
+			
 			routes.push({
-				path: '/events',
-				component: resolve(__dirname, 'pages/events/feed.vue'),
-				name: 'events',
-				children: [
-					{
-						path: ':id?/:slug?',
-						component: resolve(__dirname, 'pages/events/event.vue'),
-						name: 'event'
-					}
-				]
+				path: '/tags',
+				component: resolve(__dirname, 'pages/tags/tags.vue'),
+				name: 'tags'
 			});
 			
-			/*
-				Venues - Feed, Filters, and Item
-			*/
 			routes.push({
-				path: '/venues',
-				component: resolve(__dirname, 'pages/venues/feed.vue'),
-				name: 'venues',
+				path: '/tags/:tag',
+				component: resolve(__dirname, 'pages/tags/tag.vue'),
+				name: 'tag',
 				children: [
 					{
-						path: ':id?/:slug?',
-						component: resolve(__dirname, 'pages/venues/venue.vue'),
-						name: 'venue'
+						path: 'posts/:slug?',
+						component: resolve(__dirname, 'pages/tags/post.vue'),
+						name: 'tag-post'
 					}
 				]
 			});
@@ -278,7 +163,7 @@ module.exports = {
      ** Customize the progress-bar color
      */
     loading: {
-        color: '#FFFFFF',
+        color: '#bca474',
         height: '4px',
         continuous: true
     },
@@ -370,8 +255,6 @@ module.exports = {
 	    componentPlugins: [
 		    'AlertPlugin',
 		    'ButtonPlugin', 
-		    'ButtonGroupPlugin',
-		    'CardPlugin',
 		    'DropdownPlugin',
 			'FormPlugin',
 			'FormCheckboxPlugin',
@@ -381,12 +264,7 @@ module.exports = {
 			'FormRadioPlugin',
 			'FormSelectPlugin',
 			'FormTextareaPlugin',
-			'ImagePlugin',
-			'InputGroupPlugin',
-		    'LayoutPlugin',
-		    'ListGroupPlugin',
 			'ModalPlugin',
-		    'NavbarPlugin',
 		    'PopoverPlugin',
 		    'SpinnerPlugin',
 		    'TablePlugin',

@@ -13,6 +13,7 @@
 import _ from 'lodash';
 import ip from 'ip';
 import S from 'string';
+import uuid from 'uuid-by-string';
 
 module.exports = {
 	method: 'POST',
@@ -27,6 +28,7 @@ module.exports = {
 		
 		let form = req.body.form;
 		let test = await this.test(req, res);
+		let referer = req.headers.referrer || req.headers.referer;
 		
 		if (admin && !form) form = test.body.form;
 				
@@ -56,6 +58,8 @@ module.exports = {
 		}
 		
 		form.ip_address = req.ip || ip.address();
+		form.uuid = form.uuid || uuid(Date.now() + JSON.stringify(form));
+		form.url = form.url || referer;
 		
 		let endpoint = __app.helpers.core.api.endpoint('form.submit');
 	    

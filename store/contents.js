@@ -7,7 +7,7 @@
  *
  */
  
-import _ from 'lodash';
+import { get as __Get, set as __Set } from 'lodash';
 import superagent from 'superagent';
 import uuid from 'uuid-by-string';
 
@@ -18,7 +18,7 @@ export const state = () => ({
 export const mutations = {
 	SET (state, payload) {
 		if (typeof payload.key === 'string') {
-			_.set(state, payload.key, payload.data);			
+			__Set(state, payload.key, payload.data);			
 		}
 	}
 };
@@ -48,7 +48,7 @@ export const actions = {
 		let key = `${ options.collection }.${ hash }`;
 		
 		if (cache === true) {
-			let currcache = _.get(state, key);
+			let currcache = __Get(state, key);
 			
 			if (currcache) {
 				return currcache;
@@ -70,7 +70,7 @@ export const actions = {
 			.set(options.headers)
 			.query(query);
 			
-			let data = _.get(result, options.response);
+			let data = __Get(result, options.response);
 			
 			if (cache === true && options.collection) {				
 				commit('SET', {

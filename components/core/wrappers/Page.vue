@@ -1,5 +1,5 @@
 <template>
-	<div v-bind:id="`page-${ page.name }`" class="container-fluid p-0 vh-100 page-wrapper" role="wrapper" v-bind:key="keys.page">
+	<div v-bind:id="`page-${ page.name }`" class="vh-100 page-wrapper" role="wrapper" v-bind:key="keys.element" v-if="loaded">
 		<ImageLoader 
 			v-bind:src="page.image.name" 
 			size="cdn" 
@@ -7,55 +7,35 @@
 			classname="position-fixed position-full bg-cover-center bg-cover-dark"
 			v-if="background">
 		</ImageLoader>
-		<div class="page-container">
+		<div class="page-container vh-100">
 			<slot></slot>
 		</div>	
 	</div>
 </template>
 
 <script>
-	import _ from 'lodash';	
 	import ImageLoader from "~/components/core/ui/ImageLoader.vue";
 	import Page from "~/helpers/core/page.js";
 	
 	export default {
 		name: "PageWrapper",
-		props: ['background', 'content', 'mode'],
+		props: ['page', 'background', 'mode'],
 		components: {
 			ImageLoader
-		},
-		computed: {
-			configuration () {
-				return this.$store.state.api.config;
-			},
-			labels () {
-				return this.$store.state.api.labels;
-			},
-			page () {
-				let page = Page.get(this.pages, this.$route.path);
-				
-				if (this.$props.content) page = Page.content(page, this.$props.content);
-				
-				return page;
-			},
-			pages () {
-				return this.$store.state.api.pages;
-			},
-			path () {
-				return this.$route.path;
-			}
 		},
 		data () {
 			return {
 				keys: {
-					page: Page.utils.rand()
+					element: Page.utils.rand()
 				},
-				timer: 0
+				timer: 0,
+				loaded: false,
+				rendered: false
 			};
 		},
 		methods: {
 			reload () {
-				this.key = Page.utils.rand();
+				this.keys.element = Page.utils.rand();
 			},
 			render () {
 				if (this.$props.mode) {
@@ -72,26 +52,37 @@
 						document.body.removeAttribute('data-mode');
 					}, 300);
 				}
+				
+				this.rendered = true;
 			}
 		},
 		head () {
 			return Page.metadata(this.page, this.configuration);
 		},
-		mounted () {		
-			if (window.DEBUG) console.log("debug - app.components.wrappers.Page.mounted");
+		mounted () {
+			this.loaded = this.$store.state.app.loaded;
+					
+			if (window.DEBUG) console.log("debug - app.components.core.wrappers.Page.mounted - loaded:", this.loaded);
 			
-			this.render();	
+			if (this.loaded) this.render();	
+			else {
+				const subscription = this.$store.subscribe((mutation, state) => {
+					if (mutation.payload.key === 'loaded') {
+						this.loaded = this.$store.state.app.loaded;						
+						
+						if (window.DEBUG) console.log("debug - app.components.core.wrappers.Page.loaded");
+						
+						this.render();
+						
+						setTimeout(subscription, 300);
+					}												
+				});
+			}
 		},
 		updated () {			
-			if (window.DEBUG) console.log("debug - app.components.wrappers.Page.updated");
+			if (window.DEBUG) console.log("debug - app.components.core.wrappers.Page.updated");
 			
-			this.render();		
+			if (!this.rendered) this.render();	
 		}
 	}
 </script>
-
-<style lang="less" scoped>
-	.page-wrapper {
-		box-shadow: 0 -3px 0 0 fade(black, 30);
-	}
-</style>

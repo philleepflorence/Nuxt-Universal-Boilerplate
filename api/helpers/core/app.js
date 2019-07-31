@@ -32,13 +32,13 @@ module.exports = {
 	
 		if (getcache && currcache) return currcache;
 	
-		const token = (req.query.token === process.env.APP_TOKEN);
+		const token = (req.query.token && req.query.token === process.env.APP_TOKEN);
 		const debug = req.query.debug;
 	
 		const endpoint = __app.helpers.core.api.endpoint('compile');
 		
 		let initialize = _.cloneDeep(__app.config.initialize);		
-		initialize = {...initialize, ...__app.config.app.initialize};
+		initialize = _.merge(initialize, __app.config.app.initialize);
 				
 		const response = await __app.helpers.core.api.connect({
 			method: 'post',
@@ -46,7 +46,7 @@ module.exports = {
 				reload: true
 			},
 			url: endpoint,
-			send: __app.config.initialize
+			send: initialize
 		}, req);
 		
 		const data = response.body;
@@ -67,7 +67,7 @@ module.exports = {
 			
 			if (typeof Method !== 'function' || !_.size(row)) continue;
 			
-			_.set(data, method, Method(row, req));
+			_.set(data, method, Method(row, req, data));
 		}
 		
 		const success = __app.helpers.core.cache.$.set('app', data);

@@ -4,8 +4,14 @@ html
 	{
 		[data-custom-scroll]
 		{
+			.os-scrollbar {
+				z-index: 9999999999;
+			}
+			
 			.os-scrollbar-handle {
-				border-radius: 3px !important
+				border-radius: 0 !important;
+				background: @colorprimary !important;
+				width: 4px !important;
 			}
 		}
 	}

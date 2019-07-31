@@ -1,24 +1,24 @@
 <template>
-	<div id="navigation" role="app navigation" class="position-relative off">
+	<div id="navigation" role="app navigation" class="position-relative off" v-bind:key="keys.element">
 		<nav class="navigation-controls transition position-fixed mt-2 h-50px w-100 pointer-events-none d-flex">
 			<button 
-				class="position-relative plain h-50px w-50px bg-primary bg-secondary-hover bg-secondary-active text-white navigation-controls-open" 
+				class="position-relative plain h-50px w-50px bg-primary bg-secondary-hover bg-primary-active text-white navigation-controls-open" 
 				v-html="icons.menu.open.icon.icon" 
 				v-on:click="controls('open')">
 			</button>
 			<button 
-				class="position-relative plain h-50px w-50px bg-primary bg-secondary-hover bg-secondary-active text-white navigation-controls-close position-absolute position-top position-left" 
+				class="position-relative plain h-50px w-50px bg-primary bg-secondary-hover bg-primary-active text-white navigation-controls-close position-absolute position-top position-left" 
 				v-html="icons.menu.close.icon.icon" 
 				v-on:click="controls('close')">
 			</button>
 			<button 
-				class="position-relative plain h-50px w-50px bg-primary bg-secondary-hover bg-secondary-active text-white animated fadeIn"
+				class="position-relative plain h-50px w-50px bg-primary bg-secondary-hover bg-primary-active text-white animated fadeIn"
 				v-show="options.logo">
 				<span class="filter-white"><img v-bind:src="configuration.application.favicon" class="icon-logo"></span>
 				<a class="position-absolute position-full" href="/"></a>
 			</button>
 			<button 
-				class="position-relative plain h-50px w-50px bg-primary bg-secondary-hover bg-secondary-active text-white navigation-controls-back animated fadeIn animated fadeInRight delay-1s faster" 
+				class="position-relative plain h-50px w-50px bg-primary bg-secondary-hover bg-primary-active text-white navigation-controls-back animated fadeIn animated fadeInRight delay-1s faster" 
 				v-html="icons.history.back.icon.icon" 
 				v-on:click="navigate(-1)" 
 				v-show="goback">
@@ -37,6 +37,9 @@
 					
 					<div class="col-lg-4 col-md-5 vh-100 navigation-column">
 						<div class="d-flex flex-column align-items-center vh-100 pt-10">
+							<header class="navigation-column-header spacer w-100">
+								<img v-bind:src="configuration.application.logo" class="navigation-logo w-50 pb-5">
+							</header>
 							<section v-for="(section, index) in navigation" v-bind:key="index" class="text-secondary navigation-section spacer w-100">
 								<h4 class="navigation-header fancy fancy-left fancy-sm fs-1rem font-weight-book text-primary">
 									<span class="text-primary">{{ index }}</span>
@@ -118,16 +121,29 @@
 			},
 			pages () {
 				return this.$store.state.api.pages;
+			},
+			routes () {
+				return this.$store.state.app.routes;
 			}
 		},
 		data () {
 			return {
+				keys: {
+					element: Page.utils.rand()
+				},
 				goback: false,
 				routed: false,
 				options: {
 					logo: true,
 					menu: false,
 					info: true,
+					content: {
+						description: '',
+						color: 'fff',
+						icon: {
+							icon: ''
+						}
+					},
 					nav: {
 						description: '',
 						color: 'fff',
@@ -206,11 +222,22 @@
 				else this.options.nav.id = null;
 			},
 			navigate (direction) {
+				if (window.DEBUG) console.log("debug - app.components.core.layouts.Navigation.navigate");
+				
 				direction = Number(direction);
 				
 				let page = Page.get(this.pages, this.$route.path);
 				
-				if (this.routed) this.$router.go(direction);
+				if (this.routes.parent && this.routes.history.length === 1) {
+					this.$router.push({
+						path: this.routes.parent
+					});
+					
+					this.$store.commit("app/HISTORY", false);
+				}
+				else if (this.routed) {
+					this.$router.go(direction);
+				}
 				else if (page && page.parent) {
 					let parent = Page.get(this.pages, true, page.parent);
 					
@@ -250,13 +277,6 @@
 					this.options.active = nav;
 				}, 100);
 			},
-			showlogo () {
-				clearTimeout(this.logotimer);
-				
-				setTimeout(() => {
-					this.options.logo = false;
-				}, 50000);
-			},
 			style (nav, prop) {
 				prop = prop || 'color';
 				
@@ -278,25 +298,35 @@
 		},
 		mounted () {
 			if (window.DEBUG) console.log("debug - app.components.core.layouts.Navigation.mounted");
-			
-			this.options.logo = true;
-						
+									
 			this.options.nav.id = 0;	
 			
 			if (this.$route.path !== '/') this.goback = true;
 			
 			this.routedActive();
+						
+			this.$store.commit("app/ROUTES", this.$route.path);
 			
-			this.showlogo();
-		},
-		updated () {
-			if (window.DEBUG) console.log("debug - app.components.core.layouts.Navigation.updated");
-		},
-		watch: {
-			$route (to, from) {
+			this.$store.subscribe((mutation, state) => {
+				if (mutation.type === 'app/CONTENT' && !this.options.nav.id) {
+					this.options.nav = {
+						id: mutation.payload.id,
+						color: mutation.payload.color,
+						description: mutation.payload.headline,
+						icon: mutation.payload.icon
+					};
+					this.options.content = this.options.nav;					
+				}												
+			});
+			
+			this.$router.afterEach((to, from) => {
+				this.$store.commit("app/ROUTES", to.path);
+				
 				this.controls('close');
 				
-				this.options.logo = true;
+				if (this.options.logo && process.env.LOGO_HIDE) {
+					this.options.logo = false;
+				}
 				
 				if (to.path === '/') {
 					this.goback = false;
@@ -304,13 +334,14 @@
 				}
 				else {
 					this.goback = true;
-					this.routed = false;
+					this.routed = true;
 				}
 				
 				this.routedActive();
-			
-				this.showlogo();
-			}
+			});	
+		},
+		updated () {
+			if (window.DEBUG) console.log("debug - app.components.core.layouts.Navigation.updated");
 		}
 	}	
 </script>

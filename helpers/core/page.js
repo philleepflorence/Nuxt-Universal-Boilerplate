@@ -116,7 +116,10 @@ export default {
 			let intersection = _.intersection(Paths, paths);
 			let sum = intersection.length + num;
 			
-			if (num && intersection.length && Paths.length === sum) page = row;							
+			if (num && intersection.length && Paths.length === sum) {
+				page = row;	
+				return;
+			}						
 		});	
 			
 		return _.cloneDeep(page);
@@ -139,6 +142,9 @@ export default {
 				{ hid: 'shortcut icon', rel: 'shortcut icon', type: 'image/png', content: _.get(config, 'application.favicon') }
 			],
 			meta: [
+				{ hid: 'share:description', name: 'share:description', content: description },
+				{ hid: 'share:title', name: 'share:title', content: title },
+				{ hid: 'share:image', name: 'share:image', content: _.get(page, 'image.url') },
 				{ hid: 'description', name: 'description', content: description },
 				{ hid: 'twitter:card', name: 'twitter:card', content: 'summary_large_image' },
 				{ hid: 'twitter:site', name: 'twitter:site', content: _.get(config, 'application.website') },

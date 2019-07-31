@@ -33,11 +33,11 @@ export default async function (req, res, next)
 	await __app.helpers.core.logger(process.env.SERVER_DEBUG || req.query.debug);
 	
 	let xhr = req.xhr || req.query.xhr || false;
-		
+			
 	__app.debugger.info('api.policies.app - Path: `%s` - XHR: `%s`', req.path, xhr);
 	
 	__app.data = await __app.helpers.core.app.initialize(req, res, xhr);
-	
+		
 	if (__app.data === false) return res.status(500).send("Initialization Data Failure - See Logs for details!");
 	
 	req.store = {};

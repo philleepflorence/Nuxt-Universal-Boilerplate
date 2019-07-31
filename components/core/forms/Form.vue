@@ -1,8 +1,17 @@
 <template>
 	<div class="form-container">
-		<b-form v-on:submit="submit" v-on:reset="reset" v-on:change="change" v-bind:id="id" v-bind:data-path="path" v-if="show" class="form form-slim" v-bind:autocomplete="autocomplete" v-bind:autofill="autocomplete" disabled>
-			<slot></slot>
-			<footer class="form-options mt-4" v-if="options">
+		<b-form 
+			v-on:submit.prevent="submit" 
+			v-on:reset="reset" 
+			v-on:change="change" 
+			v-bind:id="id" 
+			v-bind:data-path="path" 
+			v-if="show" 
+			class="form form-slim" 
+			v-bind:autocomplete="autocomplete"
+			v-bind:autofill="autocomplete" 
+			disabled>
+			<header class="form-options mb-2" v-if="options">
 				<div class="form-group bg-secondary p-2 cursor-hand position-relative">
 					<b-form-checkbox 
 						v-bind:id="`form-${ toggle.slug }`" 
@@ -12,23 +21,50 @@
 						switch>{{ toggle.plaintext }}
 					</b-form-checkbox>
 				</div>
+			</header>
+			<slot></slot>
+			<footer class="form-options" v-if="captcha">
+				<div class="form-group bg-secondary p-2 cursor-hand position-relative">
+					<b-form-checkbox 
+						v-bind:id="`form-captcha-${ id }`" 
+						name="form-captcha"
+						value="1" 
+						v-on:change="confirmForm"
+						v-bind:placeholder="disclaimer.confirm.name"
+						switch
+						required>{{ disclaimer.confirm.plaintext }}
+					</b-form-checkbox>
+				</div>
 			</footer>
 		</b-form>
 	</div>
 </template>
 
 <script>
-	import _ from 'lodash';	
-	import {form2js} from 'form2js';
-	import deepmerge from 'deepmerge';
+	import { get as __Get, merge as __Merge } from 'lodash';	
+	import { form2js } from 'form2js';
 	
 	import Alert from '~/helpers/core/alert.js';
 	import Page from '~/helpers/core/page.js';
 	
 	export default {
 		name: "Form",
-		components: {},
+		props: [
+			'id', 
+			'captcha',
+			'clearonsuccess',
+			'path', 
+			'elements', 
+			'autocomplete', 
+			'skipEmpty', 
+			'confirm', 
+			'options', 
+			'formdata'
+		],
 		computed: {
+			disclaimer () {
+				return this.$store.state.api.labels.app.form.disclaimer;
+			},
 			icons () {
 				return this.$store.state.api.icons;
 			},
@@ -93,6 +129,14 @@
 				this.$nextTick(() => {
 					this.show = true;
 				});
+			},
+			confirmForm (e, a) {
+				this.formElement = document.getElementById(this.formID);
+				
+				if (this.formCaptcha) {
+					this.formCaptcha = true;
+					this.formElement.classList.add('form-captcha');
+				}				
 			},
 			toggleForm (e) {
 				this.formElement = document.getElementById(this.formID);
@@ -179,7 +223,7 @@
 				
 				this.formProcessing = true;	
 				
-				let processing = _.get(this.labels, 'submit-form-processing.value');
+				let processing = __Get(this.labels, 'submit-form-processing.value');
 				
 				this.formInputs = this.formElement.querySelectorAll(this.formSelector);
 				
@@ -189,8 +233,10 @@
 				let source = this.$props.formdata;
 				
 				if (!this.formElement.changed && source) {
-					post = deepmerge(post, source);
+					post = __Merge(post, source);
 				}
+				
+				if (window.DEBUG) console.log("debug - app.components.core.forms.Form.send - post", post);
 										
 				this.$store.commit('app/SET', {
 					key: 'form.changed',
@@ -199,7 +245,7 @@
 				
 				let response = await Page.post(this.formPath, post);
 				
-				if (window.DEBUG) console.log("debug - app.components.core.forms.Form.response -", response);
+				if (window.DEBUG) console.log("debug - app.components.core.forms.Form.send - response", response);
 				
 				let message;
 				
@@ -214,6 +260,10 @@
 				if (typeof response.response === 'string') message = `${ message }<p><em>${ response.response }</em></p>`;
 				
 				let alert = response.error ? 'error' : 'success';
+				
+				if (response.success && this.clearonsuccess) {
+					this.clear();
+				}
 							
 				if (message) {
 					Alert.show(message, alert);
@@ -240,9 +290,11 @@
 			submit (e) {
 				if (window.DEBUG) console.log("debug - app.components.core.forms.Form.submit");
 				
+				if (this.captcha && !this.formCaptcha) return false;
+				
 				e.preventDefault();		
 				
-				let processing = _.get(this.labels, 'submit-form-processing.value');
+				let processing = __Get(this.labels, 'submit-form-processing.value');
 				
 				if (this.formProcessing) {
 					Alert.show(processing);
@@ -273,7 +325,6 @@
 		updated () {
 			if (window.DEBUG) console.log("debug - app.components.core.forms.Form.updated");
 		},
-		props: ['id', 'path', 'elements', 'autocomplete', 'skipEmpty', 'confirm', 'options', 'formdata'],
 		watch: {}
 	}
 </script>

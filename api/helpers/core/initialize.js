@@ -18,7 +18,7 @@ module.exports = {
 			navigation - [] - Unprocessed navigation rows
 			req - {} - Current request object to get user and path
 	*/
-	navigation: function (input, req)
+	navigation: function (input, req, data)
 	{
 		__app.debugger.info('api.helpers.core.initialize.navigation');
 		
@@ -75,28 +75,6 @@ module.exports = {
             else row.active = false;
             
             processed++;
-                        
-            /*
-	            Process CSS Selectors - Bootstrap Classes 
-            */
-            
-            row.cssclass = [];
-            
-            if (row.header) row.cssclass.push('d-none d-lg-block');
-            if (row.header_mobile) row.cssclass.push('d-sm-block');
-            if (row.header_tablet) row.cssclass.push('d-md-block');
-            
-            row.cssclass = row.cssclass.join(' ');
-            
-            /*
-	            Process CSS Inline Styles
-            */
-            
-            let rowstyle = [];
-            
-            if (typeof row.color === 'string') rowstyle.push(`color: #${ row.color }`);
-            
-            row.style = rowstyle.join(';');
                         
             /*
                 Header Navigation grouped by Parent or Self

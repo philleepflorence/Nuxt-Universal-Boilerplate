@@ -62,7 +62,10 @@
 			page () {
 				let page = Page.get(this.pages, this.$route.path);
 				
-				if (this.$props.content) page = Page.content(page, this.$props.content);
+				if (this.content) {
+					page = Page.content(page, this.content); 					
+					this.$store.commit("app/CONTENT", page);
+				}
 				
 				return page;
 			},

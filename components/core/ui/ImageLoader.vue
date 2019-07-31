@@ -36,13 +36,13 @@
 		},
 		methods: {
 			done () {
-				if (window.DEBUG) console.log("debug - app.components.core.ui.ImageLoader.done", this.src);
+				this.$store.commit('event/SET', ["image:loaded", this.src]);
 			},
 			load () {
 				let elements = this.$el.querySelectorAll('[data-image-load]');
 				
 				Image.load(this.options, elements, (len) => {
-					this.done(len);
+					this.done();
 				});
 			}
 		},
@@ -55,14 +55,7 @@
 			};
 		},
 		mounted () {
-			if (window.DEBUG) console.log("debug - app.components.core.ui.ImageLoader.mounted", this.src);
-			
 			this.load();	
-		},
-		updated () {
-			if (window.DEBUG) console.log("debug - app.components.core.ui.ImageLoader.updated", this.src);
-			
-			this.load();
 		}
 	}
 </script>

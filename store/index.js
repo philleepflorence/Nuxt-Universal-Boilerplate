@@ -7,7 +7,7 @@
  *
  */
  
-import _ from 'lodash';
+import { get as __Get, set as __Set } from 'lodash';
 
 export const state = () => ({
 	api: {},
@@ -16,10 +16,10 @@ export const state = () => ({
 
 export const mutations = {
 	INIT_STORE (state, payload) {
-		_.set(state, 'api', payload);
+		__Set(state, 'api', payload);
 	},
 	INIT_USER (state, payload) {
-		_.set(state, 'user', payload);
+		__Set(state, 'user', payload);
 	}
 };
 
@@ -39,6 +39,6 @@ export const actions = {
 
 export const getters = {
 	GET (find) {
-		return _.get(state, find);
+		return __Get(state, find);
 	}
 };

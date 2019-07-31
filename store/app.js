@@ -7,7 +7,7 @@
  *
  */
  
-import _ from 'lodash';
+import { get as __Get, set as __Set } from 'lodash';
 
 export const state = () => ({
 	endpoints: {
@@ -48,13 +48,35 @@ export const state = () => ({
 	feed: {
 		rows: 20
 	},
-	options: {}
+	options: {},
+	routes: {
+		parent: null,
+		history: []
+	}
 });
 
 export const mutations = {
+	CONTENT (state, payload) {
+		if (payload && payload.id) {
+			state.content = payload;			
+		}
+	},
+	HISTORY (state, payload) {
+		if (typeof payload === 'string') {
+			state.routes.parent = payload;			
+		}
+		else if (payload === false) {
+			state.routes.parent = null;	
+		}
+	},
+	ROUTES (state, payload) {
+		if (typeof payload === 'string') {
+			state.routes.history.push(payload);			
+		}
+	},
 	SET (state, payload) {
 		if (typeof payload.key === 'string') {
-			_.set(state, payload.key, payload.data);			
+			__Set(state, payload.key, payload.data);			
 		}
 	}
 };
