@@ -37,8 +37,10 @@
 					
 					<div class="col-lg-4 col-md-5 vh-100 navigation-column">
 						<div class="d-flex flex-column align-items-center vh-100 pt-10">
-							<header class="navigation-column-header spacer w-100">
-								<img v-bind:src="configuration.application.logo" class="navigation-logo w-50 pb-5">
+							<header class="navigation-column-header spacer w-100 pb-5">
+								<a class="position-relative d-block w-50" href="/">
+									<img v-bind:src="configuration.application.logo" class="navigation-logo d-block w-100">
+								</a>
 							</header>
 							<section v-for="(section, index) in navigation" v-bind:key="index" class="text-secondary navigation-section spacer w-100">
 								<h4 class="navigation-header fancy fancy-left fancy-sm fs-1rem font-weight-book text-primary">

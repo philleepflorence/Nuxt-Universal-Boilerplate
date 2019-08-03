@@ -5,6 +5,17 @@ require('dotenv').config();
 module.exports = {
     mode: 'universal',
     
+    globalName: 'name-of-project',
+    
+    globals: {
+		id: globalName => `${globalName}`,
+		nuxt: globalName => `$${globalName}`,
+		context: globalName => `__${globalName.toUpperCase()}__`,
+		pluginPrefix: globalName => globalName,
+		readyCallback: globalName => `onAppReady`,
+		loadedCallback: globalName => `onAppLoaded`
+    },
+    
     server: {
 	    port: process.env.SERVER_PORT,
 	    host: process.env.SERVER_HOST,
@@ -16,6 +27,7 @@ module.exports = {
     serverMiddleware: [
 	    '~/api/index.js',
 	    '~/api/policies/app',
+	    '~/api/policies/redirect',
 	    '~/api/policies/auth',
 	    '~/api/policies/page'
     ],
@@ -26,68 +38,9 @@ module.exports = {
 	router: {
 		middleware: 'auth',
 		extendRoutes (routes, resolve) {
-			
 			/*
-				Poetry - Feed and Post Item
-			*/
-			routes.push({
-				path: '/',
-				component: resolve(__dirname, 'pages/posts/posts.vue'),
-				name: 'posts',
-				children: [
-					{
-						path: 'posts/:slug?',
-						component: resolve(__dirname, 'pages/posts/post.vue'),
-						name: 'post'
-					}
-				]
-			});
-			
-			/*
-				Categories, Category and Category Post Item
-			*/
-			
-			routes.push({
-				path: '/categories',
-				component: resolve(__dirname, 'pages/categories/categories.vue'),
-				name: 'categories'
-			});
-			
-			routes.push({
-				path: '/categories/:category',
-				component: resolve(__dirname, 'pages/categories/category.vue'),
-				name: 'category',
-				children: [
-					{
-						path: 'posts/:slug?',
-						component: resolve(__dirname, 'pages/categories/post.vue'),
-						name: 'category-post'
-					}
-				]
-			});
-			
-			/*
-				Tags, Tag and Tag Post Item
-			*/
-			
-			routes.push({
-				path: '/tags',
-				component: resolve(__dirname, 'pages/tags/tags.vue'),
-				name: 'tags'
-			});
-			
-			routes.push({
-				path: '/tags/:tag',
-				component: resolve(__dirname, 'pages/tags/tag.vue'),
-				name: 'tag',
-				children: [
-					{
-						path: 'posts/:slug?',
-						component: resolve(__dirname, 'pages/tags/post.vue'),
-						name: 'tag-post'
-					}
-				]
-			});
+				Add all custom routes that do not follow the standard boilerplate!
+			*/			
 		}
 	},
 	 
@@ -245,7 +198,13 @@ module.exports = {
          ** You can extend webpack config here
          */
         extend(config, ctx) {},
-        watch: []
+        watch: [],
+        extractCSS: true,
+        filenames: {
+	        app: ({ isDev }) => isDev ? 'app.[name].js' : 'app.[chunkhash].js',
+	        chunk: ({ isDev }) => isDev ? 'chunk.[name].js' : 'chunk.[id].[chunkhash].js',
+	        css: ({ isDev }) => isDev ? 'style.[name].css' : 'style.[contenthash].css'
+        }
     },
 
     /*

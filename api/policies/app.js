@@ -32,9 +32,10 @@ export default async function (req, res, next)
 	
 	await __app.helpers.core.logger(process.env.SERVER_DEBUG || req.query.debug);
 	
-	let xhr = req.xhr || req.query.xhr || false;
+	let referrer = req.get('Referrer') || '';
+	let xhr = req.xhr || req.query.xhr || referrer.indexOf(process.env.SERVER_DOMAIN) === 0 || false;
 			
-	__app.debugger.info('api.policies.app - Path: `%s` - XHR: `%s`', req.path, xhr);
+	__app.debugger.info('api.policies.app - Path: `%s` - XHR: `%s` - REFERRER: `%s`', req.path, xhr, referrer);
 	
 	__app.data = await __app.helpers.core.app.initialize(req, res, xhr);
 		

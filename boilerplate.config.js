@@ -27,8 +27,7 @@ module.exports = {
 			output: "__package.json"
 		},
 		{
-			path: "nuxt.config.js",
-			output: "__nuxt.config.js"
+			path: "__nuxt.config.js"
 		},
 		{
 			path: "__.env"
