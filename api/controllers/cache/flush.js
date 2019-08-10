@@ -23,7 +23,7 @@ module.exports = {
 		
 		__app.debugger.info('api.controllers.cache.flush');
 		
-		if (!__app.cache) return res.status(503).json({
+		if (!__app.helpers.core.cache.$) return res.status(503).json({
 			error: "Unable to load cache!"
 		});
 		

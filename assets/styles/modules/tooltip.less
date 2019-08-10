@@ -37,36 +37,31 @@ html
 		    .arrow
 		    {
 			    display: none;
-		    }
-		    
-		    &.bs-tooltip-right
-		    {			    	
-			    margin-left: -6px;	    
-		    }
-		    
-		    &.bs-tooltip-bottom
-		    {			    	
-			    margin-top: -6px;	
-		    }
-		    
-		    &.bs-tooltip-top
-		    {			    	
-			    margin-bottom: -6px;	
-		    }
-		    
-		    &.bs-tooltip-left
-		    {			    	
-			    margin-right: -6px;
-		    }
+		    }		    
 	    }
 	    
 	    [data-module="tooltip"]
 	    {
-		    .tooltip
-		    {
+		    .tooltip {
 			    position: relative;
 			    opacity: 1;
 			    .animation(fadeIn 1s @ease);
+		    }
+	    }
+	    
+	    [data-tooltip-container="width"]
+	    {
+		    .tooltip 
+		    {
+			    width: 100% !important;
+				max-width: 100% !important;
+				min-width: 100% !important;
+					
+			    .tooltip-inner {
+				    width: 100% !important;
+					max-width: 100% !important;
+					min-width: 100% !important;
+			    }			    	
 		    }
 	    }
 	}

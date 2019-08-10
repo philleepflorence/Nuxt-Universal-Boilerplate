@@ -143,6 +143,49 @@ html {
 				padding: @spacer * 2 @spacer;
 			}
 	    }
+	    
+	    .dropdown-icon 
+	    {
+		    .dropdown-toggle {
+			    background: none !important;
+			    border: none !important;
+			    height: 40px !important;
+			    width: 40px !important;
+			    padding: 0 !important;
+			    text-align: right !important;
+			    
+			    span {
+				    i.mdi:after {
+					    text-align: right !important;
+				    }
+			    }
+			    
+			    &:after, &:before {
+				    display: none !important;
+			    }
+			    
+			    &:focus {
+				    outline: none;
+			    }
+		    }
+		    
+		    .dropdown-menu {
+			    animation: fadeIn 650ms @ease;
+			    background: @colorsecondary;
+			    border: none !important;
+			    box-shadow: 0 1px 1px fade(black, 30);
+			    
+			    .dropdown-item {
+				    color: white;
+				    font-size: 0.875rem;
+				    font-weight: 500;
+				    
+				    &:hover, &:active {
+					    background: darken(@colorsecondary, 5);
+				    }
+			    }
+		    }
+	    }
 		
 		[role="legacy browser"]
 		{

@@ -71,7 +71,7 @@
 			};
 		},
 		methods: {
-			error (e) {
+			error (e) {				
 				let data = {
 					message: e.message,
 					filename: e.filename,

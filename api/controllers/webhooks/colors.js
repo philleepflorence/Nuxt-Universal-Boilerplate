@@ -10,23 +10,22 @@
  *
  */
 
-import _ from 'lodash';
 import fs from 'fs-extra';
 
 module.exports = {
-	method: 'GET',
+	method: 'POST',
 	/*
 		Actual Method to run - REQUIRED
 	*/
 	async run (req, res) {
 		
-		__app.debugger.info('api.controllers.webhooks.color');
-		
 		const debug = req.query.debug;
 		const filename = `${ process.cwd() }/assets/styles/mixins/colors.less`;
 		
+		__app.debugger.info(`api.controllers.webhooks.color - filename: ${ filename }`);
+		
 		let endpoint = __app.helpers.core.api.endpoint('colors');
-						
+								
 		let response = await __app.helpers.core.api.connect({
 			method: 'get',
 			url: endpoint,
@@ -42,9 +41,11 @@ module.exports = {
 		if (fs.existsSync(filename))
 		{
 			fs.writeFile(filename, response, (err) => {
-				if (err) return res.status(500).send(err);
+				let error = err || response.error;
 				
-				return res.status(201).send(`'assets/styles/mixins/colors.less' was successfully updated!`);
+				if (error) return res.status(500).send(error);
+				
+				return res.status(201).send(`'${ filename }' was successfully updated!`);
 			});
 		}		
 		else return res.status(500).send("Unable to locate colors.less");

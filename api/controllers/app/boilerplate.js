@@ -17,6 +17,7 @@ import path from 'path';
 
 module.exports = {
 	method: 'GET',
+	token: true,
 	async run (req, res) {
 
 		__app.debugger.info('api.controllers.app.boilerplate');

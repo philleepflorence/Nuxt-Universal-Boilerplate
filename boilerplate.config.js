@@ -116,8 +116,16 @@ module.exports = {
 			recursive: true
 		},
 		{
-			path: "store",
-			recursive: true
+			path: "store/app.js"
+		},
+		{
+			path: "store/contents.js"
+		},
+		{
+			path: "store/event.js"
+		},
+		{
+			path: "store/index.js"
 		},
 		{
 			path: "pages/auth",

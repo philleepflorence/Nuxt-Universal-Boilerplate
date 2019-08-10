@@ -83,7 +83,7 @@
 				};
 				
 				__forEach(data, (row, property) => {
-					data[`${ property }_encoded`] = encodeURI(row);
+					if (row) data[`${ property }_encoded`] = encodeURI(row);
 				});
 				
 				if (buttons) {

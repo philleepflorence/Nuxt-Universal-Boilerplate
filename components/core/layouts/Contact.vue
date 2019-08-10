@@ -11,39 +11,58 @@
 							</span>
 						</header>
 						<section class="contact-contents plain-form w-100 bg-dark spacer transform t-delay">
-							<header class="p pb-4 text-white" v-html="headline.value"></header>
-							<Form id="contact-overlay-form" path="/api/form/submit" captcha="true" options="true" clearonsuccess="true">
-								<input type="hidden" value="contact" name="form.form" class="input">
-								<div class="form-group" v-for="input in inputs">
-									<label class="form-label form-no-label" v-bind:for="`form-${ input.slug }`" v-html="input.plaintext"></label>
-									<b-form-input 
-										class="input"
-										v-if="input.form_type == 'input'"
-										v-bind:id="`form-${ input.slug }`" 
-										v-bind:type="input.input_type" 
-										v-bind:placeholder="input.plaintext"
-										v-bind:v-model="`form.${ input.slug }`"
-										v-bind:value="input.defaultValue" 
-										v-bind:name="`form.${ input.slug }`" 
-										v-b-tooltip.focus v-bind:title="input.hint"
-										v-bind="attributes(input.attributes)">
-									</b-form-input>
-									<b-form-textarea 
-										class="input"
-										v-if="input.form_type == 'textarea'"
-										v-bind:id="`form-${ input.slug }`" 
-										v-bind:type="input.input_type" 
-										v-bind:placeholder="input.plaintext"
-										v-bind:v-model="`form.${ input.slug }`" 
-										v-bind:value="input.defaultValue" 
-										v-bind:name="`form.${ input.slug }`" 
-										v-b-tooltip.focus v-bind:title="input.hint" 
-										v-bind="attributes(input.attributes)">
-									</b-form-textarea>
-								</div>
-								<div class="form-group form-footer text-center">
-									<b-button type="submit" variant="primary" class="w-100 text-uppercase font-weight-book form-button">{{ submit.plaintext }}</b-button>
-								</div>
+							<Form 
+								id="contact-overlay-form" 
+								path="/api/form/submit" 
+								captcha="true" 
+								options="true" 
+								clearonsuccess="true" 
+								autocomplete="off"
+								data-tooltip-container="width">
+								<template v-slot:header>
+									<div class="p pb-4 text-white" v-html="headline.value"></div>
+								</template>
+								<template v-slot:inputs>
+									<div class="form-inputs">
+										<input type="hidden" value="contact" name="form.form" class="input">
+										<div v-bind:id="`form-group-${ input.slug }`" class="form-group" v-for="input in inputs">
+											<label class="form-label form-no-label" v-bind:for="`form-${ input.slug }`" v-html="input.plaintext"></label>
+											<b-form-input 
+												class="input"
+												v-if="input.form_type == 'input'"
+												v-bind:id="`form-${ input.slug }`" 
+												v-bind:type="input.input_type" 
+												v-bind:placeholder="input.plaintext"
+												v-bind:v-model="`form.${ input.slug }`"
+												v-bind:value="input.defaultValue" 
+												v-bind:name="`form.${ input.slug }`" 
+												v-b-tooltip:contact-overlay-form.focus 
+												v-bind:title="input.hint" 
+												v-bind="attributes(input.attributes)"
+												autocomplete="off">
+											</b-form-input>
+											<b-form-textarea 
+												class="input form-textarea"
+												v-if="input.form_type == 'textarea'"
+												v-bind:id="`form-${ input.slug }`" 
+												v-bind:type="input.input_type" 
+												v-bind:placeholder="input.plaintext"
+												v-bind:v-model="`form.${ input.slug }`" 
+												v-bind:value="input.defaultValue" 
+												v-bind:name="`form.${ input.slug }`" 
+												v-b-tooltip:contact-overlay-form.focus 
+												v-bind:title="input.hint"  
+												v-bind="attributes(input.attributes)"
+												autocomplete="off">
+											</b-form-textarea>
+										</div>
+									</div>
+								</template>
+								<template v-slot:footer>
+									<div class="form-group form-footer text-center">
+										<b-button type="submit" variant="primary" class="w-100 text-uppercase font-weight-book form-button">{{ submit.plaintext }}</b-button>
+									</div>
+								</template>																	
 							</Form>
 						</section>
 					</div>
@@ -135,6 +154,23 @@
 		
 		.contact-wrapper {
 			width: 90vw;
+			
+			.contact-contents {
+				.form-group {
+					.form-control {
+						color: white !important;
+						background: fade(white, 10) !important;
+						
+						&:focus {
+							border-bottom: 1px solid @colorprimary !important;
+						}
+						
+						&.error {
+							border-bottom: 1px solid @colordanger !important;
+						}
+					}
+				}
+			}
 		}
 		
 		&.off {

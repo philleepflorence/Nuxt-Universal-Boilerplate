@@ -26,6 +26,14 @@
 		</nav>
 		<nav class="navigation-controls secondary transition position-fixed position-right mt-2 h-50px w-100 pointer-events-none navigation-controls-fullscreen d-flex justify-content-end">
 			<button 
+				v-for="(button, key, index) in buttons"
+				class="position-relative plain h-50px w-50px bg-primary bg-secondary-hover bg-secondary-active text-white animated fadeInRight"
+				v-html="button.icon.icon" 
+				v-bind:data-overlay="button.url"
+				v-bind:key="button.url"
+				v-on:click="onOverlay">
+			</button>
+			<button 
 				class="position-relative plain h-50px w-50px bg-primary bg-secondary-hover bg-secondary-active text-white animated fadeInRight" 
 				v-html="icons.toggle.fullscreen.icon.icon" 
 				v-on:click="fullscreen()">
@@ -106,6 +114,9 @@
 			NavLink
 		},
 		computed: {
+			buttons () {
+				return this.$store.state.api.labels.app.button.options;
+			},
 			configuration () {
 				return this.$store.state.api.config;
 			},
@@ -130,6 +141,9 @@
 		},
 		data () {
 			return {
+				components: {
+					hash: '/#!/:overlay'
+				},
 				keys: {
 					element: Page.utils.rand()
 				},
@@ -251,10 +265,36 @@
 					path: '/'
 				});
 			},
+			onOverlay (e) {
+				let path = Page.hash(e.currentTarget.getAttribute('data-overlay'));				
+				this.$router.push({
+					path: path
+				});				
+			},
 			paths (path) {
 				path = typeof path === 'string' ? path : this.$route.path;
 				
 				return path.replace(/^\/+/, '').split('/');
+			},
+			render (to) {
+				to = to || window.location;
+				
+				this.controls('close');
+				
+				if (this.options.logo && process.env.LOGO_HIDE) {
+					this.options.logo = false;
+				}
+				
+				if (to.path === '/' && to.hash === '') {
+					this.goback = false;
+					this.routed = false;
+				}
+				else {
+					this.goback = true;
+					this.routed = true;
+				}
+				
+				this.routedActive();
 			},
 			routedActive () {
 				let elements = document.querySelectorAll('.navigation-item');
@@ -305,7 +345,7 @@
 			
 			if (this.$route.path !== '/') this.goback = true;
 			
-			this.routedActive();
+			this.render();
 						
 			this.$store.commit("app/ROUTES", this.$route.path);
 			
@@ -324,22 +364,7 @@
 			this.$router.afterEach((to, from) => {
 				this.$store.commit("app/ROUTES", to.path);
 				
-				this.controls('close');
-				
-				if (this.options.logo && process.env.LOGO_HIDE) {
-					this.options.logo = false;
-				}
-				
-				if (to.path === '/') {
-					this.goback = false;
-					this.routed = false;
-				}
-				else {
-					this.goback = true;
-					this.routed = true;
-				}
-				
-				this.routedActive();
+				this.render();
 			});	
 		},
 		updated () {

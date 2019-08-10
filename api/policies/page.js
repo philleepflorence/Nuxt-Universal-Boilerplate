@@ -9,7 +9,7 @@
  *
  */
 
-import _ from 'lodash';
+import { get as __Get } from 'lodash';
 import routeParser from 'route-parser';
  
 export default async function (req, res, next) 
@@ -17,13 +17,13 @@ export default async function (req, res, next)
 	for (let route of __app.config.router.server.middleware.exclude) if (req.path.indexOf(route) >= 0) return next();
 	
 	const user = req.me || {};
-	const pages = _.get(__app.data, 'pages');
-	const redirects = _.get(__app.data, 'redirects');
+	const pages = __Get(__app.data, 'pages');
+	const redirects = __Get(__app.data, 'redirects');
 	
 	__app.debugger.info('api.policies.page - User: %s', user.username);
 	
 	let page = __app.helpers.core.page.get(pages, req);
-	let controller = _.get(__app.controllers, `contents.${ page.slug }`);
+	let controller = __Get(__app.controllers, `contents.${ page.slug }`);
 	let route = new routeParser(page.path);
 	
 	if (page.name && controller) {
@@ -38,7 +38,7 @@ export default async function (req, res, next)
 	if (!page) return next();
 	
 	let forbidden = __app.helpers.core.page.forbidden(page, req);
-	let redirectpath = _.get(redirects, 'route.forbidden.url', '/');
+	let redirectpath = __Get(redirects, 'route.forbidden.url', '/');
 	
 	if (forbidden === 'login')
 	{

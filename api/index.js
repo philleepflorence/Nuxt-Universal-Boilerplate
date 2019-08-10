@@ -15,7 +15,7 @@ const session = require('express-session');
 const RedisStore = require('connect-redis')(session);
 const app = express();
 
-import _ from 'lodash';
+import { get as __Get } from 'lodash';
 
 global.__app = global.__app || {};
 
@@ -57,9 +57,15 @@ app.use(async function (req, res, next)
 		
 	const method = req.method.toLowerCase();
 	
+	let referrer = req.get('Referrer') || '';
+	let reload = req.query.reload || req.body.reload;
+	let xhr = req.xhr || req.query.xhr || req.body.xhr || referrer.indexOf(process.env.SERVER_DOMAIN) === 0 || true; 
+	
+	if (reload) xhr = false;
+	
 	if (!['get', 'post'].includes(method)) return res.status(405).send();
 	
-	__app.data = await __app.helpers.core.app.initialize(req, res, true);
+	__app.data = await __app.helpers.core.app.initialize(req, res, xhr);
 	
 	if (__app.data === false) return res.status(500).send("Initialization Data Failure - See Logs for details!");
 	
@@ -72,7 +78,7 @@ app.use(async function (req, res, next)
 	Excludes .git, .svn, and __boilerplate copies!
 	REQUIRED:
 		module.exports = {
-			token: @Boolean - requires APP_TOKEN to process and for testing
+			token: @Boolean|@String - requires APP_TOKEN to process and for testing or String
 			run () => {},
 			[...]
 		}
@@ -113,13 +119,15 @@ app.all('*', async function (req, res, next) {
 	
 	const data = __app.helpers.core.cache.$.get('app');
 	const path = req.path.replace(/^\/|\/$/g, '').replace(/\//g, '.');
-	const controller = _.get(__app.controllers, path);
+	const controller = __Get(__app.controllers, path);
+	const validated = typeof controller.token === "boolean" ? req.query.token === process.env.APP_TOKEN : 
+		( typeof controller.token === "string" ? req.query.token === controller.token : false );
 	
 	if (!controller) return res.status(404).send();
 	
 	if (controller.method && controller.method !== req.method) return res.status(405).send();
 	
-	if (controller.token && req.query.token !== process.env.APP_TOKEN) return res.status(403).send();
+	if (!validated) return res.status(403).send();
 	
 	__app.debugger.info('api.index - Controller: `%s`', path);
 	

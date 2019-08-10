@@ -64,10 +64,6 @@ module.exports = {
 	*/
 	async test (req, res)
 	{
-		/*
-			Faker - https://www.npmjs.com/package/faker
-		*/
-		
 		return {
 			query: {
 				debug: 'test',

@@ -1,29 +1,32 @@
 <template>
-	<div class="form-container">
+	<div class="form-container" v-bind:key="keys.element">
 		<b-form 
 			v-on:submit.prevent="submit" 
 			v-on:reset="reset" 
 			v-on:change="change" 
-			v-bind:id="id" 
+			v-bind:id="id"  
+			v-bind:key="keys.form" 
 			v-bind:data-path="path" 
 			v-if="show" 
-			class="form form-slim" 
+			class="form position-relative form-slim" 
 			v-bind:autocomplete="autocomplete"
 			v-bind:autofill="autocomplete" 
 			disabled>
-			<header class="form-options mb-2" v-if="options">
-				<div class="form-group bg-secondary p-2 cursor-hand position-relative">
-					<b-form-checkbox 
-						v-bind:id="`form-${ toggle.slug }`" 
-						v-bind:name="`form.${ toggle.slug }`"
-						v-bind:value="`form.${ toggle.slug }`" 
-						v-on:change="toggleForm"
-						switch>{{ toggle.plaintext }}
-					</b-form-checkbox>
-				</div>
+			<header class="form-header pr-2">
+				<slot name="header"></slot>
 			</header>
-			<slot></slot>
-			<footer class="form-options" v-if="captcha">
+			<nav class="dropdown position-absolute position-top position-right" v-if="options">
+				<b-dropdown v-bind:id="`dropdown-${ id }`" class="dropdown-icon" dropdown right menu-class="text-right">
+					<template slot="button-content">
+						<span class="text-white dropdown-icon" v-html="icons.toggle.options.open.icon.icon"></span>
+					</template>
+					<b-dropdown-item href="#" v-on:click="resetForm">{{ reset.plaintext }}</b-dropdown-item>
+					<b-dropdown-item href="#" v-on:click="toggleForm">{{ toggle.plaintext }}</b-dropdown-item>
+					<slot name="dropdown"></slot>
+				</b-dropdown>				
+			</nav>
+			<slot name="inputs"></slot>
+			<footer class="form-options mb-3" v-if="captcha">
 				<div class="form-group bg-secondary p-2 cursor-hand position-relative">
 					<b-form-checkbox 
 						v-bind:id="`form-captcha-${ id }`" 
@@ -36,6 +39,7 @@
 					</b-form-checkbox>
 				</div>
 			</footer>
+			<slot name="footer"></slot>
 		</b-form>
 	</div>
 </template>
@@ -73,10 +77,17 @@
 			},
 			toggle () {
 				return this.$store.state.api.labels.app.form.option['toggle-form-labels'];
+			},
+			reset () {
+				return this.$store.state.api.labels.app.form.option['reset-form'];
 			}
 		},
 		data () {
 			return {
+				keys: {
+					element: Page.utils.rand(),
+					form: Page.utils.rand()
+				},
 				show: true,
 				formID: this.$props.id,
 				formConfirm: this.$props.confirm,
@@ -93,7 +104,7 @@
 					data: true
 				});
 				
-				this.formElement = document.getElementById(this.formID);
+				this.formElement = this.$el.querySelector('form.form');
 				
 				this.formElement.changed = true;
 				
@@ -106,32 +117,18 @@
 			},
 			clear () {				
 				this.formProcessing = false;
+				
+				this.form = {};
+				
+				this.keys.form = Page.utils.rand();
 							
 				this.$store.commit('app/SET', {
 					key: 'form.changed',
 					data: false
 				});
-				
-				for (let input of this.formInputs) {
-					var type = input.type || input.getAttribute('data-type');
-				
-					if (type == 'hidden') return false;
-					
-					if (type === 'radio' || type === 'checkbox') input.checked = false;
-					else if (input.value || input.type) input.value = '';
-					else if (input.selectedIndex) input.selectedIndex = -1;
-					else if (input.hasAttribute('contenteditable')) input.innerHTML = '';
-				}
-				
-				this.form = {};
-				
-				this.show = false;
-				this.$nextTick(() => {
-					this.show = true;
-				});
 			},
 			confirmForm (e, a) {
-				this.formElement = document.getElementById(this.formID);
+				this.formElement = this.$el.querySelector('form.form');
 				
 				if (this.formCaptcha) {
 					this.formCaptcha = true;
@@ -139,7 +136,7 @@
 				}				
 			},
 			toggleForm (e) {
-				this.formElement = document.getElementById(this.formID);
+				this.formElement = this.$el.querySelector('form.form');
 				
 				if (this.formElement.classList.contains('form-slim')) {
 					this.formElement.classList.remove('form-slim');
@@ -150,7 +147,7 @@
 					this.formElement.classList.remove('form-expanded');
 				}
 			},
-			reset (e) {
+			resetForm (e) {
 				e.preventDefault();
 				
 				this.clear();
@@ -225,7 +222,7 @@
 				
 				let processing = __Get(this.labels, 'submit-form-processing.value');
 				
-				this.formInputs = this.formElement.querySelectorAll(this.formSelector);
+				this.formInputs = this.$el.querySelectorAll(this.formSelector);
 				
 				Alert.show(processing);
 				
@@ -314,18 +311,14 @@
 		mounted () {
 			if (window.DEBUG) console.log("debug - app.components.core.forms.Form.mounted");
 						
-			this.formElement = document.getElementById(this.formID);
+			this.formElement = this.$el.querySelector('form.form');
 			
 			if (!this.formElement) return false;
 					
-			this.formInputs = this.formElement.querySelectorAll(this.formSelector);
+			this.formInputs = this.$el.querySelectorAll(this.formSelector);
 			
 			if (this.formElement && this.formInputs && this.$props.autocomplete === "off") this.clear();
-		},
-		updated () {
-			if (window.DEBUG) console.log("debug - app.components.core.forms.Form.updated");
-		},
-		watch: {}
+		}
 	}
 </script>
 

@@ -23,6 +23,11 @@
 		components: {
 			ImageLoader
 		},
+		computed: {
+			configuration () {
+				return this.$store.state.api.config;
+			}
+		},
 		data () {
 			return {
 				keys: {

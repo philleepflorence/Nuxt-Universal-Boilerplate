@@ -38,7 +38,7 @@ module.exports = {
 		const endpoint = __app.helpers.core.api.endpoint('compile');
 		
 		let initialize = _.cloneDeep(__app.config.initialize);		
-		initialize = _.merge(initialize, __app.config.app.initialize);
+			initialize = _.merge(initialize, __app.config.app.initialize);
 				
 		const response = await __app.helpers.core.api.connect({
 			method: 'post',

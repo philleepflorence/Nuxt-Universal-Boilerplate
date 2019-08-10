@@ -16,7 +16,7 @@ module.exports = {
 				url: ':domain/api/analytics'
 			},
 			colors: {
-				url: ':domain/api/styles/colors/less'
+				url: ':domain/api/styles/colors'
 			},
 			compile: {
 				url: ':domain/api/compile'
@@ -82,13 +82,7 @@ module.exports = {
 			users: {
 				rows: 'app_users',
 				metadata: 'joins_app_users_metadata'
-			},
-			venues: {
-				feed: {
-					rows: 'contents_venues',
-					columns: 'id, name, slug, description, location, address, neighborhood, latitude, longitude, type.name, type.description, media.name'
-				}
-			} 
+			}
 		},			
 		credentials: {
 			access_token: process.env.API_TOKEN

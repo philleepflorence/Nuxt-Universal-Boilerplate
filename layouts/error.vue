@@ -26,7 +26,7 @@
 		},
 		computed: {
 			template () {
-				let templates = this.$store.state.api.templates.error;
+				let templates = this.$store.state.api.errors.error;
 				
 				let index = typeof this.error === "number" ? this.error : this.error.statusCode;
 				

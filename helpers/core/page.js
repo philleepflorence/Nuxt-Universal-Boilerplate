@@ -125,6 +125,16 @@ export default {
 		return _.cloneDeep(page);
 	},
 	/*
+		Get the current location pathname and hash
+		PARAMETER:
+			hash - the hash to append to the current path
+	*/
+	hash (hash) {
+		let path = _.trimEnd(window.location.pathname, '/');
+		
+		return path + hash;
+	},
+	/*
 		Process page head metadata
 		PARAMETERS:		
 			Page - Incoming Page content

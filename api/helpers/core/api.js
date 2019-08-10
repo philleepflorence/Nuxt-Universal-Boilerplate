@@ -131,7 +131,7 @@ module.exports = {
 			const duration = ( Date.now() - currtime );
 			const error = ( result.status > 300 || result.status < 200 );
 			
-			__app.debugger.info('api.helpers.core.api.connect - Duration: `%s ms`', duration);
+			__app.debugger.info('api.helpers.core.api.connect - Endpoint: `%s` - Duration: `%s ms`', options.url, duration);
 			
 			result.duration = duration;
 			

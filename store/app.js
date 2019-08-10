@@ -39,9 +39,7 @@ export const state = () => ({
 	timer: {
 		transition: 800
 	},
-	cache: {
-		
-	},
+	cache: {},
 	form: {
 		changed: false
 	},

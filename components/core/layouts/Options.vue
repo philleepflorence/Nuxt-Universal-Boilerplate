@@ -3,6 +3,7 @@
 		
 		<component v-bind:is="contact"></component>
 		<component v-bind:is="share"></component>
+		<component v-bind:is="search"></component>
 		
 		<nav class="position-fixed position-bottom position-right w-50px m-4" v-if="buttons">
 			
@@ -12,7 +13,7 @@
 					v-for="(button, key, index) in buttons"
 					v-on:click="onOverlay"
 					v-bind:key="button.slug"
-					v-bind:data-overlay="button.slug">
+					v-bind:data-overlay="button.url">
 					<span 
 						class="text-white"
 						v-html="button.icon.icon">
@@ -51,9 +52,6 @@
 		},
 		data () {
 			return {
-				components: {
-					hash: '/#!/:overlay'
-				},
 				loaded: false,
 				keys: {
 					element: Page.utils.rand()
@@ -92,13 +90,16 @@
 			path () {
 				return this.$route.path;
 			},
+			search () {
+				return () => import(process.env.OPTIONS_SEARCH);
+			},
 			share () {
 				return () => import(process.env.OPTIONS_SHARE);
 			}
 		},
 		methods: {
 			close (mode = "overlays") {
-				if (window.DEBUG) console.log("debug - app.components.core.layouts.Options.close", mode);
+				if (window.DEBUG) console.log("debug - app.components.core.layouts.Options.close");
 				
 				let $overlays = this.$el.querySelectorAll('.options-overlay');
 				
@@ -113,9 +114,7 @@
 				
 				this.close();
 				
-				let overlay = e.currentTarget.getAttribute('data-overlay');
-				let path = this.components.hash.replace(':overlay', overlay);
-				
+				let path = Page.hash(e.currentTarget.getAttribute('data-overlay'));				
 				this.$router.push({
 					path: path
 				});				
@@ -123,16 +122,17 @@
 			overlay (location) {
 				if (window.DEBUG) console.log("debug - app.components.core.layouts.Options.overlay");
 				
+				this.close();
+				
 				location = location || window.location;
 				
 				if (location.hash) {
 					let overlay = location.hash.replace('#!/', '');
-					
-					overlay = overlay.split('/').shift();
+						overlay = overlay.split('/').shift();
 					
 					let $overlay = this.$el.querySelector(`[role="app ${ overlay }"]`);
 					let $buttons = this.$el.querySelectorAll('.options-overlay-button');
-					let $button = this.$el.querySelector(`[data-overlay="${ overlay }"]`);
+					let $button = this.$el.querySelector(`[data-overlay="/#!/${ overlay }"]`);
 					
 					__forEach($buttons, (button) => {
 						button.classList.remove('active');
@@ -143,7 +143,7 @@
 						
 						setTimeout(() => {
 							$overlay.classList.remove('off');
-							$button.classList.add('active');							
+							if ($button) $button.classList.add('active');							
 						}, 300);						
 					}
 				}
@@ -151,8 +151,6 @@
 					this.options.open = false;
 					
 					this.$el.setAttribute('data-open', 'false');
-					
-					this.close();
 				}
 			},
 			onToggle () {
@@ -178,7 +176,7 @@
 				let tdelay = 150;
 				
 				let $buttons = this.$el.querySelectorAll('.options-overlay-button');
-				let $icons = this.$el.querySelectorAll('.options-button-open');
+				let $icons = this.$el.querySelectorAll('span.options-button-open');
 								
 				if ($icons.length && delay) {
 					$icons[index].classList.add('active');
@@ -217,7 +215,6 @@
 			this.$router.afterEach((to, from) => {
 				if (window.DEBUG) console.log("debug - app.components.core.layouts.Options.afterEach");
 				
-				this.close();				
 				this.overlay(to);
 			});	
 			
@@ -225,23 +222,22 @@
 				this.render();
 			}	
 			else if (this.configuration.overlay) {
+				if (window.DEBUG) console.log("debug - app.components.core.layouts.Options.subscription");
+				
 				const subscription = this.$store.subscribe((mutation) => {
-					if (mutation.type = 'app/SET' && mutation.payload.key === 'loaded') {
-						this.loaded = true;						
-						
+					if (mutation.type === "app/SET" && mutation.payload.key === "loaded") {					
 						if (window.DEBUG) console.log("debug - app.components.core.layouts.Options.loaded");
-												
-						if (!this.rendered) this.render();
 						
-						setTimeout(subscription, 300);
+						this.loaded = true;	
+						
+						setTimeout(() => {
+							if (!this.rendered) this.render();
+							
+							subscription();
+						}, 300);
 					}												
 				});
 			}
-		},
-		updated () {
-			if (window.DEBUG) console.log("debug - app.components.core.layouts.Options.updated");
-			
-			if (!this.rendered) this.render();
 		}
 	}
 </script>

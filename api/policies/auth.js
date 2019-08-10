@@ -9,7 +9,7 @@
  *
  */
 
-import _ from 'lodash';
+import { get as __Get } from 'lodash';
  
 export default async function (req, res, next) 
 {
@@ -52,7 +52,7 @@ export default async function (req, res, next)
 		url: endpoint
 	}, req);
 	
-	user = _.get(response, 'data.data', {});
+	user = __Get(response, 'data.data', {});
 	
 	if (!user.id) return next();
 	
