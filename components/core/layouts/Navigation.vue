@@ -279,19 +279,23 @@
 			render (to) {
 				to = to || window.location;
 				
+				if (window.DEBUG) console.log("debug - app.components.core.layouts.Navigation.render");
+				
+				const home = (!to.path || to.path === '/') && (!to.hash || to.hash === '');
+				
 				this.controls('close');
 				
-				if (this.options.logo && process.env.LOGO_HIDE) {
-					this.options.logo = false;
-				}
-				
-				if (to.path === '/' && to.hash === '') {
+				if (home) {
 					this.goback = false;
 					this.routed = false;
 				}
 				else {
 					this.goback = true;
 					this.routed = true;
+					
+					if (this.options.logo && process.env.LOGO_HIDE) {
+						this.options.logo = false;
+					}
 				}
 				
 				this.routedActive();

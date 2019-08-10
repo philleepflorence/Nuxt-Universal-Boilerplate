@@ -23,6 +23,9 @@ export default async function (req, res, next)
 	__app.debugger.info('api.policies.page - User: %s', user.username);
 	
 	let page = __app.helpers.core.page.get(pages, req);
+	
+	if (!page) return next();
+	
 	let controller = __Get(__app.controllers, `contents.${ page.slug }`);
 	let route = new routeParser(page.path);
 	
@@ -34,8 +37,6 @@ export default async function (req, res, next)
 	__app.debugger.info('api.policies.page - Page: %s', page.name);
 	
 	if (req.query.debug === 'json' && req.query.token === process.env.APP_TOKEN) return res.json(req.contents);
-	
-	if (!page) return next();
 	
 	let forbidden = __app.helpers.core.page.forbidden(page, req);
 	let redirectpath = __Get(redirects, 'route.forbidden.url', '/');
