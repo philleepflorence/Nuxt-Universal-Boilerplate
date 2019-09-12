@@ -1,12 +1,32 @@
 /**
  * Api.js
  *
- * @author 		:: Philleep Florence
- * @description :: Holds Form Validation Configuration.
- * @directory 	:: api/config
+ * @author 			:: Philleep Florence
+ * @description 	:: Holds Form Validation Configuration.
+ * @directory 		:: api/config
+ * @parameters 		
+ * inputs 			:: Inputs or data to add to form submissions before sending to the API - use for sensitive data
+ * methods	 		:: Process - middleware configuration
+ * validations 		:: Validation configuration - overrides the configuration from the API Configuration
  */
 
 module.exports = {
+	inputs: {
+		contact: {
+			save: true
+		},
+		subscribe: {
+			save: true
+		}
+	},
+	methods: {
+		subscribe (form, template) {
+			return {...form, 
+				subject: template.title,
+				message: form.email
+			};
+		}
+	},
 	validations: {
 		comment: [
 			{

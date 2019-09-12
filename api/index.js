@@ -121,13 +121,13 @@ app.all('*', async function (req, res, next) {
 	const path = req.path.replace(/^\/|\/$/g, '').replace(/\//g, '.');
 	const controller = __Get(__app.controllers, path);
 	const validated = typeof controller.token === "boolean" ? req.query.token === process.env.APP_TOKEN : 
-		( typeof controller.token === "string" ? req.query.token === controller.token : false );
+		( typeof controller.token === "string" ? req.query.token === controller.token : true );
 	
-	if (!controller) return res.status(404).send();
+	if (!controller) return res.status(404).send("Controller Not Found!");
 	
-	if (controller.method && controller.method !== req.method) return res.status(405).send();
+	if (controller.method && controller.method !== req.method) return res.status(405).send("Invalid HTTP Method!");
 	
-	if (!validated) return res.status(403).send();
+	if (!validated) return res.status(403).send("Not Validated! - Token mismatch...");
 	
 	__app.debugger.info('api.index - Controller: `%s`', path);
 	

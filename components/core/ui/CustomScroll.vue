@@ -1,90 +1,253 @@
 <template>
-	<div class="custom-scroll position-absolute position-full" data-custom-scroll="name">
+	<div class="custom-scroll position-absolute position-full" v-bind:data-custom-scroll="name">
 		<div class="custom-scroll-content position-relative">
 			<slot></slot>
 			<footer class="position-relative custom-scroll-footer spacer text-center" v-if="scrollable">
-				<button class="btn w-80px h-80px rounded-circle bg-primary bg-primary-active bg-secondary-hover shadow text-white" v-html="icons.scroll.up.icon.icon" v-on:click="scrollup"></button>
+				<button class="btn w-50px h-50px rounded-circle bg-primary text-white position-absolute position-bottom position-left m-4" v-html="icons.scroll.up.icon.icon" v-on:click="scrollup"></button>
 			</footer>
 		</div>
 	</div>
 </template>
 
 <script>
-	import { cloneDeep as __cloneDeep } from 'lodash';
+	import { cloneDeep as __cloneDeep, set as __Set, get as __Get } from 'lodash';
 	import Page from "~/helpers/core/page.js";
 	
 	export default {
 		name: "CustomScroll",
-		props: ['name', 'options', 'overlay'],
+		props: [
+			'name', 
+			'options', 
+			'overlay',
+			'direction',
+			'route'
+		],
+		data () {
+			return {
+				keys: {
+					element: Page.utils.rand()
+				},
+				scrollable: false,
+				custom: false,
+				axis: 'y'
+			};
+		},
 		computed: {
 			icons () {
 				return this.$store.state.api.icons;
+			},
+			mobile () {
+				return (typeof window.orientation !== "undefined") || (window.navigator.userAgent.indexOf('IEMobile') !== -1);
+			},
+			position () {
+				let position;
+				
+				if (this.custom) {
+					position = {};
+					
+					position[this.axis] = 0;
+				}
+				else {
+					position = this.axis === "y" ? "scrollTop" : "scrollLeft";
+				}
+				
+				return position;
+			},
+			scrollbar () {
+				if (this.mobile) return 0;
+				
+				if (typeof this.$store.state.app.scrollpane === "boolean") return this.$store.state.app.scrollpane;
+				
+				document.body.style.minHeight = '101vh';
+				
+				let window = document.createElement("div");
+				
+				window.className = 'scroll-pane-check scroll-pane-window';
+				document.body.appendChild(window);
+				
+				let viewport = document.createElement("div");
+				
+				viewport.className = 'scroll-pane-check scroll-pane-viewport';
+				document.body.appendChild(viewport);
+				
+				let offset = viewport.offsetWidth - window.offsetWidth;
+				
+				this.$store.commit('app/SET', {
+					key: "scrollpane",
+					data: offset
+				});
+				
+				document.body.removeChild(window);
+				document.body.removeChild(viewport);
+				document.body.style.minHeight = '100vh';
+				
+				return offset;
 			}
 		},
 		methods: {
-			render (prop) {
-				if (prop === true && this.overlay && this.$content) {
-					this.scrollable = true;
+			initialize () {
+				if (this.direction) this.axis = this.direction;
+			
+				this.$content = this.$el.querySelector('.custom-scroll-content');
+				this.custom = ( this.scrollbar > 0 && !this.mobile && typeof window.OverlayScrollbars === 'function' );
+				
+				let input = this.options || {};
+				
+				if (this.axis === "x") {
+					input = Object.assign(input, {
+						x: "scroll",
+						y: "hidden"
+					});
 				}
-				else if (prop === false && this.overlay && this.$content) {
-					this.scrollable = true;
+				
+				const options = __cloneDeep(this.$store.state.app.scrollBar.options, input);
+				const chain = this.axis === "y" ? { vertical: true } : { horizontal: true }
+				
+				if (this.overlay) {
+					options.onContentSizeChanged = () => { this.render() };
 				}
-				else if (!prop && this.overlay && this.$content) {
-					let rect = this.$content.getBoundingClientRect();
-					let Rect = this.$el.parentElement;
+				
+				if (!this.custom) {
+					this.$el.classList.add('scroll');
+					this.$el.scrollTo = 0;
 					
-					if (Rect.height < rect.height) {
-						this.scrollable = true;
+					window.addEventListener('resize', this.render);
+					
+					if (this.axis === "y") {
+						this.$el.addEventListener('mouseenter', this.mouseenter);
+						this.$el.addEventListener('mouseleave', this.mouseleave);
+						window.addEventListener('wheel', this.wheel, { passive: false });
 					}
-					else {
-						this.scrollable = false;
-					}
-				}				
+				}
+				else if (this.$el && this.custom) {
+					this.$el.OverlayScrollbars = OverlayScrollbars(this.$el, options);
+					
+					if (this.overlay) {	
+						this.$el.OverlayScrollbars.addExt('scroll-chain', chain);
+						this.$el.OverlayScrollbars.options('callbacks.onOverflowChanged', (e) => {
+							this.render(e.clipped);
+						});
+					}					
+				}
+				
+				this.render();
+			},
+			mouseenter (e) {
+				this.$el.scrollactive = true;
+			},
+			mouseleave (e) {
+				this.$el.scrollactive = null;
+			},
+			prevent (e) {
+				e.stopPropagation();
+				e.preventDefault();
+				e.returnValue = false;
+				
+				return false;
+			},
+			render (clipped) {
+				let height = Math.max(this.$el.scrollHeight, this.$content.offsetHeight);
+				
+				if (clipped === true && this.overlay && this.$content) {
+					this.scrollable = true;
+				}
+				else if (this.overlay && this.$content && height > this.$el.offsetHeight) {
+					this.scrollable = true;
+				}
+				else {
+					this.scrollable = false;
+				}
 			},
 			scrollup (e) {
 				let duration = 600;
 				let rect = e.currentTarget.getBoundingClientRect();
 				
-				if (window.innerHeight < rect.top) {
+				if (rect.top > this.$el.offsetHeight) {
 					duration = Math.floor(rect.top * 0.80);
 				}
 				
-				this.$el.OverlayScrollbars.scroll({ y: 0 }, duration);
+				if (this.custom) {
+					this.$el.OverlayScrollbars.scroll(this.position, duration);
+				}		
+				else {
+					this.$el[this.position] = 0;
+				}
+			},
+			wheel (e) {
+				if (this.$el.scrollactive) {
+					let up = e.wheelDelta > 0;
+					let down = e.wheelDelta < 0;
+					let scrollTop = this.$el.scrollTop;
+					let offset = (this.$el.clientHeight + scrollTop);
+					
+					if (down && e.deltaY > (this.$el.scrollHeight - this.$el.clientHeight - scrollTop)) {
+						this.$el.scrollTop = this.$el.scrollHeight;
+						
+						return this.prevent(e);
+					}
+					else if (up && e.wheelDelta > scrollTop) {
+						this.$el.scrollTop = 0;
+						
+						return this.prevent(e);
+					}					
+				}
 			}
-		},
-		data () {
-			return {
-				keys: {
-					element: 0
-				},
-				scrollable: false
-			};
 		},
 		mounted () {
-			this.$content = this.$el.querySelector('.custom-scroll-content');
+			this.initialize();
 			
-			let input = this.options || {};
-			const options = __cloneDeep(this.$store.state.app.scrollBar.options, input);
-			
-			if (this.overlay) {
-				options.onContentSizeChanged = () => { this.render() };
-			}
-			
-			if (this.$el && window.OverlayScrollbars) {
-				this.$el.OverlayScrollbars = OverlayScrollbars(this.$el, options);	
-				this.$el.OverlayScrollbars.addExt('scroll-chain', { vertical: false, horizontal: false });
-				
-				if (this.overlay) {
-					this.$el.OverlayScrollbars.options('callbacks.onOverflowChanged', (e) => {
-						this.render(e.clipped);
-					});
+			const subscribe = this.$store.subscribe((mutation, state) => {
+				if (mutation.type === "event/SET" && mutation.payload[0] === "app:rendered") {
+					this.render();
+					subscribe();
 				}
-				
-				this.render();	
+			});
+			
+			if (this.route) {	
+				this.$router.beforeEach((to, from, next) => {
+					if (Page.path(to.path) !== Page.path(from.path)) {
+						if (this.custom) {
+							this.$el.OverlayScrollbars.scroll(this.position, 0);
+						}
+						else {
+							this.$el.classList.add('scroll-top');
+							this.$el[this.position] = 0;
+						}
+					}
+					next();
+				});
+				this.$router.afterEach((to, from) => {
+					if (!this.custom && Page.path(to.path) !== Page.path(from.path)) {
+						this.$el.classList.remove('scroll-top');
+					}
+				});
 			}
 		},
+		updated () {
+			if (!this.custom) {
+				this.$el.classList.add('scroll');
+			}
+			
+			if (this.$el.OverlayScrollbars) {
+				this.$el.OverlayScrollbars.update();
+			}
+			
+			this.render();
+		},
 		beforeDestroy () {
-			this.$el.OverlayScrollbars = null;
+			if (this.$el.OverlayScrollbars) {
+				this.$el.OverlayScrollbars.destroy();
+			}
+			
+			if (!this.custom) {
+				window.removeEventListener('resize', this.render);
+				
+				if (this.axis === "y") {
+					this.$el.removeEventListener('mouseenter', this.mouseenter);
+					this.$el.removeEventListener('mouseleave', this.mouseleave);
+					window.removeEventListener('wheel', this.wheel, { passive: false });
+				}
+			}		
 		}
 	}
 </script>
@@ -93,13 +256,46 @@
 	.custom-scroll {
 		transition-property: none;
 		
+		&.scroll {
+			overflow: scroll !important;
+			overscroll-behavior: contain !important;
+			scroll-behavior: smooth !important;
+		}
+		
+		&.scroll-top {
+			scroll-behavior: auto !important;
+		}
+		
 		.custom-scroll-content {
 			transition-property: none;			
 		}
 		
 		.custom-scroll-footer {
-			padding-bottom: 15rem;
+			padding: 3rem 0;
 			z-index: 100;
 		}		
+	}
+	.custom-scroll-debug {
+		width: 100px;
+		height: 100px;
+		overflow: scroll;
+		position: absolute;
+		top: -9999px;
+	}
+				
+	.scroll-pane-check {
+		position: fixed;
+		height: 10px;
+		top: 0;
+		pointer-events: none;
+		z-index: 100;
+		
+		&.scroll-pane-window {
+			width: 100%;
+		}
+		
+		&.scroll-pane-viewport {
+			width: 100vw;
+		}
 	}
 </style>

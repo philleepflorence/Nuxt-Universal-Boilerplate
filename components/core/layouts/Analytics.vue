@@ -33,7 +33,7 @@
 			},
 			page () {
 				let pages = this.$store.state.api.pages;
-				let page = Page.get(pages, this.$route.path) || {};
+				let page = Page.get(pages, Page.path()) || {};
 				
 				return page;
 			},

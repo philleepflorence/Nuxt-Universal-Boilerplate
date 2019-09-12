@@ -1,23 +1,32 @@
 <template>
-	<div id="share" class="options-overlay position-fixed position-full bg-gray-90 off" role="app share" v-bind:key="keys.element">
-		<div class="share-container position-relative position-absolute position-center" v-if="buttons">
-			<button 
-				class="plain bg-white text-primary h-50px w-50px position-absolute position-center animated fadeIn"
-				v-html="labels.app.button.options.share.icon.icon">
-			</button>
-			<a class="position-relative transform" 
-				v-bind:href="nav.url" 
-				v-for="nav in buttons" 
-				v-bind:key="nav.id"
-				target="_blank"
-				data-on-circle="share">
-				<button 
-					class="plain bg-primary bg-primary-active bg-secondary-hover text-white h-50px w-50px"
-					v-html="nav.icon.icon"
-					v-b-tooltip.hover v-bind:title="nav.description">
-				</button>
-			</a>
+	<div id="share" class="options-overlay position-fixed position-full bg-dark off" role="app share" v-bind:key="keys.element">
+		<a href="#" class="position-absolute position-full" v-on:click.prevent.stop="close"></a>
+		<div class="share-container d-flex position-absolute position-full align-items-center justify-content-center pointer-events-none" v-if="buttons">
+			<section class="d-flex-item position-relative">
+				<header class="share-contents-header spacer transform t-delay">
+					<span 
+						class="d-flex align-items-center justify-content-center bg-white text-secondary h-70px w-70px mx-auto rounded-circle" 
+						v-html="labels.app.button.options.share.icon.icon">
+					</span>
+				</header>
+				<div class="share-row max-w-600px w-100 row no-gutters justify-content-center mx-auto">
+					<a class="share-anchor col-lg-4 col-sm-6 t-delay pointer-events-auto transition"
+						v-for="nav in buttons"
+						v-bind:href="nav.url"
+						v-bind:key="nav.id"
+						target="_blank">
+						<div class="bg-primary px-2 py-4 text-center text-white">
+							<button class="plain bg-white-40 h-40px w-40px rounded-circle text-primary" v-html="nav.icon.icon"></button>
+							<p class="p lead pt-3">{{ nav.description }}</p>
+						</div>
+					</a>
+				</div>
+				
+			</section>
 		</div>
+		<footer class="share-footer position-absolute position-bottom w-100 spacer" v-if="description">
+			<p class="p lead text-center text-white">{{ description }}</p>
+		</footer>
 	</div>
 </template>
 
@@ -27,10 +36,13 @@
 	import { forEach as __forEach, get as __Get, cloneDeep as __cloneDeep } from "lodash";
 	
 	export default {
-		name: "Share",
+		name: "ShareOverlay",
 		computed: {
 			configuration () {
 				return this.$store.state.api.config.application;
+			},
+			description () {
+				return __Get(this.labels, 'app.button.options.share.hint');
 			},
 			icons () {
 				return this.$store.state.api.icons;
@@ -49,22 +61,8 @@
 			};
 		},
 		methods: {
-			circle () {
-				if (window.DEBUG) console.log("debug - app.components.core.layouts.Share.circle");
-				
-				let $buttons = this.$el.querySelectorAll('[data-on-circle="share"]');
-				let len = $buttons.length;
-				let size = 50;
-				let circlesize = 300;
-				let angle = ( 360 / len );
-				
-				if (len) {
-					__forEach($buttons,  (button, index) => {
-						let rotate = Math.ceil( index * angle );
-						
-						button.style.transform = `rotate(${ rotate * 1 }deg) translate(${ circlesize / 2 }px) rotate(-${ rotate * 1 }deg)`;
-					});
-				}
+			close (e) {
+				this.$emit('close', 'share');
 			},
 			render () {
 				if (window.DEBUG) console.log("debug - app.components.core.layouts.Share.render");
@@ -72,6 +70,7 @@
 				let description = document.querySelector('[name="share:description"]').getAttribute('content');
 				let title = document.querySelector('[name="share:title"]').getAttribute('content');
 				let image = document.querySelector('[name="share:image"]').getAttribute('content');
+				let url = window.location.href.replace('/#!/share', '');
 				let buttons = __Get(this.icons, 'social.share');
 					buttons = buttons ? __cloneDeep(buttons) : buttons;
 				
@@ -79,7 +78,7 @@
 					title: title,
 					description: description,
 					image: image,
-					url: window.location.href
+					url: url
 				};
 				
 				__forEach(data, (row, property) => {
@@ -93,11 +92,8 @@
 						button.url = template(data);
 					});
 					
-					this.buttons = buttons;
-					
+					this.buttons = buttons;					
 					this.rendered = true;
-					
-					setTimeout(() => { this.circle() }, 300);
 				}
 			}
 		},
@@ -125,43 +121,31 @@
 		
 	@import '../../../assets/styles/mixins/mixins.less';
 	
-	@circle-size: 300px;
-	@item-size: 50px;
-	
 	#share[role="app share"] {
 		.share-container {
-			width:  @circle-size;
-			height: @circle-size;
-			padding: 0;
-			border-radius: 50%; 
-			list-style: none;       
-  
-			[data-on-circle] 
-			{
-				border-radius: 50%; 
-				display: block;
-				position: absolute !important;
-				top:  50%; 
-				left: 50%;
-				width:  @item-size;
-				height: @item-size;
-				margin: -(@item-size / 2);
-				transition-duration: 900ms !important;
-		    }
+			.share-row {
+				padding: 1px;
 				
-			button {
-				border-radius: 50% !important; 
-			}			
+				.share-anchor {
+					padding: 1px;
+				}
+			}		
 		}
 		&.off {
 			opacity: 0;
 			pointer-events: none;
 			
 			.share-container {
-				[data-on-circle] {
-					opacity: 0 !important;
-					transform: rotate(0) translate(0) rotate(0) !important;
+				.share-row {
+					.t-delay {
+						opacity: 0;
+						transform: translateY(150%);
+					}
 				}
+			}
+			
+			.pointer-events-auto {
+				pointer-events: none !important;
 			}
 		}
 	}

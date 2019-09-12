@@ -9,7 +9,6 @@
  *
  */
  
-import axios from 'axios';
 import _ from 'lodash';
 import ip from 'ip';
 import useragent from 'useragent';
@@ -61,7 +60,7 @@ module.exports = {
 		
 		for (let method in data) 
 		{
-			const Method = __app.helpers.core.initialize[method];
+			const Method = _.get(__app.helpers, `app.initialize.${ method }`) || _.get(__app.helpers, `core.initialize.${ method }`);
 			
 			let row = _.get(data, method);
 			

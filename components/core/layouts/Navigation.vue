@@ -24,17 +24,17 @@
 				v-show="goback">
 			</button>
 		</nav>
-		<nav class="navigation-controls secondary transition position-fixed position-right mt-2 h-50px w-100 pointer-events-none navigation-controls-fullscreen d-flex justify-content-end">
+		<nav class="navigation-controls secondary transition position-fixed position-right mt-2 h-50px w-100 pointer-events-none d-flex justify-content-end">
 			<button 
 				v-for="(button, key, index) in buttons"
-				class="position-relative plain h-50px w-50px bg-primary bg-secondary-hover bg-secondary-active text-white animated fadeInRight"
+				class="position-relative plain h-50px w-50px bg-primary bg-secondary-hover bg-secondary-active text-white animated fadeInRightSmall a-delay"
 				v-html="button.icon.icon" 
 				v-bind:data-overlay="button.url"
 				v-bind:key="button.url"
 				v-on:click="onOverlay">
 			</button>
 			<button 
-				class="position-relative plain h-50px w-50px bg-primary bg-secondary-hover bg-secondary-active text-white animated fadeInRight" 
+				class="position-relative navigation-controls-fullscreen plain h-50px w-50px bg-primary bg-secondary-hover bg-secondary-active text-white animated fadeInRightSmall a-delay" 
 				v-html="icons.toggle.fullscreen.icon.icon" 
 				v-on:click="fullscreen()">
 			</button>
@@ -90,8 +90,9 @@
 					<div class="col-lg-3 col-md-7 vh-100 border-md-left navigation-column">
 						<div class="d-flex align-items-end flex-column vh-100 position-relative">
 							<footer class="navigation-footer mt-auto w-100 text-secondary bg-white">
-								<p class="p small spacer m-0">{{ configuration.application.tagline }}</p>
-								<p class="p small spacer border-top m-0">{{ `&copy; ${ date() } ${ configuration.application.name }` }}</p>
+								<div class="p small spacer m-0" v-html="configuration.application.tagline"></div>
+								<div class="p small spacer border-top m-0" v-html="configuration.application.disclaimer.contents" v-if="configuration.application.disclaimer.contents"></div>
+								<p class="p spacer border-top m-0 text-primary"><small>{{ `${ date() } &mdash; ${ configuration.application.name } &mdash; v${ configuration.application.app.version }` }}</small></p>
 							</footer>
 						</div>
 					</div>
@@ -134,6 +135,9 @@
 			},
 			pages () {
 				return this.$store.state.api.pages;
+			},
+			path () {
+				return Page.path(this.$route.path);
 			},
 			routes () {
 				return this.$store.state.app.routes;
@@ -242,7 +246,7 @@
 				
 				direction = Number(direction);
 				
-				let page = Page.get(this.pages, this.$route.path);
+				let page = Page.get(this.pages, this.path);
 				
 				if (this.routes.parent && this.routes.history.length === 1) {
 					this.$router.push({
@@ -266,34 +270,42 @@
 				});
 			},
 			onOverlay (e) {
-				let path = Page.hash(e.currentTarget.getAttribute('data-overlay'));				
-				this.$router.push({
-					path: path
-				});				
+				if (window.DEBUG) console.log("debug - app.components.core.layouts.Navigation.onOverlay");
+				
+				this.$store.commit("app/SET", {
+					key: "app:options:overlay",
+					data: e.currentTarget.getAttribute('data-overlay')
+				});
+				
+				this.controls('close');			
 			},
 			paths (path) {
-				path = typeof path === 'string' ? path : this.$route.path;
+				path = typeof path === 'string' ? path : this.path;
 				
 				return path.replace(/^\/+/, '').split('/');
 			},
 			render (to) {
-				to = to || window.location;
+				to = to || this.$route || window.location;
 				
 				if (window.DEBUG) console.log("debug - app.components.core.layouts.Navigation.render");
 				
-				const home = (!to.path || to.path === '/') && (!to.hash || to.hash === '');
+				const home = (!to.path || this.path === '/') && (!to.hash || to.hash === '');
 				
 				this.controls('close');
 				
 				if (home) {
 					this.goback = false;
 					this.routed = false;
+					
+					if (process.env.LOGO_HIDE) {
+						this.options.logo = true;
+					}
 				}
 				else {
 					this.goback = true;
 					this.routed = true;
 					
-					if (this.options.logo && process.env.LOGO_HIDE) {
+					if (process.env.LOGO_HIDE) {
 						this.options.logo = false;
 					}
 				}
@@ -302,7 +314,7 @@
 			},
 			routedActive () {
 				let elements = document.querySelectorAll('.navigation-item');
-				let currpath = this.$route.path;
+				let currpath = this.path;
 				let active;
 				
 				_.forEach(elements, (node) => {
@@ -347,11 +359,11 @@
 									
 			this.options.nav.id = 0;	
 			
-			if (this.$route.path !== '/') this.goback = true;
+			if (this.path !== '/' && this.$route.hash) this.goback = true;
 			
 			this.render();
 						
-			this.$store.commit("app/ROUTES", this.$route.path);
+			this.$store.commit("app/ROUTES", this.path);
 			
 			this.$store.subscribe((mutation, state) => {
 				if (mutation.type === 'app/CONTENT' && !this.options.nav.id) {
@@ -368,7 +380,7 @@
 			this.$router.afterEach((to, from) => {
 				this.$store.commit("app/ROUTES", to.path);
 				
-				this.render();
+				this.render(to);
 			});	
 		},
 		updated () {
@@ -526,6 +538,18 @@
 	        bottom: 0;
 	        right: 0;
 	        width: ~"calc(25% + 2px)" !important;
+        }
+    }
+	
+    @media (max-width: @breakpoint-sm)
+    {
+	    .navigation-controls.secondary {
+		    top: auto !important;
+		    bottom: 1rem !important;
+        }
+        
+        footer.navigation-footer {
+	        padding-bottom: 10rem !important;
         }
     }	
 </style>

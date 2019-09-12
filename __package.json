@@ -1,17 +1,17 @@
 {
-  "name": "MyWords",
-  "version": "2.0.6",
-  "description": "MyWords: The Thoughts of Jolomi",
+  "name": "WildlifeByCanon",
+  "version": "3.0.3",
+  "description": "Wildlife Awareness Progressive Web Application",
   "author": "Philleep Florence",
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://philleepflorence@bitbucket.org/philleepflorence/drinqwell-app.git"
+    "url": "https://philleepflorence@bitbucket.org/philleepflorence/wildlife-by-canon-application.git"
   },
   "scripts": {
-    "dev": "cross-env NODE_ENV=development nodemon server/index.js --watch api --watch .env --watch nuxt.config.js --watch server --port 1404",
+    "dev": "cross-env NODE_ENV=development nodemon server/index.js --watch api --watch .env --watch nuxt.config.js --watch server --port 1405",
     "build": "nuxt build",
-    "start": "cross-env NODE_ENV=production node server/index.js --port 1404",
+    "start": "cross-env NODE_ENV=production node server/index.js --port 1405",
     "generate": "nuxt generate"
   },
   "dependencies": {
@@ -39,6 +39,7 @@
     "html-metadata": "^1.7.0",
     "human-format": "^0.10.1",
     "ip": "^1.1.5",
+    "load-google-maps-api": "^2.0.1",
     "lodash": "^4.17.15",
     "medium-editor": "^5.23.3",
     "moment": "^2.17.1",
@@ -61,7 +62,6 @@
     "useragent": "^2.3.0",
     "uuid-by-string": "^2.1.1",
     "validator": "^6.2.1",
-    "waypoints": "^4.0.1",
     "webpack": "^4.37.0",
     "winston": "^3.2.1"
   },

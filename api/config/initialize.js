@@ -9,12 +9,36 @@
 module.exports = {
 	"process": true,
 	"server": [
+		"administrators",
 		"configuration",
-		"administrators"
+		"notifications",
+		"privileges",
+		"templates"
 	],
 	"tables": {
 		"albums": {
 			"table": "app_albums",
+			"params": {
+				"columns": [
+					"id", 
+					"name", 
+					"title", 
+					"headline", 
+					"description", 
+					"page", 
+					"sort_media", 
+					"image.name", 
+					"image.width", 
+					"image.height", 
+					"media.id", 
+					"media.name", 
+					"media.title", 
+					"media.caption", 
+					"media.width", 
+					"media.height", 
+					"media.type"
+				].join(",")
+			},
 			"compile": {
 				"rows": "data",
 				"key": {
@@ -29,18 +53,19 @@ module.exports = {
 		},
 		"colors": {
 			"table": "app_colors",
+			"params": {
+				"columns": [
+					"id", 
+					"name", 
+					"color", 
+					"text_color", 
+					"gradient_color"
+				].join(",")
+			},
 			"compile": {
 				"rows": "data",
 				"key": {
-					"id": "id"
-				},
-				"filters": {
-					"config": {
-						"name": "config.colors",
-						"key": {
-							"name": "name"
-						}
-					}
+					"name": "name"
 				}
 			}
 		},
@@ -71,6 +96,17 @@ module.exports = {
 		"icons": {
 			"table": "contents_icons",
 			"params": {
+				"columns": [
+					"id", 
+					"path", 
+					"url", 
+					"description",
+					"icon.id", 
+					"icon.icon", 
+					"icon.css_entity", 
+					"icon.class", 
+					"analytics.data"
+				].join(","),
 				"filters": {
 					"application": "app"
 				}
@@ -82,16 +118,15 @@ module.exports = {
 				},
 				"value": {
 					"color": "icon.data.color",
-					"icon": "icon.data"
-				},
-				"process": {
-					"analytics": "data-toggle=\"analytics\" data-analytics-category=\"{{ analytics.data.category }}\" data-analytics-action=\"{{ analytics.data.action }}\" data-analytics-label=\"{{ analytics.data.label }}\" data-analytics-value=\"{{ analytics.data.value }}\""
+					"icon": "icon.data",
+					"analytics": "analytics.data"
 				}
 			}
 		},
 		"dropdowns": {
 			"table": "app_dropdowns",
 			"params": {
+				"columns": "id,name,value,text,title,description,slug",
 				"filters": {
 					"application": "app"
 				},
@@ -113,6 +148,35 @@ module.exports = {
 		"labels": {
 			"table": "app_labels",
 			"params": {
+				"columns": [
+					"id", 
+					"name", 
+					"slug", 
+					"value", 
+					"section", 
+					"category", 
+					"privilege",
+					"image.name", 
+					"image.width", 
+					"image.height",  
+					"icon",
+					"page", 
+					"analytics.data", 
+					"plaintext", 
+					"textarea", 
+					"input_type", 
+					"form_type", 
+					"validation", 
+					"attributes", 
+					"source", 
+					"format", 
+					"url", 
+					"color", 
+					"show_html", 
+					"hint", 
+					"inputs", 
+					"property"
+				].join(","),
 				"limit": -1,
 				"filters": {
 					"application": "app"
@@ -121,35 +185,26 @@ module.exports = {
 			"compile": {
 				"rows": "data",
 				"key": {
+					"image": "image.data",
 					"page": "page.data.slug",
 					"section": "section",
 					"category": "category",
 					"slug": "slug"
 				},
 				"value": {
+					"analytics": "analytics.data",
 					"plaintext": "value",
 					"textarea": "value",
 					"icon": "icon.data",
+					"image": "image.data",
 					"color": "color.data.color",
 					"page": "page.data.name",
 					"privilege": "privilege.data.privilege"
-				},
-				"filters": {
-					"config": {
-						"name": "config",
-						"filter": {
-							"public": 1
-						},
-						"values": "value"
-					}
 				},
 				"format": {
 					"inputs": "json",
 					"plaintext": "plaintext",
 					"textarea": "textarea"
-				},
-				"process": {
-					"analytics": "data-toggle=\"analytics\" data-analytics-category=\"{{ analytics.data.category }}\" data-analytics-action=\"{{ analytics.data.action }}\" data-analytics-label=\"{{ analytics.data.label }}\" data-analytics-value=\"{{ analytics.data.value }}\""
 				}
 			}
 		},
@@ -206,6 +261,31 @@ module.exports = {
 		"pages": {
 			"table": "app_pages",
 			"params": {
+				"columns": [
+					"id", 
+					"privilege", 
+					"level", 
+					"name", 
+					"slug", 
+					"icon", 
+					"color", 
+					"path",
+					"title",
+					"description",
+					"headline",
+					"synopsis",
+					"contents",
+					"mode",
+					"tags",
+					"categories",
+					"image.name", 
+					"image.width", 
+					"image.height", 
+					"image.type",
+					"style",
+					"script",
+					"page_views"
+				].join(","),
 				"filters": {
 					"application": "app"
 				},
@@ -232,10 +312,7 @@ module.exports = {
 					"property": "categories",
 					"array": "tags",
 					"key": "path"
-				}],
-				"process": {
-					"analytics": "data-toggle=\"analytics\" data-analytics-category=\"{{ analytics.data.category }}\" data-analytics-action=\"{{ analytics.data.action }}\" data-analytics-label=\"{{ analytics.data.label }}\" data-analytics-value=\"{{ analytics.data.value }}\""
-				}
+				}]
 			}
 		},
 		"privileges": {
@@ -282,8 +359,7 @@ module.exports = {
 					"id": "id"
 				},
 				"value": {
-					"parent": "parent.data",
-					"parent.parent": "parent.parent.data.id"
+					"parent": "parent.data.id"
 				}
 			}
 		},
@@ -304,6 +380,14 @@ module.exports = {
 					"icon": "icon.data",
 					"parent": "parent.data.slug",
 					"analytics": "analytics.data"
+				},
+				"filters": {
+					"errors": {
+						"name": "errors",
+						"filter": {
+							"type": "error"
+						}
+					}
 				}
 			}
 		},
@@ -331,22 +415,6 @@ module.exports = {
 							"id": "id"
 						}
 					}
-				}
-			}
-		},
-		"administrators": {
-			"table": "app_users",
-			"params": {
-				"columns" : "id,username,first_name,last_name,email,privilege,location",
-				"filters": {
-					"privilege": 6,
-					"application": "app"
-				}
-			},
-			"compile": {
-				"rows": "data",
-				"value": {
-					"privilege": "privilege.data"
 				}
 			}
 		}

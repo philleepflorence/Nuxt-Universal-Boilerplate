@@ -983,6 +983,33 @@
 		background: none !important;
 		background-color: transparent !important;
 	}
+	.bg-cover-primary {
+		position: relative;
+		
+		&:before {
+			.beforefull(@content:'', @pos: absolute);
+			background: fade(@colorprimary, 80);
+			z-index: 0;
+		}
+	}
+	.bg-cover-primary-md {
+		position: relative;
+		
+		&:before {
+			.beforefull(@content:'', @pos: absolute);
+			background: fade(@colorprimary, 50);
+			z-index: 0;
+		}
+	}
+	.bg-cover-primary-sm {
+		position: relative;
+		
+		&:before {
+			.beforefull(@content:'', @pos: absolute);
+			background: fade(@colorprimary, 20);
+			z-index: 0;
+		}
+	}
 	.bg-cover-dark {
 		position: relative;
 		
@@ -1982,7 +2009,7 @@
 	{
 		.transition() !important;
 
-		* {
+		*, &:before, &:after {
 			.transition();
 		}
 	}

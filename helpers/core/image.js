@@ -66,8 +66,8 @@ export default {
 		};
 		
 		const size = (element, src, url, options) => {
-			let width = Number( element.getAttribute('data-image-width') || element.parentElement.offsetWidth );
-	        let height = Number( element.getAttribute('data-image-height') || element.parentElement.offsetHeight ) || width;
+			let width = Number( element.getAttribute('data-image-width') || element.offsetWidth || element.parentElement.offsetWidth );
+	        let height = Number( element.getAttribute('data-image-height') || element.offsetHeight || element.parentElement.offsetHeight ) || width;
 			let sizes = _.get(options, 'sizes');
 			let size = _.get(options, 'size');
 			

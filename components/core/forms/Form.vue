@@ -127,15 +127,19 @@
 					data: false
 				});
 			},
-			confirmForm (e, a) {
+			confirmForm (e) {
+				if (window.DEBUG) console.log("debug - app.components.core.forms.Form.confirmForm");
+				
 				this.formElement = this.$el.querySelector('form.form');
 				
-				if (this.formCaptcha) {
+				if (!this.formCaptcha && document.body.getAttribute('data-device-control')) {
 					this.formCaptcha = true;
 					this.formElement.classList.add('form-captcha');
 				}				
 			},
 			toggleForm (e) {
+				if (window.DEBUG) console.log("debug - app.components.core.forms.Form.toggleForm");
+				
 				this.formElement = this.$el.querySelector('form.form');
 				
 				if (this.formElement.classList.contains('form-slim')) {
@@ -285,9 +289,9 @@
 				}
 			},
 			submit (e) {
-				if (window.DEBUG) console.log("debug - app.components.core.forms.Form.submit");
+				if (window.DEBUG) console.log("debug - app.components.core.forms.Form.submit", this.captcha, this.formCaptcha);
 				
-				if (this.captcha && !this.formCaptcha) return false;
+				if ((this.captcha && !this.formCaptcha) || !document.body.getAttribute('data-device-control')) return false;
 				
 				e.preventDefault();		
 				
@@ -322,7 +326,9 @@
 	}
 </script>
 
-<style lang="less">
+<style lang="less">		
+	@import '../../../assets/styles/mixins/mixins.less';
+	
 	html {
 		body {
 			.custom-switch {
@@ -332,8 +338,8 @@
 					}
 				}
 				.custom-control-input:checked ~ .custom-control-label::before {
-					border-color: #808080;
-					background-color: #808080;
+					border-color: @colorprimary;
+					background-color: @colorprimary;
 				}
 			}
 			.plain-form {

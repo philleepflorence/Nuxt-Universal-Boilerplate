@@ -32,7 +32,12 @@ export const state = () => ({
 			resize: "none",
 			autoUpdate: true,
 			overflowBehavior: {
-				x: "hidden"
+				x: "hidden",
+				y: "scroll"
+			},
+			scrollbars: {
+				autoHide: "leave",
+				visibility: "auto"
 			}
 		}
 	},

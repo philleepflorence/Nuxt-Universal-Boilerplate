@@ -100,6 +100,8 @@ export default {
 		let pages = {...Pages};
 		let page = {};
 		
+		path = path === '/' ? path : _.trimEnd(path, '/');
+		
 		_.forEach(pages, function (row)
 		{
 			if (row.path === path) page = row;
@@ -133,6 +135,22 @@ export default {
 		let path = _.trimEnd(window.location.pathname, '/');
 		
 		return path + hash;
+	},
+	/*
+		Get the current location pathname and hash
+		PARAMETER:
+			hash - the hash to append to the current path
+	*/
+	path (path) {
+		path = path || window.location.pathname;
+		
+		if (path === '/') return path;
+		
+		path = path.split('/!#');
+		
+		path = _.trimEnd(_.get(path, 0, ''), '/');
+		
+		return path;
 	},
 	/*
 		Process page head metadata
@@ -271,7 +289,7 @@ export default {
 			});
 		}
 	},
-	scrollTo (e, offset) {
+	scrollTo (e, offset, behavior = 'smooth') {
 		if (typeof offset !== 'number') {
 			let button = e.currentTarget;
 			let element = document.getElementById(button.getAttribute('data-scroll-to'));
@@ -282,7 +300,7 @@ export default {
 		window.scrollTo({
 			top: offset,
 			left: 0,
-			behavior: 'smooth'
+			behavior: behavior
 		});		
 	},
 	/*
@@ -343,6 +361,22 @@ export default {
 			}
 			
 			return buf.join('');
+		},
+		format (string, options) {
+			if (!Array.isArray(options) || !string) return string;
+			
+			options.forEach(function (obj)
+			{
+				_.forEach(obj, function (display, node)
+				{
+					var pattern = new RegExp(node, 'gi');
+					var span = `<span style="display: ${ display }" data-component-format>${ node }</span>`;
+					
+					string = string.replace(pattern, span);		
+				});			
+			});
+			
+			return string;
 		},
 		rand (prefix) {
 			prefix = prefix || Math.random().toString(36).replace(/[^a-z]+/g, '').substring(0, 8);

@@ -51,16 +51,15 @@
 			},
 			navigation () {
 				let navigation = this.$store.state.api.navigation.accounts;
-				let path = this.$route.path;
 				
-				navigation = _.filter(navigation, function (row) {
-					return row.path !== path;
+				navigation = _.filter(navigation, (row) => {
+					return row.path !== this.path;
 				});
 				
 				return navigation;
 			},
 			page () {
-				let page = Page.get(this.pages, this.$route.path);
+				let page = Page.get(this.pages, this.path);
 				
 				if (this.content) {
 					page = Page.content(page, this.content); 					

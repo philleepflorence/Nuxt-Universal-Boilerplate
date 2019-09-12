@@ -1,12 +1,13 @@
 <template>
 	<div id="contact" class="options-overlay position-fixed position-full bg-gray-70 off" role="app contact" v-bind:key="keys.element">
-		<div class="contact-container position-absolute position-full">
-			<CustomScroll name="contact" overlay="true">
+		<a href="#" class="position-absolute position-full" v-on:click.prevent.stop="close"></a>
+		<div class="contact-container position-absolute position-full pointer-events-none">
+			<CustomScroll name="contact">
 				<div class="contact-wrapper d-flex align-items-center vh-100 max-w-480px mx-auto">
-					<div class="flex-item w-100">
+					<div class="flex-item w-100 pointer-events-auto">
 						<header class="contact-contents-header spacer transform t-delay">
 							<span 
-								class="d-flex align-items-center justify-content-center bg-white text-primary h-50px w-50px rounded-circle mx-auto" 
+								class="d-flex align-items-center justify-content-center bg-white text-secondary h-70px w-70px rounded-circle mx-auto" 
 								v-html="labels.app.button.options.contact.icon.icon">
 							</span>
 						</header>
@@ -80,7 +81,7 @@
 	import { forEach as __forEach, get as __Get, cloneDeep as __cloneDeep } from "lodash";
 	
 	export default {
-		name: "Contact",
+		name: "ContactOverlay",
 		props: [
 		
 		],
@@ -132,6 +133,9 @@
 		methods: {
 			attributes (attributes) {
 				return Page.utils.attributes(attributes);
+			},
+			close (e) {
+				this.$emit('close', 'contact');
 			}
 		},
 		mounted () {
@@ -183,6 +187,10 @@
 					transform: translateY(20vh);
 					opacity: 0;
 				}
+			}
+			
+			.pointer-events-auto {
+				pointer-events: none !important;
 			}
 		}
 	}

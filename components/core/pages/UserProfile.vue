@@ -69,7 +69,7 @@
 				return this.$store.state.api.labels;
 			},
 			page () {
-				return Page.get(this.pages, this.$route.path);
+				return Page.get(this.pages, this.path);
 			},
 			pages () {
 				return this.$store.state.api.pages;

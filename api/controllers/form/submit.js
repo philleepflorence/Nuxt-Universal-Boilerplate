@@ -32,11 +32,28 @@ module.exports = {
 		
 		if (admin && !form) form = test.body.form;
 				
-		if (!_.size(form)) return res.status(400).send("Form object is required!");	
+		if (!_.size(form))	
+		{
+			return res.status(400).json({
+				error: true,
+				message: _.get(responses, 'error.value'),
+				response: "Form object is required!"
+			});
+		}
 		
 		const formname = form.form;
-		let notifications = _.get(__app.data, `notifications.${ formname }`);
 		
+		let template = req.body.template || formname;		
+			template = _.get(__app.data, `templates.${ template }`);
+		
+		let inputs = _.get(__app.config.form, `inputs.${ formname }`);		
+		let methods = _.get(__app.config.form, `methods.${ formname }`);
+		
+		if (inputs) form = Object.assign(form, inputs);
+		
+		if (methods) form = methods(form, template);
+				
+		let notifications = _.get(__app.data, `notifications.${ formname }`);		
 		let responses = _.get(__app.data, `labels.app.form.${ formname }`);
 		const redirect = req.body.redirect;
 		let previews = [];

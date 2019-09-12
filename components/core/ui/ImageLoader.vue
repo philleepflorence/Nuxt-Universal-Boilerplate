@@ -1,5 +1,5 @@
 <template>
-	<div v-bind:key="keys.wrapper">
+	<div v-bind:key="keys.wrapper" v-bind:class="container">
 		<figure 
 			v-bind:class="classname" 
 			v-bind:data-image-format="format" 
@@ -28,18 +28,49 @@
 	
 	export default {
 		name: "ImageLoader",
-		props: ['src', 'size', 'format', 'classname', 'visible', 'preview'],
+		props: [
+			'src', 
+			'size', 
+			'format', 
+			'callback',
+			'container', 
+			'classname', 
+			'visible', 
+			'preview', 
+			'height', 
+			'width'
+		],
 		computed: {
 			options () {
 				return this.$store.state.api.config.application.cdn.images;
+			},
+			rendered () {
+				return this.$store.state.app.rendered;
+			},
+			ratio () {
+				if (this.width && this.height) return this.height / this.width;
+				
+				return 0;
 			}			
 		},
 		methods: {
 			done () {
-				this.$store.commit('event/SET', ["image:loaded", this.src]);
+				if (typeof this.$props.callback === "function") {
+					this.$store.commit('event/SET', ["image:loaded", "ImageLoader", this.src]);
+					this.$props.callback(this.$el)
+				}
+				if (this.ratio) {
+					this.$el.style.minHeight = '';
+				}
 			},
 			load () {
 				let elements = this.$el.querySelectorAll('[data-image-load]');
+				
+				if (this.ratio && this.$el.offsetWidth) {
+					let height = this.$el.offsetWidth * this.ratio;
+					
+					this.$el.style.minHeight = `${ height }px`;
+				}
 				
 				Image.load(this.options, elements, (len) => {
 					this.done();
@@ -55,11 +86,25 @@
 			};
 		},
 		mounted () {
-			this.load();	
+			if (!this.rendered) {
+				const subscription = this.$store.subscribe((mutation, state) => {
+					if (mutation.payload.key === 'rendered') {												
+						this.load();						
+						setTimeout(subscription, 300);
+					}												
+				});	
+			}
+			else if (this.visible === "true") {
+				const infinite = this.$store.subscribe((mutation, state) => {
+					if (mutation.payload.key === 'infinite') {												
+						this.load();						
+						setTimeout(infinite, 300);
+					}												
+				});
+			}
+			else {
+				this.load();
+			}
 		}
 	}
 </script>
-
-<style lang="less">
-	
-</style>

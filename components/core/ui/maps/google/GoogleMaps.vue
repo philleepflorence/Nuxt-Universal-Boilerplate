@@ -3,7 +3,7 @@
 		
 		<div v-bind:id="options.id" class="w-100 h-100 z-index-1" v-bind:key="keys.map"></div>
 		
-		<div class="position-relative google-maps-contents z-index-1">
+		<div class="position-absolute position-full google-maps-contents z-index-1 pointer-events-none">
 			<slot></slot>
 		</div>
 		
@@ -29,7 +29,11 @@
 		components: {
 			GoogleMapsInfoBox, GoogleMapsGeolocation
 		},
-		props: ['options', 'page', 'location'],
+		props: [
+			'options', 
+			'page', 
+			'location'
+		],
 		computed: {
 			cdn () {
 				return this.$store.state.api.config.application.cdn.url;
@@ -175,7 +179,7 @@
 				mapObject.map = map;
 				mapObject.overlay = overlay;
 	
-				if (params.homeMarker) {
+				if (params.homeMarker && this.options.marker) {
 					homeMarker = this.marker(map, mapCenter, params.homeMarker, this.map.title);
 					homeMarker.setMap(map);
 				}

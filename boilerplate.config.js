@@ -45,6 +45,9 @@ module.exports = {
 			path: "api/config/form.js"
 		},
 		{
+			path: "api/config/initialize.js"
+		},
+		{
 			path: "api/config/router.js"
 		},
 		{
@@ -68,6 +71,10 @@ module.exports = {
 		},
 		{
 			path: "api/controllers/webhooks",
+			recursive: true
+		},
+		{
+			path: "api/controllers/wiki",
 			recursive: true
 		},
 		{

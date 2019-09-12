@@ -1,15 +1,16 @@
 <template>
-	<div id="options" class="position-relative" role="app options" v-bind:key="keys.element" data-open="false">
+	<div id="options" class="position-relative" role="app options" v-bind:key="keys.element" data-open="false" data-overlay="false">
 		
-		<component v-bind:is="contact"></component>
-		<component v-bind:is="share"></component>
-		<component v-bind:is="search"></component>
+		<component v-bind:if="display('OPTIONS_CONTACT')" v-bind:is="contact" v-on:close="close"></component>
+		<component v-bind:if="display('OPTIONS_FILTER')" v-bind:is="filter" v-on:close="close"></component>
+		<component v-bind:if="display('OPTIONS_SEARCH')" v-bind:is="search" v-on:close="close"></component>
+		<component v-bind:if="display('OPTIONS_SHARE')" v-bind:is="share" v-on:close="close"></component>
+		<component v-bind:if="display('OPTIONS_SUBSCRIBE')" v-bind:is="subscribe" v-on:close="close"></component>
 		
-		<nav class="position-fixed position-bottom position-right w-50px m-4" v-if="buttons">
-			
+		<nav class="options-menu position-fixed position-bottom position-right w-50px m-4 transform" v-if="buttons">
 			<div class="options-overlay-buttons">
 				<button 
-					class="shadow-sm plain h-50px w-50px bg-primary bg-secondary-hover bg-secondary-active transition position-relative options-overlay-button mb-4"
+					class="shadow-sm plain h-50px w-50px bg-primary transition position-relative options-overlay-button mb-4"
 					v-for="(button, key, index) in buttons"
 					v-on:click="onOverlay"
 					v-bind:key="button.slug"
@@ -20,10 +21,9 @@
 					</span>
 				</button>
 			</div>
-			
 			<button 
 				id="options-button" 
-				class="shadow-sm plain h-50px w-50px bg-primary bg-secondary-hover bg-primary-active transition animated zoomIn position-relative options-toggle-button"
+				class="shadow-sm plain h-50px w-50px bg-primary transition animated zoomIn position-relative options-toggle-button"
 				v-if="loaded"
 				v-on:click="onToggle">
 				<span 
@@ -38,6 +38,20 @@
 				</span>
 			</button>			
 		</nav>
+		
+		<nav class="options-overlay-menu position-fixed position-bottom position-right w-50px m-4 transform" v-if="buttons">
+			<button 
+				id="options-close-button" 
+				class="shadow-sm plain h-50px w-50px bg-primary transition animated zoomIn position-relative options-toggle-button a-delay"
+				v-if="curroverlay"
+				v-on:click="close">
+				<span 
+					class="overlay-close-button position-absolute position-center text-white animated fadeIn" 
+					v-html="icons.toggle.options.close.icon.icon">
+				</span>
+			</button>			
+		</nav>
+		
 	</div>
 </template>
 
@@ -47,9 +61,6 @@
 	
 	export default {
 		name: "Options",
-		components: {
-			
-		},
 		data () {
 			return {
 				loaded: false,
@@ -59,7 +70,8 @@
 				rendered: false,
 				options: {
 					open: false
-				}
+				},
+				curroverlay: null
 			};
 		},
 		computed: {
@@ -70,10 +82,15 @@
 				return this.$store.state.api.config.application.options;
 			},
 			contact () {
-				return () => import(process.env.OPTIONS_CONTACT);
+				if (process.env.OPTIONS_CONTACT) return () => import(process.env.OPTIONS_CONTACT);
+				else return null;
 			},
 			dirname () {
 				return (process.env.INIT_CWD || process.env.PWD);
+			},
+			filter () {
+				if (process.env.OPTIONS_FILTER) return () => import(process.env.OPTIONS_FILTER);
+				else return null;
 			},
 			icons () {
 				return this.$store.state.api.icons;
@@ -82,7 +99,7 @@
 				return this.$store.state.api.labels;
 			},
 			page () {
-				return Page.get(this.pages, this.$route.path);
+				return Page.get(this.pages, this.path);
 			},
 			pages () {
 				return this.$store.state.pages;
@@ -91,48 +108,63 @@
 				return this.$route.path;
 			},
 			search () {
-				return () => import(process.env.OPTIONS_SEARCH);
+				if (process.env.OPTIONS_SEARCH) return () => import(process.env.OPTIONS_SEARCH);
+				else return null;
 			},
 			share () {
-				return () => import(process.env.OPTIONS_SHARE);
+				if (process.env.OPTIONS_SHARE) return () => import(process.env.OPTIONS_SHARE);
+				else return null;
+			},
+			subscribe () {
+				if (process.env.OPTIONS_SUBSCRIBE) return () => import(process.env.OPTIONS_SUBSCRIBE);
+				else return null;
 			}
 		},
 		methods: {
-			close (mode = "overlays") {
+			close (e) {
 				if (window.DEBUG) console.log("debug - app.components.core.layouts.Options.close");
 				
 				let $overlays = this.$el.querySelectorAll('.options-overlay');
+				let $buttons = this.$el.querySelectorAll('.options-overlay-button');
 				
-				if (mode === "overlays") {
-					__forEach($overlays, (element) => {
-						element.classList.add('off');
-					});
+				__forEach($overlays, (element) => {
+					element.classList.add('off');
+				});
+				__forEach($buttons, (element) => {
+					element.classList.remove('active');
+				});
+				
+				this.curroverlay = null;
+				
+				if (e !== true) {
+					this.options.open = false;
+						
+					this.$el.setAttribute('data-open', 'false');
+					this.$el.setAttribute('data-overlay', 'false');
+					console.log("debug - app.components.core.layouts.Options.close", this.$el);
 				}
+			},
+			display (component) {
+				if (process.env[component]) return true;
+				
+				return false;
 			},
 			onOverlay (e) {
 				if (window.DEBUG) console.log("debug - app.components.core.layouts.Options.onOverlay");
 				
-				this.close();
+				this.close(true);
 				
-				let path = Page.hash(e.currentTarget.getAttribute('data-overlay'));				
-				this.$router.push({
-					path: path
-				});				
+				this.curroverlay = e.currentTarget.getAttribute('data-overlay');
+											
+				this.overlay();				
 			},
-			overlay (location) {
+			overlay () {
 				if (window.DEBUG) console.log("debug - app.components.core.layouts.Options.overlay");
 				
-				this.close();
-				
-				location = location || window.location;
-				
-				if (location.hash) {
-					let overlay = location.hash.replace('#!/', '');
-						overlay = overlay.split('/').shift();
-					
-					let $overlay = this.$el.querySelector(`[role="app ${ overlay }"]`);
+				if (this.curroverlay) {
+					let $overlay = this.$el.querySelector(`[role="app ${ this.curroverlay }"]`);
 					let $buttons = this.$el.querySelectorAll('.options-overlay-button');
-					let $button = this.$el.querySelector(`[data-overlay="/#!/${ overlay }"]`);
+					let $button = this.$el.querySelector(`[data-overlay="${ this.curroverlay }"]`);
 					
 					__forEach($buttons, (button) => {
 						button.classList.remove('active');
@@ -140,31 +172,32 @@
 					
 					if ($overlay) {					
 						this.options.open = true;
+						this.$el.setAttribute('data-overlay', this.curroverlay);
 						
 						setTimeout(() => {
 							$overlay.classList.remove('off');
-							if ($button) $button.classList.add('active');							
+							
+							if ($button) {
+								$button.classList.add('active');
+							}							
 						}, 300);						
 					}
-				}
-				else {
-					this.options.open = false;
-					
-					this.$el.setAttribute('data-open', 'false');
 				}
 			},
 			onToggle () {
 				if (window.DEBUG) console.log("debug - app.components.core.layouts.Options.onToggle");
 								
 				if (this.options.open) {
-					this.$router.push({
-						path: window.location.pathname
-					});
+					this.options.open = false;
+					
+					this.$el.setAttribute('data-open', 'false');
+					this.$el.setAttribute('data-overlay', 'false');
 				}
 				else {
 					this.options.open = true;
 					
 					this.$el.setAttribute('data-open', 'true');
+					this.$el.setAttribute('data-overlay', 'false');
 				}
 			},
 			render () {
@@ -208,14 +241,12 @@
 			}
 		},
 		mounted () {
-			this.loaded = this.$store.state.app.loaded;
-			
 			if (window.DEBUG) console.log("debug - app.components.core.layouts.Options.mounted");
 						
-			this.$router.afterEach((to, from) => {
-				if (window.DEBUG) console.log("debug - app.components.core.layouts.Options.afterEach");
-				
-				this.overlay(to);
+			this.loaded = this.$store.state.app.loaded;
+						
+			this.$router.afterEach((to, from) => {				
+				this.close();
 			});	
 			
 			if (this.loaded && this.configuration.overlay && !this.rendered) {
@@ -238,6 +269,14 @@
 					}												
 				});
 			}
+			
+			this.$store.subscribe((mutation, state) => {
+				if (mutation.type === 'app/SET' && mutation.payload.key === "app:options:overlay") {
+					this.curroverlay = mutation.payload.data;
+
+					this.overlay();						
+				}												
+			});
 		}
 	}
 </script>
@@ -274,6 +313,15 @@
 		}
 		
 		@transform: 74px;
+		
+		&:not([data-overlay="false"]) {
+			.options-menu {
+				transform: translateY(50%);
+				transition-delay: 50ms;
+				transition-duration: 600ms;
+				opacity: 0;
+			}
+		}
 		
 		&[data-open="true"] {
 			.options-overlay-button {

@@ -111,10 +111,11 @@ module.exports = {
 		options.headers = options.headers || {};
 		options.headers = options.method === 'get' ? options.headers : Object.assign({
 			'Content-type': 'application/json',
-			'User-Agent': _.get(req, 'headers[user-agent]', 'Axios'),
+			'User-Agent': _.get(req, 'headers[user-agent]', 'SuperAgent'),
 			'Ip-Address': ip.address(),
 			'App-User': _.get(req, 'me.id', 0),
-			'App-Environment': process.env.SERVER_ENVIRONMENT
+			'App-Environment': process.env.SERVER_ENVIRONMENT,
+			'App-Domain': process.env.SERVER_DOMAIN
 		}, options.headers); 
 		
 		const currtime = Date.now();

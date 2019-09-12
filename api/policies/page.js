@@ -26,6 +26,8 @@ export default async function (req, res, next)
 	
 	if (!page) return next();
 	
+	__app.debugger.info('api.policies.page - Page: %s', page.name);
+	
 	let controller = __Get(__app.controllers, `contents.${ page.slug }`);
 	let route = new routeParser(page.path);
 	
@@ -33,8 +35,6 @@ export default async function (req, res, next)
 		req.params = route.match(req.path);
 		req.contents = await controller.run(req, res, true);
 	}
-	
-	__app.debugger.info('api.policies.page - Page: %s', page.name);
 	
 	if (req.query.debug === 'json' && req.query.token === process.env.APP_TOKEN) return res.json(req.contents);
 	
