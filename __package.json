@@ -1,17 +1,17 @@
 {
-  "name": "WildlifeByCanon",
-  "version": "3.0.3",
-  "description": "Wildlife Awareness Progressive Web Application",
+  "name": "NuxtPWA",
+  "version": "0.0.9",
+  "description": "Nuxt Universal Express PWA Boilerplate and Framework",
   "author": "Philleep Florence",
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://philleepflorence@bitbucket.org/philleepflorence/wildlife-by-canon-application.git"
+    "url": "https://github.com/philleepflorence/Nuxt-Universal-Boilerplate.git"
   },
   "scripts": {
-    "dev": "cross-env NODE_ENV=development nodemon server/index.js --watch api --watch .env --watch nuxt.config.js --watch server --port 1405",
+    "dev": "cross-env NODE_ENV=development nodemon server/index.js --watch api --watch .env --watch nuxt.config.js --watch server --port 1400",
     "build": "nuxt build",
-    "start": "cross-env NODE_ENV=production node server/index.js --port 1405",
+    "start": "cross-env NODE_ENV=production node server/index.js --port 1400",
     "generate": "nuxt generate"
   },
   "dependencies": {

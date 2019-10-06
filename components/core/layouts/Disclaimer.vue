@@ -1,25 +1,33 @@
 <template>
-	<div id="disclaimer" class="pointer-events-none position-fixed position-bottom" role="app disclaimer" v-bind:key="keys.element">
+	<div id="disclaimer" class="pointer-events-none position-fixed position-bottom pointer-events-none" role="app disclaimer" v-bind:key="keys.element">
 		
-		<aside class="disclaimer-container position-fixed position-full pointer-events-none animated fadeIn" v-if="display()">
+		<PreventScroll classname="disclaimer-container position-fixed position-full pointer-events-none animated fadeIn pointer-events-auto" v-if="display()">
 		
-			<div class="position-fixed position-bottom w-100 bg-primary text-white d-flex justify-content-center pointer-events-auto animated fadeInUpSmall">
-				<div class="disclaimer-content p lead spacer flex-grow-1 cursor-hand" v-if="display() === 'gdpr'" v-html="gdpr" v-on:click.stop.prevent="onclick"></div>
-				<div class="disclaimer-content p lead spacer flex-grow-1 cursor-hand" v-if="display() === 'update'" v-html="update" v-on:click.stop.prevent="onclick"></div>
-				<button class="plain spacer text-white" v-html="icons.toggle.options.close.icon.icon" v-on:click.stop.prevent="onclick"></button>
+			<div class="position-fixed position-bottom w-100 text-white d-flex justify-content-center pointer-events-auto p-1">
+				<div class="disclaimer-content p lead sm spacer flex-grow-1 cursor-hand bg-primary animated fadeInUpSmall a-delay" v-if="display() === 'gdpr'" v-html="gdpr" v-on:click.stop.prevent="onclick"></div>
+				<div class="disclaimer-content p lead sm spacer flex-grow-1 cursor-hand bg-primary animated fadeInUpSmall a-delay" v-if="display() === 'update'" v-html="update" v-on:click.stop.prevent="onclick"></div>
+				<button 
+					class="disclaimer-button position-absolute position-right h-40px w-40px rounded-circle plain bg-primary text-white m-1 animated fadeInUpSmall a-delay" 
+					v-html="icons.toggle.options.close.icon.icon" 
+					v-on:click.stop.prevent="onclick">
+				</button>
 			</div>
 			
-		</aside>
+		</PreventScroll>
 		
 	</div>
 </template>
 
 <script>
+	import PreventScroll from "~/components/core/ui/PreventScroll.vue";
 	import Page from "~/helpers/core/page.js";
 	import { forEach as __forEach, get as __Get } from "lodash";
 	
 	export default {
 		name: "Disclaimer",
+		components: {
+			PreventScroll
+		},
 		data () {
 			return {
 				keys: {
@@ -90,6 +98,10 @@
 						color: white;
 					}
 				}
+			}
+			
+			.disclaimer-button {
+				top: -44px;
 			}
 		}		
 	}

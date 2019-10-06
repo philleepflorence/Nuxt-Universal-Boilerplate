@@ -11,8 +11,7 @@
 		name: "PageWrapper",
 		props: [
 			'parent',
-			'page', 
-			'mode'
+			'page'
 		],
 		computed: {
 			configuration () {
@@ -20,6 +19,17 @@
 			},
 			loaded () {
 				return this.$store.state.app.loaded;
+			},
+			pages () {
+				return this.$store.state.api.pages;
+			},
+			path () {
+				let path = Page.path(this.$route.path);
+				let page = Page.get(this.pages, path);
+				
+				if (page.name === this.page.name) return path;
+				
+				return null;
 			}
 		},
 		data () {
@@ -32,11 +42,22 @@
 			};
 		},
 		methods: {
+			metadata () {
+				let path = Page.path(this.$route.path);
+				let page = Page.get(this.pages, path);
+				let metadata = this.path ? this.$store.state.app.metadata[path] : null;
+				
+				if (metadata) return metadata;
+				
+				metadata = Page.metadata(this.$props.page, this.configuration);
+				
+				return metadata;
+			},
 			reload () {
 				this.keys.element = Page.utils.rand();
 			},
 			render () {
-				if (window.DEBUG) console.log("debug - app.components.core.wrappers.Page.render", this.$props.parent);
+				if (window.DEBUG) console.log("debug - app.components.core.wrappers.Page.render");
 				
 				if (this.$props.mode) {
 					clearTimeout(this.timer);
@@ -53,14 +74,21 @@
 					}, 300);
 				}
 				
+				if (this.path) {
+					this.$store.commit('app/METADATA', {
+						key: this.path,
+						data: this.metadata()
+					});	
+				}
+				
 				this.rendered = true;
 			}
 		},
 		head () {
-			return Page.metadata(this.page, this.configuration);
+			return this.metadata();
 		},
 		mounted () {
-			if (window.DEBUG) console.log("debug - app.components.core.wrappers.Page.mounted", this.$props.parent);
+			if (window.DEBUG) console.log("debug - app.components.core.wrappers.Page.mounted");
 			
 			if (this.loaded) this.render();	
 			else {
@@ -79,7 +107,7 @@
 			});
 		},
 		updated () {			
-			if (window.DEBUG) console.log("debug - app.components.core.wrappers.Page.updated", this.$props.parent);
+			if (window.DEBUG) console.log("debug - app.components.core.wrappers.Page.updated");
 			
 			if (!this.rendered) this.render();	
 		},

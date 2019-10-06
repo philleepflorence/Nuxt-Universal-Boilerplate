@@ -23,11 +23,10 @@ module.exports = {
 			content: "# Change Log"
 		},
 		{
-			path: "package.json",
-			output: "__package.json"
+			path: "__package.json"
 		},
 		{
-			path: "__nuxt.config.js"
+			path: "nuxt.config.js"
 		},
 		{
 			path: "__.env"
@@ -40,6 +39,9 @@ module.exports = {
 		},
 		{
 			path: "api/config/api.js"
+		},
+		{
+			path: "api/config/__app.js"
 		},
 		{
 			path: "api/config/form.js"

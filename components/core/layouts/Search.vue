@@ -1,44 +1,50 @@
 <template>
 	<div id="search" class="options-overlay position-fixed position-full bg-dark off" role="app search" v-bind:key="keys.element">
-		<a href="#" class="position-absolute position-full" v-on:click.prevent.stop="close"></a>
-		<div class="page-search-container position-fixed position-full d-flex align-items-center pointer-events-none">
-			<div class="page-search-content page-search-form pointer-events-auto max-w-640px w-90 spacer mx-auto transition">
-				<header class="share-contents-header spacer t-delay">
-					<span 
-						class="d-flex align-items-center justify-content-center bg-white text-secondary h-70px w-70px mx-auto rounded-circle" 
-						v-html="labels.app.button.options.search.icon.icon">
-					</span>
-				</header>
-				<p class="page-search-hint p lead text-white text-center t-delay">{{ input.hint }}</p>
-				<div class="page-search-form-row position-relative shadow-sm t-delay">
-					<b-form-input 
-						class="page-search-input position-relative text-dark text-center lead bg-white-80 h-50px w-100 font-weight-book"
-						type="text" 
-						v-bind:placeholder="input.plaintext"
-						name="query" 
-						v-bind:value="search.query"
-						autocomplete="off"
-						v-on:keyup.enter="onsearch"
-						ref="searchInput">
-					</b-form-input>
-					<button 
-						class="plain bg-white-50 h-50px w-50px rounded-circle position-absolute position-right position-top text-primary shadow-sm" 
-						v-html="icons.settings.complete.icon.icon" 
-						v-on:click.prevent.stop="onsearch">
-					</button>					
+		<PreventScroll classname="position-fixed position-full">
+			<a href="#" class="position-absolute position-full" v-on:click.prevent.stop="close"></a>
+			<div class="page-search-container position-fixed position-full d-flex align-items-center pointer-events-none">
+				<div class="page-search-content page-search-form pointer-events-auto max-w-640px w-90 spacer mx-auto transition">
+					<header class="share-contents-header spacer t-delay">
+						<span 
+							class="d-flex align-items-center justify-content-center bg-white text-secondary h-70px w-70px mx-auto rounded-circle" 
+							v-html="labels.app.button.options.search.icon.icon">
+						</span>
+					</header>
+					<p class="page-search-hint p lead text-white text-center t-delay">{{ input.hint }}</p>
+					<div class="page-search-form-row position-relative shadow-sm t-delay">
+						<b-form-input 
+							class="page-search-input position-relative text-dark text-center lead bg-white-80 h-50px w-100 font-weight-book"
+							type="text" 
+							v-bind:placeholder="input.plaintext"
+							name="query" 
+							v-bind:value="search.query"
+							autocomplete="off"
+							v-on:keyup.enter="onsearch"
+							ref="searchInput">
+						</b-form-input>
+						<button 
+							class="plain bg-white-50 h-50px w-50px rounded-circle position-absolute position-right position-top text-primary shadow-sm" 
+							v-html="icons.settings.complete.icon.icon" 
+							v-on:click.prevent.stop="onsearch">
+						</button>					
+					</div>
 				</div>
 			</div>
-		</div>
+		</PreventScroll>
 	</div>
 </template>
 
 <script>
 	import Page from "~/helpers/core/page.js";
+	import PreventScroll from "~/components/core/ui/PreventScroll.vue";
 	import Handlebars from 'handlebars/dist/handlebars.min.js';
 	import { forEach as __forEach, get as __Get, cloneDeep as __cloneDeep, trimEnd as __trimEnd } from "lodash";
 	
 	export default {
 		name: "SearchOverlay",
+		components: {
+			PreventScroll
+		},
 		computed: {
 			basepath () {
 				return this.$store.state.api.config.application.search.base;

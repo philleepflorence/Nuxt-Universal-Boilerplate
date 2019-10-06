@@ -36,7 +36,8 @@ module.exports = {
 					"media.caption", 
 					"media.width", 
 					"media.height", 
-					"media.type"
+					"media.type", 
+					"media.url"
 				].join(",")
 			},
 			"compile": {
@@ -158,7 +159,8 @@ module.exports = {
 					"privilege",
 					"image.name", 
 					"image.width", 
-					"image.height",  
+					"image.height", 
+					"image.url",  
 					"icon",
 					"page", 
 					"analytics.data", 
@@ -282,9 +284,11 @@ module.exports = {
 					"image.width", 
 					"image.height", 
 					"image.type",
+					"image.url",
 					"style",
 					"script",
-					"page_views"
+					"page_views",
+					"content_image"
 				].join(","),
 				"filters": {
 					"application": "app"

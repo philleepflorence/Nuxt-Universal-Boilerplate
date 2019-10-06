@@ -51,6 +51,7 @@ export const state = () => ({
 	feed: {
 		rows: 20
 	},
+	metadata: {},
 	options: {},
 	routes: {
 		parent: null,
@@ -70,6 +71,11 @@ export const mutations = {
 		}
 		else if (payload === false) {
 			state.routes.parent = null;	
+		}
+	},
+	METADATA (state, payload) {
+		if (typeof payload.key === 'string') {
+			__Set(state.metadata, payload.key, payload.data);			
 		}
 	},
 	ROUTES (state, payload) {

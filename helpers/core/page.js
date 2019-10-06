@@ -57,6 +57,8 @@ export default {
 			_.set(page, index, currrow);
 		});
 		
+		if (Page.content_image && content.image) page.image = content.image;
+		
 		return page;
 	},
 	/*
@@ -162,6 +164,7 @@ export default {
 		
 		let title = _.unescape(_.get(page, 'title'));
 		let description = _.unescape(_.get(page, 'description'));
+		let image = _.get(page, 'image', {});
 		
 		return {
 			title: title,
@@ -172,25 +175,25 @@ export default {
 			meta: [
 				{ hid: 'share:description', name: 'share:description', content: description },
 				{ hid: 'share:title', name: 'share:title', content: title },
-				{ hid: 'share:image', name: 'share:image', content: _.get(page, 'image.url') },
+				{ hid: 'share:image', name: 'share:image', content: image.url },
+				{ hid: 'share:image:name', name: 'share:image:name', content: image.name },
 				{ hid: 'description', name: 'description', content: description },
 				{ hid: 'twitter:card', name: 'twitter:card', content: 'summary_large_image' },
 				{ hid: 'twitter:site', name: 'twitter:site', content: _.get(config, 'application.website') },
 				{ hid: 'twitter:title', name: 'twitter:title', content: title },
 				{ hid: 'twitter:description', name: 'twitter:description', content: description },
-				{ hid: 'twitter:image:src', name: 'twitter:image:src', content: _.get(page, 'image.url') },
-				{ hid: 'twitter:image:alt', name: 'twitter:image:alt', content: _.get(page, 'image.title') },
+				{ hid: 'twitter:image:src', name: 'twitter:image:src', content: image.url },
+				{ hid: 'twitter:image:alt', name: 'twitter:image:alt', content: image.title },
 				{ hid: 'og:type', name: 'og:type', content: 'website' },
 				{ hid: 'og:site_name', name: 'og:site_name', content: _.get(config, 'application.name') },
 				{ hid: 'og:url', name: 'og:url', content: _.get(config, 'application.website') },
 				{ hid: 'og:title', name: 'og:title', content: title },
 				{ hid: 'og:description', name: 'og:description', content: description },
-				{ hid: 'og:image', name: 'og:image', content: _.get(page, 'image.url') },
-				{ hid: 'og:image:secure_url', name: 'og:image:secure_url', content: _.get(page, 'image.url') },
-				{ hid: 'og:image:width', name: 'og:image:width', content: _.get(page, 'image.width') },
-				{ hid: 'og:image:height', name: 'og:image:height', content: _.get(page, 'image.height') },
-				{ hid: 'og:image:type', name: 'og:image:type', content: _.get(page, 'image.type') },
-				{ hid: 'og:image:width', name: 'og:image:width', content: _.get(page, 'image.url') }
+				{ hid: 'og:image', name: 'og:image', content: image.url },
+				{ hid: 'og:image:secure_url', name: 'og:image:secure_url', content: image.url },
+				{ hid: 'og:image:width', name: 'og:image:width', content: image.width },
+				{ hid: 'og:image:height', name: 'og:image:height', content: image.height },
+				{ hid: 'og:image:type', name: 'og:image:type', content: image.type }
 			]				
 		};
 	},

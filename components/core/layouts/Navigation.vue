@@ -92,7 +92,7 @@
 							<footer class="navigation-footer mt-auto w-100 text-secondary bg-white">
 								<div class="p small spacer m-0" v-html="configuration.application.tagline"></div>
 								<div class="p small spacer border-top m-0" v-html="configuration.application.disclaimer.contents" v-if="configuration.application.disclaimer.contents"></div>
-								<p class="p spacer border-top m-0 text-primary"><small>{{ `${ date() } &mdash; ${ configuration.application.name } &mdash; v${ configuration.application.app.version }` }}</small></p>
+								<p class="p spacer border-top m-0 text-primary"><small class="font-weight-book">{{ `${ date() } &mdash; ${ configuration.application.name } &mdash; v${ configuration.application.app.version }` }}</small></p>
 							</footer>
 						</div>
 					</div>

@@ -2,8 +2,12 @@
 	<div class="custom-scroll position-absolute position-full" v-bind:data-custom-scroll="name">
 		<div class="custom-scroll-content position-relative">
 			<slot></slot>
-			<footer class="position-relative custom-scroll-footer spacer text-center" v-if="scrollable">
-				<button class="btn w-50px h-50px rounded-circle bg-primary text-white position-absolute position-bottom position-left m-4" v-html="icons.scroll.up.icon.icon" v-on:click="scrollup"></button>
+			<footer class="position-fixed position-bottom custom-scroll-footer spacer text-center" v-if="scrollable" v-show="scrollback">
+				<button 
+					class="btn w-50px h-50px rounded-circle bg-primary text-white position-absolute position-bottom position-left m-4 shadow-sm animated zoomIn" 
+					v-html="icons.scroll.up.icon.icon" 
+					v-on:click="scrollup">
+				</button>
 			</footer>
 		</div>
 	</div>
@@ -28,6 +32,7 @@
 					element: Page.utils.rand()
 				},
 				scrollable: false,
+				scrollback: false,
 				custom: false,
 				axis: 'y'
 			};
@@ -105,6 +110,12 @@
 				
 				if (this.overlay) {
 					options.onContentSizeChanged = () => { this.render() };
+					options.callbacks = options.callbacks || {};
+					options.callbacks.onScroll = (e) => {
+						let position = __Get(this.$el.OverlayScrollbars.scroll(), 'position');
+						
+						this.scroll(position.x, position.y);
+					};
 				}
 				
 				if (!this.custom) {
@@ -117,6 +128,10 @@
 						this.$el.addEventListener('mouseenter', this.mouseenter);
 						this.$el.addEventListener('mouseleave', this.mouseleave);
 						window.addEventListener('wheel', this.wheel, { passive: false });
+					}
+					
+					if (this.overlay) {
+						this.$el.addEventListener('scroll', this.scroll, { passive: false });
 					}
 				}
 				else if (this.$el && this.custom) {
@@ -156,6 +171,20 @@
 				}
 				else {
 					this.scrollable = false;
+				}
+			},
+			scroll (x, y) {
+				if (this.scrollable) {
+					if (this.axis === "x") {
+						x = x || this.$el.scrollLeft;
+						
+						this.scrollback = x > window.innerWidth ? true : false;
+					}
+					else if (this.axis === "y") {
+						y = y || this.$el.scrollTop;						
+						
+						this.scrollback = y > window.innerHeight ? true : false;
+					}					
 				}
 			},
 			scrollup (e) {
@@ -246,6 +275,10 @@
 					this.$el.removeEventListener('mouseenter', this.mouseenter);
 					this.$el.removeEventListener('mouseleave', this.mouseleave);
 					window.removeEventListener('wheel', this.wheel, { passive: false });
+				}
+				
+				if (this.overlay) {
+					this.$el.removeEventListener('scroll', this.scroll);
 				}
 			}		
 		}

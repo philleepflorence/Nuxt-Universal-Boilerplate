@@ -76,6 +76,16 @@
 			}
 		},
 		methods: {
+			metadata () {
+				let path = this.$route.path;
+				let metadata = this.$store.state.app.metadata[path];
+				
+				if (metadata) return metadata;
+				
+				metadata = Page.metadata(this.page, this.configuration);
+				
+				return metadata;
+			},
 			reload () {
 				this.keys.element = Page.utils.rand();
 			},
@@ -104,12 +114,17 @@
 			};
 		},
 		head () {
-			return Page.metadata(this.page, this.configuration);
+			return this.metadata();
 		},
 		mounted () {
 			if (window.DEBUG) console.log("debug - app.components.core.wrappers.Auth.mounted");
 			
 			this.render();	
+				
+			this.$store.commit('app/METADATA', {
+				key: this.path,
+				data: this.metadata()
+			});
 		},
 		updated () {
 			if (window.DEBUG) console.log("debug - app.components.core.wrappers.Auth.updated");

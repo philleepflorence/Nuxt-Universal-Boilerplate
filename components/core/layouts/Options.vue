@@ -141,7 +141,6 @@
 						
 					this.$el.setAttribute('data-open', 'false');
 					this.$el.setAttribute('data-overlay', 'false');
-					console.log("debug - app.components.core.layouts.Options.close", this.$el);
 				}
 			},
 			display (component) {
