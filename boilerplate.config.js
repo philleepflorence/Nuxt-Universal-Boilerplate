@@ -18,21 +18,25 @@ module.exports = {
 	},
 	paths: [
 		{
-			path: "COMMIT.md",
-			create: true,
-			content: "# Change Log"
+			path: "README.md"
+		},
+		{
+			path: "COMMIT.md"
 		},
 		{
 			path: "__package.json"
 		},
 		{
-			path: "nuxt.config.js"
+			path: "__app.config.js"
 		},
 		{
 			path: "__.env"
 		},
 		{
 			path: "boilerplate.config.js"
+		},
+		{
+			path: "nuxt.config.js"
 		},
 		{
 			path: "api/index.js"
@@ -88,10 +92,6 @@ module.exports = {
 			recursive: true
 		},
 		{
-			path: "assets/styles/mixins",
-			recursive: true
-		},
-		{
 			path: "assets/styles/modules",
 			recursive: true
 		},
@@ -105,6 +105,25 @@ module.exports = {
 			path: "assets/styles/project.less",
 			create: true,
 			content: "/* Project Specific Styles! */"
+		},
+		{
+			path: "assets/styles/mixins/functions.less"
+		},
+		{
+			path: "assets/styles/mixins/mixins.less"
+		},
+		{
+			path: "assets/styles/mixins/utilities.less"
+		},
+		{
+			path: "assets/styles/mixins/colors.less",
+			create: true,
+			content: "/* Bootstrap Color Definitions - Load from API Colors Endpoint! */"
+		},
+		{
+			path: "assets/styles/mixins/project.less",
+			create: true,
+			content: "/* Project Specific Definitions and Mixins! */ \n\n@fontaccent: sans-serif; \n@fontmain: sans-serif;"
 		},
 		{
 			path: "components/core",

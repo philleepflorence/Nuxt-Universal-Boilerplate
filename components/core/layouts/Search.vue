@@ -23,7 +23,7 @@
 							ref="searchInput">
 						</b-form-input>
 						<button 
-							class="plain bg-white-50 h-50px w-50px rounded-circle position-absolute position-right position-top text-primary shadow-sm" 
+							class="page-search-button plain bg-white-50 rounded-circle position-absolute position-right position-top text-primary shadow-sm" 
 							v-html="icons.settings.complete.icon.icon" 
 							v-on:click.prevent.stop="onsearch">
 						</button>					
@@ -145,6 +145,11 @@
 					border-radius: 30px !important;
 					padding: 0 1rem;
 					text-overflow: ellipsis;
+				}
+				.page-search-button {
+					width: 44px;
+					height: 44px;
+					margin: 3px;
 				}
 			}		
 		}

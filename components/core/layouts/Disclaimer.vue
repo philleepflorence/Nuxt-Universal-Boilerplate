@@ -3,9 +3,9 @@
 		
 		<PreventScroll classname="disclaimer-container position-fixed position-full pointer-events-none animated fadeIn pointer-events-auto" v-if="display()">
 		
-			<div class="position-fixed position-bottom w-100 text-white d-flex justify-content-center pointer-events-auto p-1">
-				<div class="disclaimer-content p lead sm spacer flex-grow-1 cursor-hand bg-primary animated fadeInUpSmall a-delay" v-if="display() === 'gdpr'" v-html="gdpr" v-on:click.stop.prevent="onclick"></div>
-				<div class="disclaimer-content p lead sm spacer flex-grow-1 cursor-hand bg-primary animated fadeInUpSmall a-delay" v-if="display() === 'update'" v-html="update" v-on:click.stop.prevent="onclick"></div>
+			<div class="position-fixed position-bottom w-100 text-white d-flex justify-content-end text-left pointer-events-auto p-1 shadow">
+				<div class="disclaimer-content p lead sm flex-grow-1 max-w-768px cursor-hand bg-primary animated fadeInUpSmall a-delay" v-if="display() === 'gdpr'" v-html="gdpr" v-on:click="onclick"></div>
+				<div class="disclaimer-content p lead sm flex-grow-1 max-w-768px cursor-hand bg-primary animated fadeInUpSmall a-delay" v-if="display() === 'update'" v-html="update" v-on:click="onclick"></div>
 				<button 
 					class="disclaimer-button position-absolute position-right h-40px w-40px rounded-circle plain bg-primary text-white m-1 animated fadeInUpSmall a-delay" 
 					v-html="icons.toggle.options.close.icon.icon" 
@@ -64,7 +64,19 @@
 			onclick (e) {
 				if (window.DEBUG) console.log("debug - app.components.core.layouts.Disclaimer.onclick");
 				
-				if (this.display() === "gdpr") {
+				e.preventDefault();
+				
+				const href = e.target.getAttribute('href');
+				
+				if (href && href.charAt(0) === '/') {
+					this.$router.push({
+						path: href
+					});
+				}
+				else if (href) {
+					window.location.href = href;
+				}
+				else if (this.display() === "gdpr") {
 					window.localStorage.setItem('app:gdpr', Date.now());
 					
 					this.keys.element = Page.utils.rand();
@@ -91,12 +103,18 @@
 			background-image: linear-gradient(fade(black, 0), fade(black, 65));
 			
 			.disclaimer-content {
+				padding: 1.5rem;
+				
 				a {
 					border-bottom: 1px solid white; 
+					display: inline-block;
 					
 					&:hover, &:active, &:visited {
 						color: white;
 					}
+				}
+				* {
+					font-weight: 500 !important;
 				}
 			}
 			

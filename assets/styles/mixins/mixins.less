@@ -1,7 +1,26 @@
 /* !Bootstrap Color Definitions - Via API */ 
 
 @import 'functions.less';
+@import 'utilities.less';
 @import 'colors.less';
+
+/* !Application Definitions */
+
+@fontaccent: 'Josefin Sans', sans-serif;
+@fontmain: 'Encode Sans Condensed', sans-serif;
+@fontweightbook: 500;
+
+@mainbackgroundcolor: #FFFFFF;
+@mainbordercolor: #DEE2E6;
+@maintextcolor: @colortextdark;
+
+@ease: cubic-bezier(0.23, 1, 0.32, 1);
+
+@spacer: 1rem;
+
+/* !Project Specific Mixins */
+
+@import 'project.less';
 
 /* !Bootstrap Media Query Breakpoints */
 
@@ -19,18 +38,3 @@
 @breakpoint-xl-max: 1199px;
 @breakpoint-xxl-max: 1499px;
 
-/* !Application Definitions */
-
-@fontaccent: 'Cormorant Garamond', sans-serif;
-@fontmain: 'Encode Sans Condensed', sans-serif;
-@fontweightbook: 500;
-
-@mainbackgroundcolor: #FFFFFF;
-@mainbordercolor: #DEE2E6;
-@maintextcolor: @colortextdark;
-
-@ease: cubic-bezier(0.23, 1, 0.32, 1);
-
-@spacer: 1rem;
-
-@import 'utilities.less';

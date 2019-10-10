@@ -1,6 +1,5 @@
 const pkg = require('./package');
-
-const config = require('./api/config/app.js');
+const config = require('./app.config.js');
 
 require('dotenv').config();
 
@@ -74,7 +73,7 @@ module.exports = {
             },
             {
                 name: 'fonts',
-                content: 'Josefin Sans,Encode Sans Condensed,Material Design Icons'
+                content: process.env.APP_FONT_FAMILY
             }
         ],
         link: [
