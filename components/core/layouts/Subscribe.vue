@@ -52,7 +52,7 @@
 		},
 		methods: {
 			close (e) {
-				this.$emit('close', 'share');
+				this.$emit('close', 'subscribe');
 			}
 		},
 		mounted () {

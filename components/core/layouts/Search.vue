@@ -23,7 +23,7 @@
 							ref="searchInput">
 						</b-form-input>
 						<button 
-							class="page-search-button plain bg-white-50 rounded-circle position-absolute position-right position-top text-primary shadow-sm" 
+							class="page-search-button plain bg-primary rounded-circle position-absolute position-right position-top text-white shadow-sm" 
 							v-html="icons.settings.complete.icon.icon" 
 							v-on:click.prevent.stop="onsearch">
 						</button>					
@@ -69,7 +69,7 @@
 		},
 		methods: {
 			close (e) {
-				this.$emit('close', 'share');
+				this.$emit('close', 'search');
 			},
 			onsearch (e) {
 				let $element = this.$el.querySelector('input.page-search-input');

@@ -23,7 +23,7 @@
 							autocomplete="off">
 						</b-form-input>
 						<button 
-							class="plain bg-white-50 h-50px w-50px rounded-circle position-absolute position-right position-top text-primary shadow-sm" 
+							class="form-subscribe-button plain bg-primary rounded-circle position-absolute position-right position-top text-white shadow-sm" 
 							v-html="icons.settings.complete.icon.icon" 
 							type="submit">
 						</button>
@@ -88,6 +88,11 @@
 		.form-subscribe-row {
 			.form-subscribe-input {
 				border-radius: 25px !important;
+			}
+			.form-subscribe-button {
+				width: 44px;
+				height: 44px;
+				margin: 3px;
 			}
 		}
 		.form-options {

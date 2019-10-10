@@ -148,12 +148,12 @@
 				
 				return false;
 			},
-			onOverlay (e) {
+			onOverlay (e, curroverlay) {
 				if (window.DEBUG) console.log("debug - app.components.core.layouts.Options.onOverlay");
 				
 				this.close(true);
 				
-				this.curroverlay = e.currentTarget.getAttribute('data-overlay');
+				this.curroverlay = curroverlay || e.currentTarget.getAttribute('data-overlay');
 											
 				this.overlay();				
 			},
@@ -271,9 +271,7 @@
 			
 			this.$store.subscribe((mutation, state) => {
 				if (mutation.type === 'app/SET' && mutation.payload.key === "app:options:overlay") {
-					this.curroverlay = mutation.payload.data;
-
-					this.overlay();						
+					this.onOverlay(null, mutation.payload.data);						
 				}												
 			});
 		}
