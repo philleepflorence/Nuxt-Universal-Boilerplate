@@ -20,7 +20,7 @@ module.exports = {
 	*/
 	async run (req, res) {
 		
-		__app.debugger.info('api.controllers.app.error - DEBUG:  `%s`', req.query.debug);
+		__app.debugger.debug('api.controllers.app.error - DEBUG:  `%s`', req.query.debug);
 		
 		let endpoint = __app.helpers.core.api.endpoint('items', { collection: 'error' });
 		let form = req.body.form;

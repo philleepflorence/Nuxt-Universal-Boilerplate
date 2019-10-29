@@ -19,7 +19,7 @@ module.exports = {
 	*/
 	async run (req, res) {
 		
-		__app.debugger.info('api.controllers.auth.credentials');
+		__app.debugger.debug('api.controllers.auth.credentials');
 		
 		const admin = req.query.debug === 'test' && req.query.token === process.env.APP_TOKEN;
 		

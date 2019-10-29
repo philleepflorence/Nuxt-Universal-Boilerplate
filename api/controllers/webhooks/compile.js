@@ -11,7 +11,7 @@
  *
  */
 
-import { get as __Get } from 'lodash';
+import _ from 'lodash';
 
 module.exports = {
 	method: 'POST',
@@ -21,13 +21,13 @@ module.exports = {
 	*/
 	async run (req, res) {
 		
-		__app.debugger.info('api.controllers.webhooks.compile');
+		__app.debugger.debug('api.controllers.webhooks.compile');
 		
 		const find = req.query.find;
 		
 		__app.data = await __app.helpers.core.app.initialize(req, res, false);
 		
-		if (find) return res.json(__Get(__app.data, find));
+		if (find) return res.json(_.get(__app.data, find));
 				
 		return res.json(__app.data);
 	},

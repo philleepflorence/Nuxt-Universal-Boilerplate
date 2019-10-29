@@ -15,7 +15,7 @@ const session = require('express-session');
 const RedisStore = require('connect-redis')(session);
 const app = express();
 
-import { get as __Get } from 'lodash';
+import _ from 'lodash';
 
 global.__app = global.__app || {};
 
@@ -119,7 +119,7 @@ app.all('*', async function (req, res, next) {
 	
 	const data = __app.helpers.core.cache.$.get('app');
 	const path = req.path.replace(/^\/|\/$/g, '').replace(/\//g, '.');
-	const controller = __Get(__app.controllers, path);
+	const controller = _.get(__app.controllers, path);
 	const validated = typeof controller.token === "boolean" ? req.query.token === process.env.APP_TOKEN : 
 		( typeof controller.token === "string" ? req.query.token === controller.token : true );
 	

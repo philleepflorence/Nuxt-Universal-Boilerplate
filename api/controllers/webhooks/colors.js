@@ -22,7 +22,7 @@ module.exports = {
 		const debug = req.query.debug;
 		const filename = `${ process.cwd() }/assets/styles/mixins/colors.less`;
 		
-		__app.debugger.info(`api.controllers.webhooks.color - filename: ${ filename }`);
+		__app.debugger.debug(`api.controllers.webhooks.color - filename: ${ filename }`);
 		
 		let endpoint = __app.helpers.core.api.endpoint('colors');
 								

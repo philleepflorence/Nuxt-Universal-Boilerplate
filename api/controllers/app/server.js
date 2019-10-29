@@ -21,7 +21,7 @@ module.exports = {
 	*/
 	async run (req, res) {
 		
-		__app.debugger.info('api.controllers.app.server - DEBUG:  `%s`', req.query.debug);
+		__app.debugger.debug('api.controllers.app.server - DEBUG:  `%s`', req.query.debug);
 		
 		let response = {};
 		let currtime = Date.now();
@@ -46,7 +46,7 @@ module.exports = {
 			_.set(response.system.memory, key, __app.helpers.core.format.human(string, { scale: 'bytes' }));
 		});
 		
-		__app.debugger.info('api.controllers.app.server - Duration:  `%s ms` ', Date.now() - currtime);
+		__app.debugger.debug('api.controllers.app.server - Duration:  `%s ms` ', Date.now() - currtime);
 		
 		return res.json(response);
 	},

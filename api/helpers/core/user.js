@@ -25,7 +25,8 @@ module.exports = function (input, mode, req) {
 			"email", 
 			"telephone",
 			"image",
-			"location"
+			"location",
+			"notifications_frequency"
 		],
 		account: [
 			"salt", 
@@ -42,7 +43,7 @@ module.exports = function (input, mode, req) {
     user.privilege = permission;
     
     let privileges = _.get(__app.data, 'privileges');
-    let dateformat = _.get(__app.data, 'configuration.application.format.date') || 'LLLL';
+    let dateformat = _.get(__app.data, 'configuration.application.format.datetime') || 'LLLL';
     
     if (permission && privileges) _.set(user, 'permission', _.get(privileges, permission));
     else if (!privileges && _.get(input, 'privilege.data.id')) _.set(user, 'permission', _.get(input, 'privilege.data'));
@@ -128,9 +129,13 @@ module.exports = function (input, mode, req) {
 	
 	user.name = `${ _.get(user, 'first_name') } ${ _.get(user, 'last_name') }`;
 	
+	user.formatted = {};
+	
 	if (!user.initials && user.first_name && user.last_name) user.initials = user.first_name.charAt(0) + user.last_name.charAt(0);
 	
 	if (_.get(user, 'created')) _.set(user, 'formatted.created', ( moment(_.get(user, 'created')).format(dateformat) ));
+	
+	if (_.get(user, 'updated')) _.set(user, 'formatted.updated', ( moment(_.get(user, 'updated')).format(dateformat) ));
 	
 	if (_.get(user, 'last_login')) _.set(user, 'formatted.login', ( moment(_.get(user, 'last_login')).format(dateformat) ));
 	

@@ -26,7 +26,7 @@ module.exports = {
 		
 		let metadata = {};
 
-		__app.debugger.info('api.controllers.app.metadata - URL: `%s`', url);
+		__app.debugger.debug('api.controllers.app.metadata - URL: `%s`', url);
 		
 		const currtime = Date.now();
 	
@@ -57,7 +57,7 @@ module.exports = {
 			
 			const duration = ( Date.now() - currtime );
 			
-			__app.debugger.info('api.controllers.app.metadata - Duration: `%s ms`', duration);
+			__app.debugger.debug('api.controllers.app.metadata - Duration: `%s ms`', duration);
 			
 			return res.json(metadata);
 		});

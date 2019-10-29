@@ -5,7 +5,7 @@
 <script>
 	import Page from "~/helpers/core/page.js";
 	import Handlebars from 'handlebars/dist/handlebars.min.js';
-	import { forEach as __forEach, get as __Get, cloneDeep as __cloneDeep, trimEnd as __trimEnd } from "lodash";
+	import _ from "lodash";
 	
 	export default {
 		name: "Analytics",
@@ -14,7 +14,7 @@
 				return this.$store.state.api.config.analytics;
 			},
 			downloadtime () {
-				const timing = __Get(window, 'performance.timing');
+				const timing = _.get(window, 'performance.timing');
 				
 				if (!timing) return null;
 								
@@ -23,7 +23,7 @@
 				return loadtime;
 			},
 			loadtime () {
-				const timing = __Get(window, 'performance.timing');
+				const timing = _.get(window, 'performance.timing');
 				
 				if (!timing) return null;
 								
@@ -42,7 +42,7 @@
 				let hash = window.location.hash;
 				
 				if (hash) {
-					pathname = __trimEnd(pathname, '/');
+					pathname = _.trimEnd(pathname, '/');
 					
 					return `${ pathname }/${ hash }`;
 				}
@@ -50,7 +50,7 @@
 				return pathname;
 			},
 			rendertime () {
-				const timing = __Get(window, 'performance.timing');
+				const timing = _.get(window, 'performance.timing');
 				
 				if (!timing) return null;
 								
@@ -78,7 +78,7 @@
 					url: window.location.href,
 					lineNumber: e.lineno,
 					columnNumber: e.colno,
-					error: __Get(e.error, 'stack'),
+					error: _.get(e.error, 'stack'),
 					userAgent: navigator.appVersion
 				}
 				
@@ -102,8 +102,8 @@
 			*/
 			google (path, type, params) {			
 				const initialize = () => {
-					let UUID = __Get(this.configuration, 'google.id');
-					let debug = __Get(this.configuration, 'google.debug');
+					let UUID = _.get(this.configuration, 'google.id');
+					let debug = _.get(this.configuration, 'google.debug');
 						debug = debug || window.location.search.indexOf('analytics=debug') > 0;
 					let urlpath = debug ? 'analytics_debug' : 'analytics';
 					
@@ -134,7 +134,7 @@
 				const track = () => {
 					let result = null;
 		
-					params = params || __Get(this.configuration, `types.${ type }`) || {};
+					params = params || _.get(this.configuration, `types.${ type }`) || {};
 		
 					switch (type)
 		            {
@@ -204,15 +204,15 @@
 				else if (window.ga && path && type) track();
 			},
 			init (path, type, params) {
-			    let apis = __Get(this.configuration, 'apis');	 
-			    var options = __Get(this.configuration, 'options');
+			    let apis = _.get(this.configuration, 'apis');	 
+			    var options = _.get(this.configuration, 'options');
 			    			    
-			    if (options && __Get(options, type)) {
+			    if (options && _.get(options, type)) {
 				    this.send(path, type, params);	
 			    }   
 				
 				if (apis) {
-					__forEach(apis, (value, api) => {
+					_.forEach(apis, (value, api) => {
 						if (typeof this[api] === 'function' && typeof api === "string") this[api](path, type, params);
 					});
 				}
@@ -242,7 +242,7 @@
 			    let href = e.currentTarget.href;
 			    
 			    params = params || {};
-				params = __cloneDeep(params, __Get(this.configuration, 'types.link'));
+				params = _.cloneDeep(params, _.get(this.configuration, 'types.link'));
 				params.label = params.label || $this.attr('href');
 			
 				this.init(href, 'event', params);

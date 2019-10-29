@@ -23,7 +23,7 @@ module.exports = {
 	*/
 	async run (req, res) {
 		
-		__app.debugger.info('api.controllers.app.analytics - DEBUG:  `%s`', req.query.debug);
+		__app.debugger.debug('api.controllers.app.analytics - DEBUG:  `%s`', req.query.debug);
 		
 		let endpoint = __app.helpers.core.api.endpoint('analytics');
 		let analytics = req.body.analytics;

@@ -19,7 +19,7 @@ module.exports = {
 	*/
 	async run (req, res) {
 		
-		__app.debugger.info('api.controllers.auth.confirm');
+		__app.debugger.debug('api.controllers.auth.confirm');
 		
 		const debug = req.query.debug;
 		const salt = req.params.salt || req.query.salt;

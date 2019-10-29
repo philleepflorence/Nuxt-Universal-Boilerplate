@@ -35,6 +35,8 @@ export default {
 			element.classList.remove('image-loading');
 			element.classList.add('image-loaded');
 			
+			element.setAttribute('data-image-loaded', Date.now());
+			
 			element.dispatchEvent(new Event('helpers:image:loaded'));
 				
 			if (loaded === len && typeof done === 'function') {				
@@ -95,7 +97,7 @@ export default {
 		
 		_.forEach(elements, function (element, curr)
 		{
-			const load = !_.includes(element.classList, 'image-loaded') && !_.includes(element.classList, 'image-loading');
+			const load = !element.hasAttribute('data-image-loaded') && !_.includes(element.classList, 'image-loading');
 			
 			if (!load) {
 				len--;

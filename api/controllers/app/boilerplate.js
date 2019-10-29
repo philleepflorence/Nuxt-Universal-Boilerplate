@@ -20,7 +20,7 @@ module.exports = {
 	token: true,
 	async run (req, res) {
 
-		__app.debugger.info('api.controllers.app.boilerplate');
+		__app.debugger.debug('api.controllers.app.boilerplate');
 		
 		const token = req.query.token; 		
 		const currtime = Date.now();
@@ -47,8 +47,24 @@ module.exports = {
 				let source = `${ dirname }/${ row.path }`;
 				let pathexists = fs.pathExistsSync(source);
 				
-				
-				if (pathexists) {
+				if (!pathexists && row.create === true) {
+					
+					try {
+						let destination = `${ output }/${ row.path }`;
+						
+						fs.writeFileSync(destination, row.content);
+						
+						row.destination = destination;
+						
+						row.synced = fs.pathExistsSync(destination);
+						
+						__app.debugger.debug('api.controllers.app.boilerplate - Destination: `%s`', row.path);
+					}
+					catch (err) {
+						row.error = err;
+					}
+				}				
+				else if (pathexists) {
 					row.source = source; 
 					
 					let directory = path.dirname(source);
@@ -59,7 +75,7 @@ module.exports = {
 						let destination;
 						
 						if (row.output) {
-							destination = `${ output }/${ row.output }`;					
+							destination = `${ output }/${ row.output }`;
 						}					
 						else if (row.recursive) {
 							destination = `${ output }/${ row.path }`;
@@ -68,17 +84,18 @@ module.exports = {
 							destination = `${ output }/${ row.path }`;
 						}
 						
-						if (typeof destination === "string" && row.create) {
-							row.destination = destination;
-							row.sync = fs.writeFileSync(destination, row.content);
+						if (typeof destination === "string" && row.create === true) {
+							row.destination = destination;							
+							fs.writeFileSync(destination, row.content);
 						}
 						else if (typeof destination === "string") {
-							row.destination = destination;	
-							row.synced = fs.copySync(source, destination, { preserveTimestamps: true });
+							row.destination = destination;								
+							fs.copySync(source, destination, { preserveTimestamps: true });
 						}
-						else {
-							row.synced = false;
-						}									
+							
+						row.synced = fs.pathExistsSync(destination);
+						
+						__app.debugger.debug('api.controllers.app.boilerplate - Destination: `%s`', ( row.output || row.path ));									
 					}
 					catch (err) {
 						row.error = err;
@@ -89,7 +106,7 @@ module.exports = {
 		
 		const duration = Date.now() - currtime;
 
-		__app.debugger.info('api.controllers.app.boilerplate - Duration: `%s` ms', duration);
+		__app.debugger.debug('api.controllers.app.boilerplate - Duration: `%s` ms', duration);
 	
 		return res.json({
 			duration: `${ duration }ms`,

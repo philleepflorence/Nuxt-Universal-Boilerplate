@@ -7,10 +7,10 @@
 			v-bind:src="page.image.name">
 		</ImageLoader>
 		<div class="d-flex align-items-center vh-100 spacer">
-			<section class="p w-100 max-w-640px mx-auto spacer animated fadeInUp">
+			<section class="p w-100 mx-auto spacer animated fadeInUp">
 				<span class="p-3 text-center d-block text-white" v-html="page.icon.icon"></span>
-				<h1 class="text-center fs-2rem text-white mb-4 cursor-hand" v-on:click="reload">{{ page.headline }}</h1>
-				<div class="p text-white empty text-center font-weight-book" v-html="page.synopsis"></div>
+				<h1 class="text-center fs-2rem text-white mb-4 cursor-hand" v-on:click="reload">{{ format(page.headline) }}</h1>
+				<div class="p text-white empty text-center font-weight-book" v-html="format(page.synopsis)"></div>
 				<div class="page-container pt-3">
 					<slot></slot>
 				</div>
@@ -76,6 +76,9 @@
 			}
 		},
 		methods: {
+			format (string) {
+				return Page.utils.format (string, this.$store.state.api.config.components.display);
+			},
 			metadata () {
 				let path = this.$route.path;
 				let metadata = this.$store.state.app.metadata[path];
@@ -88,6 +91,22 @@
 			},
 			reload () {
 				this.keys.element = Page.utils.rand();
+			},
+			render () {
+				if (this.page.mode) {
+					clearTimeout(this.timer);
+					
+					this.timer = setTimeout(() => {
+						document.body.setAttribute('data-mode', this.page.mode);
+					}, 300);
+				}
+				else {
+					clearTimeout(this.timer);
+					
+					this.timer = setTimeout(() => {
+						document.body.removeAttribute('data-mode');
+					}, 300);
+				}
 			}
 		},
 		data () {
@@ -102,6 +121,8 @@
 		},
 		mounted () {
 			if (window.DEBUG) console.log("debug - app.components.core.wrappers.User.mounted");
+			
+			this.render();	
 				
 			this.$store.commit('app/METADATA', {
 				key: this.path,

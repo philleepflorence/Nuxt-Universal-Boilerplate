@@ -4,8 +4,8 @@
 		<PreventScroll classname="disclaimer-container position-fixed position-full pointer-events-none animated fadeIn pointer-events-auto" v-if="display()">
 		
 			<div class="position-fixed position-bottom w-100 text-white d-flex justify-content-end text-left pointer-events-auto p-1 shadow">
-				<div class="disclaimer-content p lead sm flex-grow-1 max-w-768px cursor-hand bg-primary animated fadeInUpSmall a-delay" v-if="display() === 'gdpr'" v-html="gdpr" v-on:click="onclick"></div>
-				<div class="disclaimer-content p lead sm flex-grow-1 max-w-768px cursor-hand bg-primary animated fadeInUpSmall a-delay" v-if="display() === 'update'" v-html="update" v-on:click="onclick"></div>
+				<div class="disclaimer-content p flex-grow-1 max-w-768px cursor-hand bg-primary animated fadeInUpSmall a-delay" v-if="display() === 'gdpr'" v-html="gdpr" v-on:click="onclick"></div>
+				<div class="disclaimer-content p flex-grow-1 max-w-768px cursor-hand bg-primary animated fadeInUpSmall a-delay" v-if="display() === 'update'" v-html="update" v-on:click="onclick"></div>
 				<button 
 					class="disclaimer-button position-absolute position-right h-40px w-40px rounded-circle plain bg-primary text-white m-1 animated fadeInUpSmall a-delay" 
 					v-html="icons.toggle.options.close.icon.icon" 
@@ -21,7 +21,7 @@
 <script>
 	import PreventScroll from "~/components/core/ui/PreventScroll.vue";
 	import Page from "~/helpers/core/page.js";
-	import { forEach as __forEach, get as __Get } from "lodash";
+	import _ from "lodash";
 	
 	export default {
 		name: "Disclaimer",
@@ -40,16 +40,24 @@
 				return this.$store.state.api.config;
 			},
 			gdpr () {
-				return __Get(this.configuration.application, "disclaimer.gdpr");
+				let string = _.get(this.configuration.application, "disclaimer.gdpr");
+				
+				string = Page.utils.format(string, this.configuration.components.display);
+				
+				return string;
 			},
 			icons () {
 				return this.$store.state.api.icons;
 			},
 			update () {
-				return __Get(this.configuration.application, "disclaimer.update");
+				let string = _.get(this.configuration.application, "disclaimer.update");
+				
+				string = Page.utils.format(string, this.configuration.components.display);
+				
+				return string;
 			},
 			version () {
-				return __Get(this.configuration.application, "app.version");
+				return _.get(this.configuration.application, "app.version");
 			}
 		},
 		methods: {

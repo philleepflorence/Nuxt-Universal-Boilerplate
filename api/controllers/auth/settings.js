@@ -19,7 +19,7 @@ module.exports = {
 	*/
 	async run (req, res) {
 		
-		__app.debugger.info('api.controllers.auth.settings');
+		__app.debugger.debug('api.controllers.auth.settings');
 		
 		const debug = req.query.debug;
 		const admin = debug === 'test' && req.query.token === process.env.APP_TOKEN;
@@ -64,7 +64,7 @@ module.exports = {
 		
 		if (file.data) 
 		{
-			__app.debugger.info(`api.controllers.auth.settings.file.upload - FILENAME: ${ file.name }`);
+			__app.debugger.debug(`api.controllers.auth.settings.file.upload - FILENAME: ${ file.name }`);
 			
 			let endpoint = __app.helpers.core.api.endpoint('form.upload');
 		

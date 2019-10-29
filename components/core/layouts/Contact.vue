@@ -1,71 +1,21 @@
 <template>
 	<div id="contact" class="options-overlay position-fixed position-full bg-gray-70 off" role="app contact" v-bind:key="keys.element">
-		<a href="#" class="position-absolute position-full" v-on:click.prevent.stop="close"></a>
-		<div class="contact-container position-absolute position-full pointer-events-none">
+		<div class="contact-container position-absolute position-full">
 			<CustomScroll name="contact">
-				<div class="contact-wrapper d-flex align-items-center vh-100 max-w-480px mx-auto">
-					<div class="flex-item w-100 pointer-events-auto">
-						<header class="contact-contents-header spacer transform t-delay">
-							<span 
-								class="d-flex align-items-center justify-content-center bg-white text-secondary h-70px w-70px rounded-circle mx-auto" 
-								v-html="labels.app.button.options.contact.icon.icon">
-							</span>
-						</header>
-						<section class="contact-contents plain-form w-100 bg-dark spacer transform t-delay">
-							<Form 
-								id="contact-overlay-form" 
-								path="/api/form/submit" 
-								captcha="true" 
-								options="true" 
-								clearonsuccess="true" 
-								autocomplete="off"
-								data-tooltip-container="width">
-								<template v-slot:header>
-									<div class="p pb-4 text-white" v-html="headline.value"></div>
-								</template>
-								<template v-slot:inputs>
-									<div class="form-inputs">
-										<input type="hidden" value="contact" name="form.form" class="input">
-										<div v-bind:id="`form-group-${ input.slug }`" class="form-group" v-for="input in inputs">
-											<label class="form-label form-no-label" v-bind:for="`form-${ input.slug }`" v-html="input.plaintext"></label>
-											<b-form-input 
-												class="input"
-												v-if="input.form_type == 'input'"
-												v-bind:id="`form-${ input.slug }`" 
-												v-bind:type="input.input_type" 
-												v-bind:placeholder="input.plaintext"
-												v-bind:v-model="`form.${ input.slug }`"
-												v-bind:value="input.defaultValue" 
-												v-bind:name="`form.${ input.slug }`" 
-												v-b-tooltip:contact-overlay-form.focus 
-												v-bind:title="input.hint" 
-												v-bind="attributes(input.attributes)"
-												autocomplete="off">
-											</b-form-input>
-											<b-form-textarea 
-												class="input form-textarea"
-												v-if="input.form_type == 'textarea'"
-												v-bind:id="`form-${ input.slug }`" 
-												v-bind:type="input.input_type" 
-												v-bind:placeholder="input.plaintext"
-												v-bind:v-model="`form.${ input.slug }`" 
-												v-bind:value="input.defaultValue" 
-												v-bind:name="`form.${ input.slug }`" 
-												v-b-tooltip:contact-overlay-form.focus 
-												v-bind:title="input.hint"  
-												v-bind="attributes(input.attributes)"
-												autocomplete="off">
-											</b-form-textarea>
-										</div>
-									</div>
-								</template>
-								<template v-slot:footer>
-									<div class="form-group form-footer text-center">
-										<b-button type="submit" variant="primary" class="w-100 text-uppercase font-weight-book form-button">{{ submit.plaintext }}</b-button>
-									</div>
-								</template>																	
-							</Form>
-						</section>
+				<a href="#" class="position-fixed position-full pointer-events-auto" v-on:click.prevent.stop="close"></a>
+				<div class="position-relative contact-wrapper d-flex align-items-center vh-100 pointer-events-auto">
+					<div class="contact-parent max-w-480px mx-auto py-10">
+						<div class="flex-item w-100">
+							<header class="contact-contents-header spacer transform t-delay">
+								<span 
+									class="d-flex align-items-center justify-content-center bg-white text-secondary h-70px w-70px rounded-circle mx-auto" 
+									v-html="labels.app.button.options.contact.icon.icon">
+								</span>
+							</header>
+							<section class="contact-contents plain-form w-100 bg-dark bg-overlay spacer transform t-delay">
+								<Contact name="contact-overlay"></Contact>
+							</section>
+						</div>						
 					</div>
 				</div>
 			</CustomScroll>
@@ -75,10 +25,10 @@
 
 <script>
 	import Page from "~/helpers/core/page.js";
-	import Handlebars from 'handlebars/dist/handlebars.min.js';
 	import Form from "~/components/core/forms/Form.vue";
+	import Contact from "~/components/core/forms/Contact.vue";
 	import CustomScroll from "~/components/core/ui/CustomScroll.vue";
-	import { forEach as __forEach, get as __Get, cloneDeep as __cloneDeep } from "lodash";
+	import _ from "lodash";
 	
 	export default {
 		name: "ContactOverlay",
@@ -86,6 +36,7 @@
 		
 		],
 		components: {
+			Contact,
 			CustomScroll,
 			Form
 		},
@@ -93,33 +44,11 @@
 			configuration () {
 				return this.$store.state.api.config.application;
 			},
-			headline () {
-				return this.$store.state.api.labels.app.header['contact-overlay'].information;
-			},
 			icons () {
 				return this.$store.state.api.icons;
 			},
-			inputs () {
-				let curruser = this.$store.state.user;
-				let inputs = __cloneDeep(this.$store.state.api.labels.app.form['contact-overlay']);
-				
-				if (curruser) {
-					__forEach(inputs, (input) => {
-						if (input.source) {
-							let template = Handlebars.compile(input.source);
-							
-							input.defaultValue = template(curruser);
-						}
-					});
-				}
-				
-				return inputs;
-			},
 			labels () {
 				return this.$store.state.api.labels;
-			},
-			submit () {
-				return this.$store.state.api.labels.app.button['contact-overlay'].submit;
 			}
 		},
 		data () {
@@ -131,9 +60,6 @@
 			};
 		},
 		methods: {
-			attributes (attributes) {
-				return Page.utils.attributes(attributes);
-			},
 			close (e) {
 				this.$emit('close', 'contact');
 			}
@@ -156,25 +82,8 @@
 	
 	#contact[role="app contact"] {
 		
-		.contact-wrapper {
-			width: 90vw;
-			
-			.contact-contents {
-				.form-group {
-					.form-control {
-						color: white !important;
-						background: fade(white, 10) !important;
-						
-						&:focus {
-							border-bottom: 1px solid @colorprimary !important;
-						}
-						
-						&.error {
-							border-bottom: 1px solid @colordanger !important;
-						}
-					}
-				}
-			}
+		.contact-parent {
+			width: 96vw;
 		}
 		
 		&.off {

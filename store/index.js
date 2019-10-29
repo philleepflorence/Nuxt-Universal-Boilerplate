@@ -7,7 +7,7 @@
  *
  */
  
-import { get as __Get, set as __Set, forEach as __forEach } from 'lodash';
+import _ from 'lodash';
 
 export const state = () => ({
 	api: {},
@@ -16,17 +16,17 @@ export const state = () => ({
 
 export const mutations = {
 	INIT_STORE (state, payload) {
-		__forEach(payload, (row, index) => {
+		_.forEach(payload, (row, index) => {
 			if (state[index]) {
-				__Set(state, index, row);
+				_.set(state, index, row);
 			}
 			else {
-				__Set(state, `api.${ index }`, row);
+				_.set(state, `api.${ index }`, row);
 			}
 		});
 	},
 	INIT_USER (state, payload) {
-		__Set(state, 'user', payload);
+		_.set(state, 'user', payload);
 	}
 };
 
@@ -36,7 +36,7 @@ export const actions = {
 			commit('INIT_STORE', req.store);
 		}
 		
-		let user = req.me || req.session.user;
+		let user = req.me || req.session.user || null;
 				
 		if (user) {
 			commit('INIT_USER', user);

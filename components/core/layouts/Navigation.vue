@@ -2,26 +2,26 @@
 	<div id="navigation" role="app navigation" class="position-relative off" v-bind:key="keys.element">
 		<nav class="navigation-controls transition position-fixed mt-2 h-50px w-100 pointer-events-none d-flex">
 			<button 
-				class="position-relative plain h-50px w-50px bg-primary bg-secondary-hover bg-primary-active text-white navigation-controls-open" 
+				class="position-relative plain h-50px w-50px bg-primary text-white navigation-controls-open" 
 				v-html="icons.menu.open.icon.icon" 
 				v-on:click="controls('open')">
 			</button>
 			<button 
-				class="position-relative plain h-50px w-50px bg-primary bg-secondary-hover bg-primary-active text-white navigation-controls-close position-absolute position-top position-left" 
+				class="position-relative plain h-50px w-50px bg-primary text-white navigation-controls-close position-absolute position-top position-left" 
 				v-html="icons.menu.close.icon.icon" 
 				v-on:click="controls('close')">
 			</button>
 			<button 
-				class="position-relative plain h-50px w-50px bg-primary bg-secondary-hover bg-primary-active text-white animated fadeIn"
+				class="position-relative plain h-50px w-50px bg-primary text-white animated fadeIn"
 				v-show="options.logo">
 				<span class="filter-white"><img v-bind:src="configuration.application.favicon" class="icon-logo"></span>
 				<a class="position-absolute position-full" href="/"></a>
 			</button>
 			<button 
-				class="position-relative plain h-50px w-50px bg-primary bg-secondary-hover bg-primary-active text-white navigation-controls-back animated fadeIn animated fadeInRight delay-1s faster" 
+				class="position-relative plain h-50px w-50px bg-primary text-white navigation-controls-back animated fadeIn animated fadeInRight delay-1s faster" 
 				v-html="icons.history.back.icon.icon" 
 				v-on:click="navigate(-1)" 
-				v-show="goback">
+				v-show="overlayopen || goback">
 			</button>
 		</nav>
 		<nav class="navigation-controls secondary transition position-fixed position-right mt-2 h-50px w-100 pointer-events-none d-flex justify-content-end">
@@ -151,8 +151,9 @@
 				keys: {
 					element: Page.utils.rand()
 				},
-				goback: false,
 				routed: false,
+				goback: false,
+				overlayopen: false,
 				options: {
 					logo: true,
 					menu: false,
@@ -243,6 +244,17 @@
 			},
 			navigate (direction) {
 				if (window.DEBUG) console.log("debug - app.components.core.layouts.Navigation.navigate");
+				
+				if (this.overlayopen) {			
+					this.$store.commit("app/SET", {
+						key: "app:close:overlay",
+						data: true
+					});	
+					
+					this.overlayopen = false;
+					
+					return false;
+				}
 				
 				direction = Number(direction);
 				
@@ -382,9 +394,22 @@
 				
 				this.render(to);
 			});	
-		},
-		updated () {
-			if (window.DEBUG) console.log("debug - app.components.core.layouts.Navigation.updated");
+			
+			this.$store.subscribe((mutation, state) => {
+				if (mutation.type === 'app/SET' && mutation.payload.key === "app:opened:overlay") {
+					if (window.DEBUG) console.log("debug - app.components.core.layouts.Navigation.mounted.subscribe - app:opened:overlay");
+					
+					this.overlayopen = true;						
+				}												
+			});	
+			
+			this.$store.subscribe((mutation, state) => {
+				if (mutation.type === 'app/SET' && mutation.payload.key === "app:closed:overlay") {
+					if (window.DEBUG) console.log("debug - app.components.core.layouts.Navigation.mounted.subscribe - app:closed:overlay");	
+					
+					this.overlayopen = false;					
+				}												
+			});
 		}
 	}	
 </script>

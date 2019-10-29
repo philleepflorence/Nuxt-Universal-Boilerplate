@@ -13,6 +13,7 @@ import _ from 'lodash';
 import ip from 'ip';
 import useragent from 'useragent';
 import superagent from 'superagent';
+import queryString from 'query-string';
 
 module.exports = {
 	
@@ -121,6 +122,8 @@ module.exports = {
 		const currtime = Date.now();
 		
         const query = Object.assign({}, options.query, this.credentials());
+        
+        __app.debugger.info('api.helpers.core.api.connect - Query: `%s`', JSON.stringify(query));
                         
         try {
         
@@ -132,7 +135,9 @@ module.exports = {
 			const duration = ( Date.now() - currtime );
 			const error = ( result.status > 300 || result.status < 200 );
 			
-			__app.debugger.info('api.helpers.core.api.connect - Endpoint: `%s` - Duration: `%s ms`', options.url, duration);
+			__app.debugger.info('api.helpers.core.api.connect - Endpoint: `%s`', decodeURIComponent(result.req.path));
+
+			__app.debugger.info('api.helpers.core.api.connect - Duration: `%s` ms', duration);
 			
 			result.duration = duration;
 			

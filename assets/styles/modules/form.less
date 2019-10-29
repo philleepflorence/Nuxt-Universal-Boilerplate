@@ -2,6 +2,13 @@ html
 {
 	body
 	{
+		.custom-control-input {
+			&:checked ~ .custom-control-label:before {
+				border-color: @colorprimary;
+				background-color: @colorprimary;
+			}
+		}
+		
 		form.form
 		{
 			@height: 40px;

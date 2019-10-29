@@ -21,7 +21,7 @@ module.exports = {
 	*/
 	async run (req, res) {
 		
-		__app.debugger.info('api.controllers.cache.view');
+		__app.debugger.debug('api.controllers.cache.view');
 		
 		if (!__app.helpers.core.cache.$) return res.status(503).json({
 			error: "Unable to load cache!"
@@ -32,7 +32,7 @@ module.exports = {
 		
 		if (Array.isArray(keys)) keys.forEach((key) => { _.set(response, key, __app.helpers.core.cache.$.get(key)) });
 		
-		__app.debugger.info('api.controllers.cache.view - KEYS: `%s`', keys.toString());
+		__app.debugger.debug('api.controllers.cache.view - KEYS: `%s`', keys.toString());
 				
 		return res.json(response);
 	},

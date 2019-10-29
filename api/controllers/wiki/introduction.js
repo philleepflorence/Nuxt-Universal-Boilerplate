@@ -3,7 +3,7 @@
  *
  * @author 		:: Philleep Florence
  * @module      :: Express Controller
- * @description :: Express Server Controller - RESTful API to load Wiki Media Files
+ * @description :: Express Server Controller - RESTful API to load Wiki Summary and Image
  * @docs        :: https://nuxtjs.org/api/configuration-servermiddleware
  * @directory 	:: api/controllers/contents/wiki
  * @method 		:: GET
@@ -20,14 +20,23 @@ module.exports = {
 		Actual Method to run - REQUIRED
 	*/
 	async run (req, res) {
-		__app.debugger.debug(`api.controllers.wiki.media`);
+		__app.debugger.debug(`api.controllers.wiki.introduction`);
 			
 		let debug = req.query.debug;
-		let title = req.query.title;	
+		let title = req.query.title;
+		let reload = req.query.reload;	
 		
 		if (!title) return res.status(400).send("Title parameter is required");
+		
+		const cachepath = `api/wikipedia/introduction/${ title }.json`;
+		
+		if (!reload) {
+			const cache = await __app.helpers.core.cache.filesystem.get(cachepath);
 			
-		const endpoint = 'https://en.wikipedia.org/api/rest_v1/page/media/:title'.replace(':title', title);
+			if (cache && cache.wiki) return res.json(cache);
+		}
+			
+		const endpoint = 'https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro&explaintext&redirects=1&titles=:title'.replace(':title', title);
 		
 		const currtime = Date.now();
 		
@@ -43,13 +52,17 @@ module.exports = {
 		
 		const duration = Date.now() - currtime;
 
-		__app.debugger.debug('api.controllers.wiki.media - Duration: `%s` ms', duration);
+		__app.debugger.debug('api.controllers.wiki.summary - Duration: `%s` ms', duration);
+		
+		let introduction = __app.helpers.core.utils.find(_.get(response, 'data'), 'extract');
 		
 		let contents = {
 			wiki: {
-				items: _.get(response, 'data.items')
+				text: introduction
 			}
 		};
+		
+		__app.helpers.core.cache.filesystem.set(cachepath, contents);
 			
 		return res.json(contents);	
 	},

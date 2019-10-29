@@ -7,7 +7,7 @@
  *
  */
  
-import { get as __Get, set as __Set } from 'lodash';
+import _ from 'lodash';
 
 export const state = () => ({
 	endpoints: {
@@ -75,7 +75,7 @@ export const mutations = {
 	},
 	METADATA (state, payload) {
 		if (typeof payload.key === 'string') {
-			__Set(state.metadata, payload.key, payload.data);			
+			_.set(state.metadata, payload.key, payload.data);			
 		}
 	},
 	ROUTES (state, payload) {
@@ -85,7 +85,7 @@ export const mutations = {
 	},
 	SET (state, payload) {
 		if (typeof payload.key === 'string') {
-			__Set(state, payload.key, payload.data);			
+			_.set(state, payload.key, payload.data);			
 		}
 	}
 };

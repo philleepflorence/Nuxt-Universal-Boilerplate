@@ -127,7 +127,7 @@ module.exports = {
 		"dropdowns": {
 			"table": "app_dropdowns",
 			"params": {
-				"columns": "id,name,value,text,title,description,slug",
+				"columns": "id,name,value,text,title,description,slug,default",
 				"filters": {
 					"application": "app"
 				},
@@ -161,7 +161,9 @@ module.exports = {
 					"image.width", 
 					"image.height", 
 					"image.url",  
-					"icon",
+					"icon.icon",
+					"icon.css_entity",
+					"icon.class",
 					"page", 
 					"analytics.data", 
 					"plaintext", 
@@ -276,6 +278,8 @@ module.exports = {
 					"description",
 					"headline",
 					"synopsis",
+					"section",
+					"parent",
 					"contents",
 					"mode",
 					"tags",

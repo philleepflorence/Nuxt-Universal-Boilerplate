@@ -95,7 +95,42 @@ html {
 		    p:not(:last-child) {
 			    margin-bottom: 0.75rem;
 		    }
+		    
+			&.lead {
+				font-size: 1.15rem;
+				
+				p {
+					font-size: 1.15rem;
+				}
+				
+				&.sm {
+					font-size: 1rem;
+					
+					p {
+						font-size: 1rem;
+					}
+				}
+			}
 	    }
+	    
+		input.rounded {
+			border-radius: 25% !important;
+		}
+			
+		button.bg-primary, 
+		a.bg-primary, 
+		.btn-primary {
+			&:hover, &:focus, &:visited {
+				background: @colorprimary !important;
+				box-shadow: none !important;
+				outline: none !important;
+			}
+			&:active {
+				background: darken(@colorprimary, 15) !important;
+				box-shadow: none !important;
+				outline: none !important;
+			}
+		}
 			
 		.mx-spacer
 		{
@@ -186,6 +221,19 @@ html {
 			    }
 		    }
 	    }
+	    	    
+	    .options-overlay {
+		    &:before {
+			    .beforefull(@content:'', @pos: absolute);
+			    background-image: linear-gradient(fade(black, 15), fade(@colorprimary, 15));
+			    pointer-events: none !important;
+		    }
+	    }
+	    
+	    .page-inline-input {
+		    padding-left: 1.5rem !important;
+		    padding-right: 4rem !important;
+	    }
 		
 		[role="legacy browser"]
 		{
@@ -194,7 +242,20 @@ html {
 		
 		.nuxt-progress {
 			.transition-duration(@duration:400ms);
-		}	
+		}
+	
+	    @media (max-width: @breakpoint-md)
+	    {
+		    .page-inline-input {
+			    height: 40px !important;
+		    }
+		    
+		    .page-inline-button {
+			    width: 36px !important;
+			    height: 36px !important;
+			    margin: 2px !important;
+		    }
+	    }	
 	}
 	
 	&.leagacy-browser

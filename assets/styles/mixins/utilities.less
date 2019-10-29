@@ -493,7 +493,7 @@
 	{
 		opacity: 0 !important;
 
-		&.image-loaded {
+		&[data-image-loaded] {
 			opacity: 1 !important;
 			.animation(fadeIn 1200ms @ease);
 		}
@@ -1522,6 +1522,14 @@
 	
 	.font-weight-book {
 		font-weight: @fontweightbook;
+	}
+	
+	.font-weight-bold {
+		font-weight: @fontweightbold;
+	}
+	
+	.font-weight-bolder {
+		font-weight: @fontweightbolder;
 	}
 
 	.loop(@n, @i:0) when (@i <= @n)

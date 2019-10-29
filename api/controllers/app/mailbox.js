@@ -21,7 +21,7 @@ module.exports = {
 		
 		if (!uuid) return res.status(400).send();
 
-		__app.debugger.info('api.controllers.app.mailbox - UUID: `%s`', uuid);
+		__app.debugger.debug('api.controllers.app.mailbox - UUID: `%s`', uuid);
 		
 		const endpoint = __app.helpers.core.api.endpoint('items', {
 			collection: 'mailbox'

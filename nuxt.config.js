@@ -193,7 +193,9 @@ module.exports = {
          */
         extend(config, ctx) {},
         watch: [],
-        extractCSS: true,
+        extractCSS: {
+	        ignoreOrder: true
+        },
         filenames: {
 	        app: ({ isDev }) => isDev ? 'app.[name].js' : 'app.[chunkhash].js',
 	        chunk: ({ isDev }) => isDev ? 'chunk.[name].js' : 'chunk.[id].[chunkhash].js',

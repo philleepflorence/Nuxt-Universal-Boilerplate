@@ -22,7 +22,7 @@ module.exports = {
 	*/
 	async run (req, res) {
 		
-		__app.debugger.info('api.controllers.form.submit');
+		__app.debugger.debug('api.controllers.form.submit');
 		
 		const admin = req.query.debug === 'test' && req.query.token === process.env.APP_TOKEN;
 		

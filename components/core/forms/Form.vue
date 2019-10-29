@@ -45,7 +45,7 @@
 </template>
 
 <script>
-	import { get as __Get, merge as __Merge } from 'lodash';	
+	import _ from 'lodash';	
 	import { form2js } from 'form2js';
 	
 	import Alert from '~/helpers/core/alert.js';
@@ -224,7 +224,7 @@
 				
 				this.formProcessing = true;	
 				
-				let processing = __Get(this.labels, 'submit-form-processing.value');
+				let processing = _.get(this.labels, 'submit-form-processing.value');
 				
 				this.formInputs = this.$el.querySelectorAll(this.formSelector);
 				
@@ -234,7 +234,7 @@
 				let source = this.$props.formdata;
 				
 				if (!this.formElement.changed && source) {
-					post = __Merge(post, source);
+					post = _.merge(post, source);
 				}
 				
 				if (window.DEBUG) console.log("debug - app.components.core.forms.Form.send - post", post);
@@ -295,7 +295,7 @@
 				
 				e.preventDefault();		
 				
-				let processing = __Get(this.labels, 'submit-form-processing.value');
+				let processing = _.get(this.labels, 'submit-form-processing.value');
 				
 				if (this.formProcessing) {
 					Alert.show(processing);

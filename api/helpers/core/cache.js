@@ -8,8 +8,9 @@
  *
  */
  
-
+import fs from 'fs-extra';
 import NodeCache from 'node-cache';
+import path from 'path';
 
 module.exports = {
 	
@@ -42,5 +43,47 @@ module.exports = {
 		
 		return this.$;
 		
+	},
+	
+	/*
+		Cache contents in JSON format!
+	*/
+	
+	filesystem: {
+		async set (filepath, content) {
+			const dirname = (process.env.INIT_CWD || process.env.PWD);
+			const destination = `${ dirname }/.cache/${ filepath }`;
+			const directory = path.dirname(destination);
+			
+			if (typeof content !== "string") content = JSON.stringify(content);
+			
+			__app.debugger.info('api.helpers.core.cache.filesystem.set :: Destination: %s', destination);
+					
+			try {
+				fs.ensureDirSync(directory);
+				
+				fs.writeFileSync(destination, content);
+				
+				return fs.pathExistsSync(destination);
+			}
+			catch (error) {
+				return error;
+			}			
+		},
+		async get (filepath) {
+			const dirname = (process.env.INIT_CWD || process.env.PWD);
+			const destination = `${ dirname }/.cache/${ filepath }`;
+			const fileexists = await fs.pathExists(destination);
+			
+			__app.debugger.info('api.helpers.core.cache.filesystem.get :: Destination: %s', destination);
+			
+			if (fileexists === true) {
+				let content = await fs.readJsonSync(destination);
+				
+				return content;
+			}
+			
+			return false;
+		}
 	}
 }

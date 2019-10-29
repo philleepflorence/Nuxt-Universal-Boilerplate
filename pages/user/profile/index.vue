@@ -1,7 +1,7 @@
 <template>
-	<div v-bind:key="keys.page">
-		<UserProfile v-bind:user="content.user" v-if="content.user" v-bind:key="keys.profile"></UserProfile>
-		<Loader v-bind:page="page.name" v-else></Loader>
+	<div class="page-container" v-bind:key="keys.page">
+		<UserProfile v-bind:user="content.user" v-if="content" v-bind:key="keys.profile"></UserProfile>
+		<Loader v-bind:page="page" mode="page" v-else></Loader>
 	</div>
 </template>
 
@@ -14,6 +14,7 @@
 	export default {
 		name: "MyProfile",
 		components: {
+			Loader,
 			UserProfile
 		},
 		computed: {
@@ -56,6 +57,7 @@
 		},
 		data () {
 			return {
+				content: null,
 				keys: {
 					page: Page.utils.rand(),
 					profile: Page.utils.rand()

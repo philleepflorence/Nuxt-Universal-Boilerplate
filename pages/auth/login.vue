@@ -1,36 +1,40 @@
 <template>
-	<div>
+	<div class="page-container" v-bind:key="keys.page">
 		<AuthWrapper>
 			<div class="max-w-280px mx-auto my-4 plain-form">
 				<Form v-bind:id="form.id" v-bind:path="form.path">
-					<input type="hidden" class="input" v-bind:value="redirect" name="redirect" v-if="redirect">
-					<div class="form-group">
-						<b-form-input 
-							class="input"
-							v-bind:id="`form-${ labels.login.form.label.username.slug }`" 
-							v-bind:type="labels.login.form.label.username.input_type" 
-							v-bind:placeholder="labels.login.form.label.username.name"
-							v-bind:v-model="`form.${ labels.login.form.label.username.slug }`" 
-							v-bind:name="`form.${ labels.login.form.label.username.slug }`" 
-							v-b-tooltip.focus v-bind:title="labels.login.form.label.username.hint"
-							required>
-						</b-form-input>
-					</div>
-					<div class="form-group">
-						<b-form-input 
-							class="input"
-							v-bind:id="`form-${ labels.login.form.label.password.slug }`" 
-							v-bind:type="labels.login.form.label.password.input_type" 
-							v-bind:placeholder="labels.login.form.label.password.name"
-							v-bind:v-model="`form.${ labels.login.form.label.password.slug }`" 
-							v-bind:name="`form.${ labels.login.form.label.password.slug }`" 
-							v-b-tooltip.focus v-bind:title="labels.login.form.label.password.hint"
-							required>
-						</b-form-input>
-					</div>
-					<div class="form-group form-footer text-center">
-						<b-button type="submit" variant="primary" class="w-100 text-uppercase font-weight-book form-button">{{ labels.login.form.label.submit.plaintext }}</b-button>
-					</div>
+					<template v-slot:inputs>
+						<input type="hidden" class="input" v-bind:value="redirect" name="redirect" v-if="redirect">
+						<div class="form-group">
+							<b-form-input 
+								class="input"
+								v-bind:id="`login-form-${ labels.login.form.label.username.slug }`" 
+								v-bind:type="labels.login.form.label.username.input_type" 
+								v-bind:placeholder="labels.login.form.label.username.name"
+								v-bind:v-model="`form.${ labels.login.form.label.username.slug }`" 
+								v-bind:name="`form.${ labels.login.form.label.username.slug }`" 
+								v-b-tooltip.focus v-bind:title="labels.login.form.label.username.hint"
+								required>
+							</b-form-input>
+						</div>
+						<div class="form-group">
+							<b-form-input 
+								class="input"
+								v-bind:id="`login-form-${ labels.login.form.label.password.slug }`" 
+								v-bind:type="labels.login.form.label.password.input_type" 
+								v-bind:placeholder="labels.login.form.label.password.name"
+								v-bind:v-model="`form.${ labels.login.form.label.password.slug }`" 
+								v-bind:name="`form.${ labels.login.form.label.password.slug }`" 
+								v-b-tooltip.focus v-bind:title="labels.login.form.label.password.hint"
+								required>
+							</b-form-input>
+						</div>
+					</template>
+					<template v-slot:footer>
+						<div class="form-group form-footer text-center">
+							<b-button type="submit" variant="primary" class="w-100 text-uppercase font-weight-book form-button">{{ labels.login.form.label.submit.plaintext }}</b-button>
+						</div>					
+					</template>
 				</Form>
 			</div>
 		</AuthWrapper>
@@ -70,6 +74,9 @@
 				form: {
 					id: 'login-form',
 					path: this.$store.state.app.endpoints.auth.login
+				},
+				keys: {
+					page: Page.utils.rand()
 				}
 			};
 		},
@@ -85,7 +92,7 @@
 			else this.redirect = _.get(this.$store.state, 'api.redirects.route.authenticated.url');
 		},
 		mounted () {		
-			if (window.DEBUG) console.log("debug - app.pages.auth.login.mounted -", this.redirect);
+			if (window.DEBUG) console.log("debug - app.pages.auth.login.mounted - Redirect:", this.redirect);
 		},
 		updated () {			
 			if (window.DEBUG) console.log("debug - app.pages.auth.login.updated");

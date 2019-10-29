@@ -56,10 +56,25 @@ module.exports = {
 		if (!data) return false;
 		
 		if (debug === 'initialize' && token) return res.json(data);
-		else if (token && debug && _.get(data, debug)) return res.json(_.get(data, debug));
+		else if (token && debug && _.get(data, debug)) return res.json(_.get(data, debug));	
+		
+		const success = __app.helpers.core.cache.$.set('app', data);
+				
+		return data;
+	},
+	
+	/*
+		Process the application initialization data for the specific response
+	*/
+	
+	async process (req, res, data) {
+		
+		__app.debugger.info('api.helpers.core.app.process');
 		
 		for (let method in data) 
 		{
+			__app.debugger.info('api.helpers.core.app.process - Method: `%s`', method);
+			
 			const Method = _.get(__app.helpers, `app.initialize.${ method }`) || _.get(__app.helpers, `core.initialize.${ method }`);
 			
 			let row = _.get(data, method);
@@ -69,8 +84,6 @@ module.exports = {
 			_.set(data, method, Method(row, req, data));
 		}
 		
-		const success = __app.helpers.core.cache.$.set('app', data);
-				
 		return data;
 	}
 }

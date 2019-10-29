@@ -2,10 +2,7 @@
 	<div class="page-loader position-absolute position-full pointer-events-none d-flex align-items-center max-z animated fast">
 		<div class="flex-item w-100 text-center">
 			<b-spinner type="grow"></b-spinner>
-		</div>
-		<footer class="position-absolute position-bottom w-100 text-primary font-accent text-center animated fadeInUp" v-if="page">
-			<span>{{ page }}</span>
-		</footer>		
+		</div>		
 	</div>
 </template>
 
@@ -14,13 +11,18 @@ import Page from "~/helpers/core/page.js";
 
 export default {
 	name: "Loader",
-	props: ['page'],
+	props: [
+		'page',
+		'mode'
+	],
 	data () {
 		return {
 			
 		};
 	},
 	mounted () {
+		console.log("debug - development");
+		
 		this.$el.classList.add('mounted');	
 	},
 	beforeDestroy () {
@@ -32,9 +34,10 @@ export default {
 <style lang="less" scoped>
 	.page-loader {
 		footer {
-			font-size: 8vh;
+			font-size: 2.25rem;
+			
 			span {
-				opacity: 0.15;
+				opacity: 0.5;
 			}
 		}
 	}

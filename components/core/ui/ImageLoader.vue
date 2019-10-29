@@ -1,5 +1,5 @@
 <template>
-	<div v-bind:key="keys.wrapper" v-bind:class="container">
+	<div v-bind:key="keys.wrapper" v-bind:class="parent">
 		<figure 
 			v-bind:class="classname" 
 			v-bind:data-image-format="format" 
@@ -41,6 +41,18 @@
 			'width'
 		],
 		computed: {
+			parent () {
+				let container = this.container;
+				
+				if (!container && this.format === 'background') {
+					container = "position-absolute position-full";
+				}
+				else if (!container && this.format === 'image') {
+					container = "d-block";
+				}
+				
+				return container;
+			},
 			options () {
 				return this.$store.state.api.config.application.cdn.images;
 			},
@@ -94,16 +106,17 @@
 					}												
 				});	
 			}
-			else if (this.visible === "true") {
+			else {
+				this.load();
+			}
+			
+			if (this.visible === "true") {
 				const infinite = this.$store.subscribe((mutation, state) => {
 					if (mutation.payload.key === 'infinite') {												
 						this.load();						
 						setTimeout(infinite, 300);
 					}												
 				});
-			}
-			else {
-				this.load();
 			}
 		}
 	}

@@ -22,7 +22,7 @@ module.exports = {
 		
 		if (!url) return res.status(400).send();
 
-		__app.debugger.info('api.controllers.app.curl - URL: `%s`', url);
+		__app.debugger.debug('api.controllers.app.curl - URL: `%s`', url);
 		
 		const currtime = Date.now();
 		
@@ -38,7 +38,7 @@ module.exports = {
 		
 		const duration = Date.now() - currtime;
 
-		__app.debugger.info('api.controllers.app.curl - Duration: `%s` ms', duration);
+		__app.debugger.debug('api.controllers.app.curl - Duration: `%s` ms', duration);
 	
 		return res.json({
 			duration: duration,

@@ -14,6 +14,7 @@ module.exports = {
 			'FormPlugin',
 			'FormCheckboxPlugin',
 			'FormFilePlugin',
+			'FormGroupPlugin',
 			'FormInputPlugin',
 			'FormRadioPlugin',
 			'FormSelectPlugin',

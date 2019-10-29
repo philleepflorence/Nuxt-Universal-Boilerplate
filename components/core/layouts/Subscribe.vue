@@ -1,5 +1,5 @@
 <template>
-	<div id="subscribe" class="options-overlay position-fixed position-full bg-dark off" role="app subscribe" v-bind:key="keys.element">
+	<div id="subscribe" class="options-overlay position-fixed position-full bg-dark bg-overlay off" role="app subscribe" v-bind:key="keys.element">
 		<PreventScroll classname="position-fixed position-full">
 			<a href="#" class="position-absolute position-full" v-on:click.prevent.stop="close"></a>
 			<div class="page-subscribe-container position-fixed position-full d-flex align-items-center pointer-events-none">
@@ -27,7 +27,7 @@
 	import PreventScroll from "~/components/core/ui/PreventScroll.vue";
 	import Handlebars from 'handlebars/dist/handlebars.min.js';
 	import Subscribe from "~/components/core/forms/Subscribe.vue";
-	import { forEach as __forEach, get as __Get, cloneDeep as __cloneDeep, trimEnd as __trimEnd } from "lodash";
+	import _ from "lodash";
 	
 	export default {
 		name: "SubscribeOverlay",

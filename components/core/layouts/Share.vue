@@ -1,5 +1,5 @@
 <template>
-	<div id="share" class="options-overlay position-fixed position-full bg-dark off" role="app share" v-bind:key="keys.element">
+	<div id="share" class="options-overlay position-fixed position-full bg-dark bg-overlay off" role="app share" v-bind:key="keys.element">
 		<PreventScroll classname="position-fixed position-full">
 			<a href="#" class="position-absolute position-full" v-on:click.prevent.stop="close"></a>
 			<div class="share-container d-flex position-absolute position-full align-items-center justify-content-center pointer-events-none" v-if="buttons">
@@ -14,7 +14,7 @@
 							<div class="position-absolute position-full share-header-content d-flex align-items-end text-white">
 								<section class="flex-grow-1 spacer">
 									<h4 class="text-capitalize">{{ header.title }}</h4>
-									<p class="p text-truncate font-weight-book">{{ header.description }}</p>
+									<p class="p font-weight-book">{{ header.description }}</p>
 								</section>
 							</div>
 						</ImageLoader>					
@@ -63,7 +63,7 @@
 	import PreventScroll from "~/components/core/ui/PreventScroll.vue";
 	import Handlebars from 'handlebars/dist/handlebars.min.js';
 	import ImageLoader from "~/components/core/ui/ImageLoader.vue";
-	import { forEach as __forEach, get as __Get, cloneDeep as __cloneDeep } from "lodash";
+	import _ from "lodash";
 	
 	export default {
 		name: "ShareOverlay",
@@ -75,13 +75,13 @@
 			clipboard () {
 				if (!document.execCommand) return null;
 				
-				return __Get(this.$store.state.api.icons, 'social.copy.clipboard');
+				return _.get(this.$store.state.api.icons, 'social.copy.clipboard');
 			},
 			configuration () {
 				return this.$store.state.api.config.application;
 			},
 			description () {
-				return __Get(this.labels, 'app.button.options.share.hint');
+				return _.get(this.labels, 'app.button.options.share.hint');
 			},			
 			icons () {
 				return this.$store.state.api.icons;
@@ -136,8 +136,8 @@
 				let imageurl = metadata.meta.filter( (row) => row.hid === "share:image" ).map( (row) => row.content ).shift();
 				let title = metadata.title;
 			
-				let buttons = __Get(this.icons, 'social.share');
-					buttons = buttons ? __cloneDeep(buttons) : buttons;
+				let buttons = _.get(this.icons, 'social.share');
+					buttons = buttons ? _.cloneDeep(buttons) : buttons;
 				
 				let data = {
 					title: title,
@@ -148,7 +148,7 @@
 				
 				this.content = {...data};
 				
-				__forEach(data, (row, property) => {
+				_.forEach(data, (row, property) => {
 					if (row) data[`${ property }_encoded`] = encodeURI(row);
 				});
 				
@@ -162,7 +162,7 @@
 				else this.header = null;
 				
 				if (buttons) {
-					__forEach(buttons, (button) => {
+					_.forEach(buttons, (button) => {
 						let template = Handlebars.compile(button.url);
 						
 						button.url = template(data);

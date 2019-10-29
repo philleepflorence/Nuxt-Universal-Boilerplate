@@ -14,8 +14,8 @@
 					<input type="hidden" value="subscribe" name="form.form" class="input">
 					<div v-bind:id="`form-group-${ input.slug }`" class="form-subscribe-row position-relative mb-4">
 						<b-form-input 
-							class="input form-subscribe-input position-relative text-dark text-left lead bg-white-80 h-50px w-100 font-weight-book"
-							v-bind:id="`form-${ input.slug }`" 
+							class="input form-subscribe-input page-inline-input position-relative text-dark text-left lead bg-white-80 h-50px w-100 font-weight-book"
+							v-bind:id="`subscribe-form-${ input.slug }`" 
 							v-bind:type="input.input_type" 
 							v-bind:placeholder="input.plaintext"
 							v-bind:v-model="`form.${ input.slug }`"
@@ -23,7 +23,7 @@
 							autocomplete="off">
 						</b-form-input>
 						<button 
-							class="form-subscribe-button plain bg-primary rounded-circle position-absolute position-right position-top text-white shadow-sm" 
+							class="form-subscribe-button page-inline-button plain bg-primary rounded-circle position-absolute position-right position-top text-white shadow-sm" 
 							v-html="icons.settings.complete.icon.icon" 
 							type="submit">
 						</button>
@@ -40,10 +40,10 @@
 <script>
 	import Page from "~/helpers/core/page.js";
 	import Form from "~/components/core/forms/Form.vue";
-	import { forEach as __forEach, get as __Get, cloneDeep as __cloneDeep, trimEnd as __trimEnd } from "lodash";
+	import _ from "lodash";
 	
 	export default {
-		name: "SubscribeOverlay",
+		name: "SubscribeForm",
 		props: [
 			"name"
 		],
@@ -52,13 +52,13 @@
 		},
 		computed: {
 			button () {
-				return __Get(this.labels, "app.button.options.subscribe");
+				return _.get(this.labels, "app.button.options.subscribe");
 			},
 			icons () {
 				return this.$store.state.api.icons;
 			},
 			input () {
-				return __Get(this.labels, "app.form['subscribe-overlay'].email");
+				return _.get(this.labels, "app.form['subscribe-overlay'].email");
 			},
 			labels () {
 				return this.$store.state.api.labels;

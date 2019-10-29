@@ -9,12 +9,13 @@
 		<div class="d-flex align-items-center vh-100 spacer">
 			<section class="p w-100 max-w-640px mx-auto spacer animated fadeInUp text-white position-relative">
 				<span class="p-3 text-center d-block" v-html="page.icon.icon"></span>
-				<h1 class="text-center fs-2rem mb-4 cursor-hand" v-on:click="reload">{{ page.headline }}</h1>
-				<div class="p empty text-center font-weight-book" v-html="page.synopsis"></div>
+				<h1 class="text-center fs-2rem mb-4 cursor-hand" v-on:click="reload">{{ format(page.headline) }}</h1>
+				<div class="p lead sm empty text-center font-weight-book" v-html="format(page.synopsis)"></div>
 				<div class="page-container pt-3">
 					<slot></slot>
 				</div>
 				<footer class="my-4 text-center transition auth-navigation">
+					<div class="p empty text-center font-weight-book mb-4" v-html="format(page.contents)" v-if="page.contents"></div>
 					<NavLink 
 						v-for="nav in navigation" 
 						v-bind:nav="nav"
@@ -76,6 +77,9 @@
 			}
 		},
 		methods: {
+			format (string) {
+				return Page.utils.format (string, this.$store.state.api.config.components.display);
+			},
 			metadata () {
 				let path = this.$route.path;
 				let metadata = this.$store.state.app.metadata[path];
@@ -90,11 +94,11 @@
 				this.keys.element = Page.utils.rand();
 			},
 			render () {
-				if (this.$props.mode) {
+				if (this.page.mode) {
 					clearTimeout(this.timer);
 					
 					this.timer = setTimeout(() => {
-						document.body.setAttribute('data-mode', this.$props.mode);
+						document.body.setAttribute('data-mode', this.page.mode);
 					}, 300);
 				}
 				else {

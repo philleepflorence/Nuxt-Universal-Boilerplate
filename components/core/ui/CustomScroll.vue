@@ -14,7 +14,7 @@
 </template>
 
 <script>
-	import { cloneDeep as __cloneDeep, set as __Set, get as __Get } from 'lodash';
+	import _ from 'lodash';
 	import Page from "~/helpers/core/page.js";
 	
 	export default {
@@ -105,14 +105,14 @@
 					});
 				}
 				
-				const options = __cloneDeep(this.$store.state.app.scrollBar.options, input);
+				const options = _.cloneDeep(this.$store.state.app.scrollBar.options, input);
 				const chain = this.axis === "y" ? { vertical: true } : { horizontal: true }
 				
 				if (this.overlay) {
 					options.onContentSizeChanged = () => { this.render() };
 					options.callbacks = options.callbacks || {};
 					options.callbacks.onScroll = (e) => {
-						let position = __Get(this.$el.OverlayScrollbars.scroll(), 'position');
+						let position = _.get(this.$el.OverlayScrollbars.scroll(), 'position');
 						
 						this.scroll(position.x, position.y);
 					};

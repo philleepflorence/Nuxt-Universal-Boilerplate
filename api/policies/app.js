@@ -9,7 +9,7 @@
  *
  */
 
-import { forEach as __forEach, get as __Get, set as __Set } from 'lodash';
+import _ from 'lodash';
 import path from 'path';
 
 global.__app = global.__app || {};
@@ -33,14 +33,14 @@ export default async function (req, res, next)
 	await __app.helpers.core.logger(process.env.SERVER_DEBUG || req.query.debug);
 	
 	let referrer = req.get('Referrer') || '';
-	let reload = __Get(req, 'query.reload') || __Get(req, 'body.reload');
-	let xhr = req.xhr || __Get(req, 'query.xhr') || __Get(req, 'body.xhr') || referrer.indexOf(process.env.SERVER_DOMAIN) === 0 || true; 
+	let reload = _.get(req, 'query.reload') || _.get(req, 'body.reload');
+	let xhr = req.xhr || _.get(req, 'query.xhr') || _.get(req, 'body.xhr') || referrer.indexOf(process.env.SERVER_DOMAIN) === 0 || true; 
 	
 	if (reload) xhr = false;
 			
-	__app.debugger.info('api.policies.app - Path: `%s` - XHR: `%s` - REFERRER: `%s`', req.path, xhr, referrer);
+	__app.debugger.warn('api.policies.app - Path: `%s` - XHR: `%s` - REFERRER: `%s`', req.path, xhr, referrer);
 	
-	__app.data = await __app.helpers.core.app.initialize(req, res, xhr);
+	__app.data = await __app.helpers.core.app.initialize(req, res, xhr);	
 		
 	if (__app.data === false) return res.status(500).send("Initialization Data Failure - Unable to load Application Data - See Logs for details!");
 	
@@ -48,9 +48,11 @@ export default async function (req, res, next)
 	
 	let exclude = __app.config.initialize.server;
 	
-	__forEach(__app.data, function (row, key)
+	let data = await __app.helpers.core.app.process(req, res, _.cloneDeep(__app.data));
+	
+	_.forEach(data, function (row, key)
 	{
-		if (!exclude.includes(key)) __Set(req.store, key, row);
+		if (!exclude.includes(key)) _.set(req.store, key, row);
 	});
 		
 	next();

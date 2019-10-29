@@ -1,33 +1,37 @@
 <template>
-	<div>
+	<div class="page-container" v-bind:key="keys.page">
 		<AuthWrapper v-bind:content="content">
 			<div class="max-w-540px mx-auto my-4 plain-form">
 				<Form v-bind:id="form.id" v-bind:path="form.path" autocomplete="off">
-					<input type="hidden"v-bind:value="salt" class="input">
-					<div class="row">
-						<div class="col-span col-md-6" v-for="input in inputs" v-bind:key="input.slug">
-							<div class="form-group">
-								<b-form-group 
-									v-bind:id="`form-group-${ input.slug }`" 
-									v-bind:label="input.plaintext" 
-									v-bind:label-for="`form-${ input.slug }`" class="form-no-label">
-									<b-form-input 
-										class="input"
-										v-bind:id="`form-${ input.slug }`" 
-										v-bind:type="input.input_type" 
-										v-bind:placeholder="input.plaintext"
-										v-bind:v-model="`form.${ input.slug }`" 
-										v-bind:name="`form.${ input.slug }`" 
-										v-b-tooltip.focus v-bind:title="input.hint"
-										v-bind="attributes(input.attributes)">
-									</b-form-input>
-								</b-form-group>
+					<template v-slot:inputs>
+						<input type="hidden"v-bind:value="salt" class="input">
+						<div class="row">
+							<div class="col-span col-md-6" v-for="input in inputs" v-bind:key="input.slug">
+								<div class="form-group">
+									<b-form-group 
+										v-bind:id="`reset-form-group-${ input.slug }`" 
+										v-bind:label="input.plaintext" 
+										v-bind:label-for="`form-${ input.slug }`" class="form-no-label">
+										<b-form-input 
+											class="input"
+											v-bind:id="`reset-form-${ input.slug }`" 
+											v-bind:type="input.input_type" 
+											v-bind:placeholder="input.plaintext"
+											v-bind:v-model="`form.${ input.slug }`" 
+											v-bind:name="`form.${ input.slug }`" 
+											v-b-tooltip.focus v-bind:title="input.hint"
+											v-bind="attributes(input.attributes)">
+										</b-form-input>
+									</b-form-group>
+								</div>
 							</div>
 						</div>
-					</div>
-					<div class="form-group form-footer text-center">
-						<b-button type="submit" variant="primary" class="w-100 text-uppercase font-weight-book form-button">{{ labels.reset.form.label.submit.plaintext }}</b-button>
-					</div>
+					</template>
+					<template v-slot:footer>
+						<div class="form-group form-footer text-center">
+							<b-button type="submit" variant="primary" class="w-100 text-uppercase font-weight-book form-button">{{ labels.reset.form.label.submit.plaintext }}</b-button>
+						</div>
+					</template>
 				</Form>
 			</div>
 		</AuthWrapper>
@@ -95,6 +99,9 @@
 				form: {
 					id: 'reset-form',
 					path: this.$store.state.app.endpoints.auth.reset
+				},
+				keys: {
+					page: Page.utils.rand()
 				}
 			};
 		},

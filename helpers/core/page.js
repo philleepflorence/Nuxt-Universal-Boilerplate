@@ -10,6 +10,8 @@
 import _ from 'lodash';
 import superagent from 'superagent';
 import handlebars from 'handlebars/dist/handlebars.min.js';
+import Image from "~/helpers/core/image.js";
+import StringCompare from 'string-similarity';
 
 export default {
 	/*
@@ -155,7 +157,7 @@ export default {
 		return path;
 	},
 	/*
-		Process page head metadata
+		Process page head metadata and image configuration
 		PARAMETERS:		
 			Page - Incoming Page content
 			config - App configuration object
@@ -166,6 +168,25 @@ export default {
 		let description = _.unescape(_.get(page, 'description'));
 		let image = _.get(page, 'image', {});
 		
+		let imageurl = _.get(config, 'application.cdn.images.metadata.url');
+		let imagewidth = _.get(config, 'application.cdn.images.metadata.width');
+		let height = image.height;
+		let width = image.width;
+		
+		if (imageurl && image.name) {
+			imageurl = imageurl.replace('{{image}}', image.name);
+		}
+		else {
+			imageurl = image.url;
+		}
+		
+		if (imagewidth) {
+			let ratio = imagewidth / width;
+			
+			height = Math.round(height * ratio);			
+			width = Math.round(width * ratio);
+		}
+		
 		return {
 			title: title,
 			link: [
@@ -175,24 +196,24 @@ export default {
 			meta: [
 				{ hid: 'share:description', name: 'share:description', content: description },
 				{ hid: 'share:title', name: 'share:title', content: title },
-				{ hid: 'share:image', name: 'share:image', content: image.url },
+				{ hid: 'share:image', name: 'share:image', content: imageurl },
 				{ hid: 'share:image:name', name: 'share:image:name', content: image.name },
 				{ hid: 'description', name: 'description', content: description },
 				{ hid: 'twitter:card', name: 'twitter:card', content: 'summary_large_image' },
 				{ hid: 'twitter:site', name: 'twitter:site', content: _.get(config, 'application.website') },
 				{ hid: 'twitter:title', name: 'twitter:title', content: title },
 				{ hid: 'twitter:description', name: 'twitter:description', content: description },
-				{ hid: 'twitter:image:src', name: 'twitter:image:src', content: image.url },
+				{ hid: 'twitter:image:src', name: 'twitter:image:src', content: imageurl },
 				{ hid: 'twitter:image:alt', name: 'twitter:image:alt', content: image.title },
 				{ hid: 'og:type', name: 'og:type', content: 'website' },
 				{ hid: 'og:site_name', name: 'og:site_name', content: _.get(config, 'application.name') },
 				{ hid: 'og:url', name: 'og:url', content: _.get(config, 'application.website') },
 				{ hid: 'og:title', name: 'og:title', content: title },
 				{ hid: 'og:description', name: 'og:description', content: description },
-				{ hid: 'og:image', name: 'og:image', content: image.url },
-				{ hid: 'og:image:secure_url', name: 'og:image:secure_url', content: image.url },
-				{ hid: 'og:image:width', name: 'og:image:width', content: image.width },
-				{ hid: 'og:image:height', name: 'og:image:height', content: image.height },
+				{ hid: 'og:image', name: 'og:image', content: imageurl },
+				{ hid: 'og:image:secure_url', name: 'og:image:secure_url', content: imageurl },
+				{ hid: 'og:image:width', name: 'og:image:width', content: width },
+				{ hid: 'og:image:height', name: 'og:image:height', content: height },
 				{ hid: 'og:image:type', name: 'og:image:type', content: image.type }
 			]				
 		};
@@ -292,16 +313,145 @@ export default {
 			});
 		}
 	},
-	scrollTo (e, offset, behavior = 'smooth') {
-		if (typeof offset !== 'number') {
-			let button = e.currentTarget;
+	/*
+		Search page contents for a value - sort by relevance in descending order!
+		PARAMETERS:
+			data - @array of objects - REQUIRED
+			columns - @Array list of object properties - REQUIRED
+			query - @Search to match against contents in data
+			mode - @String: any|all|strict
+		MODES:
+			any - match any one or more words - relevance is number of matches - relevance: 0 to 1
+			all - match all words - must contain all words in any order - relevance: 0 to 1	
+			strict - must match the query as is - case insensitive - relevance: 0		
+	*/
+	search (data, keys, query, mode = "any") {
+		let array = _.cloneDeep(data);
+		
+		if (!Array.isArray(array)) return null;
+		
+		let $query = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+		let strings = query.split(' ');
+		let pattern, result = [], relevance = 0, max = 0;
+		
+		for (let row of array) {
+			let matches = [];
+			
+			switch (mode) {
+				case 'any':
+					for (let string of strings) {
+						pattern = new RegExp(`\\b${ string }\\b`, 'gi');
+						relevance = 0;
+						
+						for (let key of keys) {
+							let value = _.get(row, key);
+							let matched = null;
+							
+							if (typeof value === "number" || typeof value === "string") {
+								matched = value.match(pattern);
+							}
+							
+							if (matched && matched.length) {
+								relevance = 1;								
+								matches = matches.concat(matched);
+							}
+						}
+						
+						if (relevance && row.relevance) row.relevance ++;
+						else if (relevance && !row.relevance) row.relevance = 1;
+					}
+					
+					if (matches.length) row.matches = _.uniq(matches);
+					
+					if (row.relevance) row.relevance = Number( (row.relevance / strings.length).toFixed(2) );
+					
+					if (row.relevance) result.push(row);
+				break;
+				
+				case 'all':
+					let currquery = $query.replace(/\s/g, "\\b|\\b");
+					pattern = new RegExp(`(\\b${ currquery }\\b)`, 'gi');
+					relevance = 0;
+					max = 0;
+					
+					for (let key of keys) {
+						let value = _.get(row, key);
+						let matched = null;
+						
+						if (typeof value === "number" || typeof value === "string") {
+							matched = value.match(pattern);
+						}
+						
+						if (matched && matched.length) {
+							max = _.uniq(matched).length;
+							matches = matches.concat(matched);
+						}
+						
+						if (max >= relevance) relevance = max;
+					}
+					
+					if (matches.length) row.matches = _.uniq(matches);
+						
+					if (row.matches && row.matches.length === strings.length) {
+						row.relevance = StringCompare.compareTwoStrings($query, row.matches.join(' '));
+						row.relevance = Number( row.relevance.toFixed(2) );
+					}
+					
+					if (row.relevance) result.push(row);
+				break;
+				
+				case 'strict':
+					pattern = new RegExp(`\\b(${ $query })\\b`, 'gi');
+					relevance = 0;
+					max = 0;
+					
+					for (let key of keys) {
+						let value = _.get(row, key);
+						let matched = null;
+						
+						if (typeof value === "number" || typeof value === "string") {
+							matched = value.match(pattern);
+						}
+						
+						if (matched && matched.length) {
+							max = StringCompare.compareTwoStrings(query, matched[0]);
+							matches = matches.concat(matched);
+						}
+						
+						if (max >= relevance) relevance = Number( max.toFixed(2) );
+					}
+					
+					if (matches.length) row.matches = _.uniq(matches);
+						
+					if (relevance) row.relevance = relevance;
+					
+					if (row.relevance) result.push(row);
+				break;			
+			}
+		}
+		
+		if (Array.isArray(result)) result.sort((a, b) => b.relevance - a.relevance);
+		
+		return result;
+	},
+	scrollTo (e, top = 0, offset = 0, behavior = 'smooth') {
+		
+		if (_.isElement(e)) {
+			let rect = e.getBoundingClientRect();
+			
+			top = rect.top + offset;
+		}
+		else if (e && (e.currentTarget || e.target)) {
+			let button = (e.currentTarget || e.target);
 			let element = document.getElementById(button.getAttribute('data-scroll-to'));
 			
-			offset = element ? element.offsetTop : button.offsetTop;
+			let rect = element ? element.getBoundingClientRect() : button.getBoundingClientRect();
+			
+			top = rect.top + offset;
 		}
 		
 		window.scrollTo({
-			top: offset,
+			top: top,
 			left: 0,
 			behavior: behavior
 		});		
@@ -373,7 +523,7 @@ export default {
 				_.forEach(obj, function (display, node)
 				{
 					var pattern = new RegExp(node, 'gi');
-					var span = `<span style="display: ${ display }" data-component-format>${ node }</span>`;
+					var span = `<span class="${ display }" data-component-format>${ node }</span>`;
 					
 					string = string.replace(pattern, span);		
 				});			

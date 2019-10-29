@@ -21,7 +21,7 @@ module.exports = {
 	*/
 	async run (req, res) {
 		
-		__app.debugger.info('api.controllers.cache.stats');
+		__app.debugger.debug('api.controllers.cache.stats');
 		
 		if (!__app.helpers.core.cache.$) return res.status(503).json({
 			error: "Unable to load cache!"

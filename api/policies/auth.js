@@ -9,17 +9,17 @@
  *
  */
 
-import { get as __Get } from 'lodash';
+import _ from 'lodash';
  
 export default async function (req, res, next) 
 {
 	for (let route of __app.config.router.server.middleware.exclude) if (req.path.indexOf(route) >= 0) return next();
 			
-	__app.debugger.info('api.policies.auth');
+	__app.debugger.warn('api.policies.auth');
 	
 	let user = req.session.user || {};
 	
-	__app.debugger.info('api.policies.auth - Session User: %s', user.username || "Not Authenticated!");
+	__app.debugger.warn('api.policies.auth - Session User: %s', user.username || "Not Authenticated!");
 	
 	req.me = user;
 	
@@ -35,7 +35,7 @@ export default async function (req, res, next)
 	
 	const usercookie = await __app.helpers.core.cookie.get('user', req, res);
 	
-	__app.debugger.info('api.policies.auth - Cookie User ID: %s', usercookie || "No Cookie!");
+	__app.debugger.warn('api.policies.auth - Cookie User ID: %s', usercookie || "No Cookie!");
 	
 	if (!usercookie) return next();
 	
@@ -52,11 +52,11 @@ export default async function (req, res, next)
 		url: endpoint
 	}, req);
 	
-	user = __Get(response, 'data.data', {});
+	user = _.get(response, 'data.data', {});
 	
 	if (!user.id) return next();
 	
-	__app.debugger.info('api.policies.auth - Cookie Authenticated User: %s', user.username);
+	__app.debugger.warn('api.policies.auth - Cookie Authenticated User: %s', user.username);
 	
 	user = __app.helpers.core.user(user, 'session', req);
 	

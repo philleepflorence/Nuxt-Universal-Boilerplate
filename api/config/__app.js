@@ -9,25 +9,6 @@
 require('dotenv').config();
 
 module.exports = {
-	bootstrapVue: {
-		componentPlugins: [
-		    'AlertPlugin',
-		    'ButtonPlugin', 
-		    'DropdownPlugin',
-			'FormPlugin',
-			'FormCheckboxPlugin',
-			'FormFilePlugin',
-			'FormInputPlugin',
-			'FormRadioPlugin',
-			'FormSelectPlugin',
-			'FormTextareaPlugin',
-		    'SpinnerPlugin',
-		    'TooltipPlugin'
-	    ],
-	    directivePlugins: [
-		    'VBTooltipPlugin'
-	    ]
-	},
 	directus: {	
 		collections: {
 			/*
@@ -42,11 +23,7 @@ module.exports = {
 	initialize: {
 		/*
 			Project specific data to load on initial load
+			See api/config/initialize.js for examples.
 		*/
-	},
-	routes (routes, resolve, dirname) {
-		/*
-			Extend the routes that do not follow the blueprint
-		*/	
 	}
 }

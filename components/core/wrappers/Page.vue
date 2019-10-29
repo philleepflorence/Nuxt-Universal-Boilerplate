@@ -1,21 +1,46 @@
 <template>
-	<div v-bind:id="`page-${ page.name }`" class="vh-100 page-wrapper" role="wrapper" v-bind:key="keys.element">
-		<slot></slot>	
+	<div v-bind:class="`page-${ page.slug } vh-100 page-wrapper`" role="wrapper" v-bind:key="keys.element">
+		<ImageLoader 
+			v-bind:src="page.image.name" 
+			size="cdn" 
+			format="background" 
+			classname="position-absolute position-full bg-cover-center bg-cover-dark"
+			container="position-fixed position-full"
+			v-if="background">
+		</ImageLoader>
+		<div class="page-container vh-100 position-relative">
+			<slot></slot>
+		</div>
 	</div>
 </template>
 
-<script>
+<script>	
+	import _ from 'lodash';
+	import ImageLoader from "~/components/core/ui/ImageLoader.vue";
 	import Page from "~/helpers/core/page.js";
 	
 	export default {
-		name: "PageWrapper",
+		name: "PageCoreWrapper",
 		props: [
-			'parent',
-			'page'
+			'background',
+			'content',
+			'mode',
+			'page',
+			'parent'
 		],
+		components: {
+			ImageLoader
+		},
 		computed: {
 			configuration () {
 				return this.$store.state.api.config;
+			},
+			hash () {
+				if (!this.$route.hash.length) return null;
+				
+				let hash = this.$route.hash.replace('#!/', '').split('/');
+				
+				return hash;
 			},
 			loaded () {
 				return this.$store.state.app.loaded;
@@ -26,7 +51,7 @@
 			path () {
 				let path = Page.path(this.$route.path);
 				let page = Page.get(this.pages, path);
-				
+
 				if (page.name === this.page.name) return path;
 				
 				return null;
@@ -116,3 +141,9 @@
 		}
 	}
 </script>
+
+<style lang="less">
+	.page-wrapper {
+		box-shadow: 0 -3px 0 0 fade(black, 30);
+	}
+</style>

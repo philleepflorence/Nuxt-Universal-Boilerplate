@@ -7,10 +7,10 @@
 		<component v-bind:if="display('OPTIONS_SHARE')" v-bind:is="share" v-on:close="close"></component>
 		<component v-bind:if="display('OPTIONS_SUBSCRIBE')" v-bind:is="subscribe" v-on:close="close"></component>
 		
-		<nav class="options-menu position-fixed position-bottom position-right w-50px m-4 transform" v-if="buttons">
+		<nav class="options-menu position-fixed position-bottom position-right w-50px m-4 transform pointer-events-none" v-if="buttons">
 			<div class="options-overlay-buttons">
 				<button 
-					class="shadow-sm plain h-50px w-50px bg-primary transition position-relative options-overlay-button mb-4"
+					class="pointer-events-auto shadow-sm plain h-50px w-50px bg-primary transition position-relative options-overlay-button mb-4"
 					v-for="(button, key, index) in buttons"
 					v-on:click="onOverlay"
 					v-bind:key="button.slug"
@@ -23,7 +23,7 @@
 			</div>
 			<button 
 				id="options-button" 
-				class="shadow-sm plain h-50px w-50px bg-primary transition animated zoomIn position-relative options-toggle-button"
+				class="pointer-events-auto shadow-sm plain h-50px w-50px bg-primary transition animated zoomIn position-relative options-toggle-button"
 				v-if="loaded"
 				v-on:click="onToggle">
 				<span 
@@ -42,7 +42,7 @@
 		<nav class="options-overlay-menu position-fixed position-bottom position-right w-50px m-4 transform" v-if="buttons">
 			<button 
 				id="options-close-button" 
-				class="shadow-sm plain h-50px w-50px bg-primary transition animated zoomIn position-relative options-toggle-button a-delay"
+				class="pointer-events-auto shadow-sm plain h-50px w-50px bg-primary transition animated zoomIn position-relative options-toggle-button a-delay"
 				v-if="curroverlay"
 				v-on:click="close">
 				<span 
@@ -57,7 +57,7 @@
 
 <script>
 	import Page from "~/helpers/core/page.js";
-	import { forEach as __forEach, get as __Get } from "lodash";
+	import _ from "lodash";
 	
 	export default {
 		name: "Options",
@@ -127,14 +127,12 @@
 				let $overlays = this.$el.querySelectorAll('.options-overlay');
 				let $buttons = this.$el.querySelectorAll('.options-overlay-button');
 				
-				__forEach($overlays, (element) => {
+				_.forEach($overlays, (element) => {
 					element.classList.add('off');
 				});
-				__forEach($buttons, (element) => {
+				_.forEach($buttons, (element) => {
 					element.classList.remove('active');
 				});
-				
-				this.curroverlay = null;
 				
 				if (e !== true) {
 					this.options.open = false;
@@ -142,6 +140,13 @@
 					this.$el.setAttribute('data-open', 'false');
 					this.$el.setAttribute('data-overlay', 'false');
 				}
+				
+				this.$store.commit("app/SET", {
+					key: "app:closed:overlay",
+					data: this.curroverlay
+				});	
+				
+				this.curroverlay = null;
 			},
 			display (component) {
 				if (process.env[component]) return true;
@@ -165,7 +170,7 @@
 					let $buttons = this.$el.querySelectorAll('.options-overlay-button');
 					let $button = this.$el.querySelector(`[data-overlay="${ this.curroverlay }"]`);
 					
-					__forEach($buttons, (button) => {
+					_.forEach($buttons, (button) => {
 						button.classList.remove('active');
 					});
 					
@@ -179,7 +184,12 @@
 							if ($button) {
 								$button.classList.add('active');
 							}							
-						}, 300);						
+						}, 300);
+				
+						this.$store.commit("app/SET", {
+							key: "app:opened:overlay",
+							data: this.curroverlay
+						});							
 					}
 				}
 			},
@@ -224,7 +234,7 @@
 				}
 				
 				if ($buttons.length) {
-					__forEach($buttons, (button, index) => {
+					_.forEach($buttons, (button, index) => {
 						let currindex = $buttons.length - (index);
 						
 						button.style.transform = `translateY(${ transform * currindex }px)`;
@@ -272,6 +282,12 @@
 			this.$store.subscribe((mutation, state) => {
 				if (mutation.type === 'app/SET' && mutation.payload.key === "app:options:overlay") {
 					this.onOverlay(null, mutation.payload.data);						
+				}												
+			});
+			
+			this.$store.subscribe((mutation, state) => {
+				if (mutation.type === 'app/SET' && mutation.payload.key === "app:close:overlay") {
+					this.close(false);						
 				}												
 			});
 		}

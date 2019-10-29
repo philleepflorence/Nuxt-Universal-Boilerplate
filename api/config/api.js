@@ -72,6 +72,14 @@ module.exports = {
 		        upload: {
 			        url: ':domain/api/1.1/files'
 		        }
+	        },
+	        search: {
+		        app: {
+			        url: ':domain/api/search/app'
+		        },
+		        cache: {
+			        url: ':domain/api/search/cache'
+		        }
 	        }
 		},	
 		collections: {

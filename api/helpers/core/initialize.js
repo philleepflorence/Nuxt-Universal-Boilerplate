@@ -7,7 +7,7 @@
  *
  */
  
-import { get as __Get, set as __Set, cloneDeep as __cloneDeep } from 'lodash';
+import _ from 'lodash';
 
 module.exports = {
 	/*
@@ -32,9 +32,9 @@ module.exports = {
 			social: {}
 		};
         let keys, path;
-        let authenticated = __Get(req, 'session.user.id', false);
+        let authenticated = _.get(req, 'session.user.id', false);
         let override = req.query.debug === 'navigation' && req.query.token === process.env.TOKEN;
-        let privilege = Number( __Get(req, 'session.user.privilege', 0) );
+        let privilege = Number( _.get(req, 'session.user.privilege', 0) );
         let processed = 0;
         
         __app.debugger.info('api.helpers.core.initialize.navigation - Authenticated: %s - Privilege: %s', authenticated, privilege);
@@ -45,13 +45,13 @@ module.exports = {
 
         input.forEach(function (currow)
         {
-	        const row = __cloneDeep(currow);
+	        const row = _.cloneDeep(currow);
 	        
             /*
                 Only add navigation if public and private parameters pass
             */
             
-            let path = __Get(row, 'url') || __Get(row, 'path');
+            let path = _.get(row, 'url') || _.get(row, 'path');
             
             path = path.replace(':domain', process.env.SERVER_DOMAIN);
             
@@ -61,7 +61,7 @@ module.exports = {
             
             if (!override && ( ( (authenticated && !row.private) || (!authenticated && !row.public) ) || !path || pagePrivilege > privilege )) return;
                                                 	
-            if (row.pageicon && !row.icon) __Set(row, 'icon', row.pageicon);
+            if (row.pageicon && !row.icon) _.set(row, 'icon', row.pageicon);
             
             if (row.icon && row.pageicon) row.pageicon = null;
             
@@ -71,7 +71,7 @@ module.exports = {
             
             if (!row.description) row.description = row.title;
             
-            row.headline = row.headline || __Get(row, 'page.headline');
+            row.headline = row.headline || _.get(row, 'page.headline');
             
             if (req.path === path) row.active = true;
             else row.active = false;
@@ -86,14 +86,14 @@ module.exports = {
             {
                 keys = row.parent && row.dropdown ? ':parent.rows.:name'.replace(':parent', row.parent).replace(':name', row.name) : row.name;
 
-                if (!row.parent) __Set(sections.header, keys, row);
+                if (!row.parent) _.set(sections.header, keys, row);
             }
 
             /*
                 Footer Navigation grouped only by Section or Self
             */
 
-            if (row.footer) __Set(sections.footer, row.name, row);
+            if (row.footer) _.set(sections.footer, row.name, row);
 
             /*
                 Main Navigation grouped only by Section or Self
@@ -103,13 +103,13 @@ module.exports = {
             {
                 keys = ':section.:name'.replace(':section', row.section || 0).replace(':name', row);
 
-                __Set(sections.navigation, ':section.:name'.replace(':section', row.section || row.slug).replace(':name', row.slug), row);
+                _.set(sections.navigation, ':section.:name'.replace(':section', row.section || row.slug).replace(':name', row.slug), row);
                 
                 if (row.parent) 
                 {
 	                keys = ':section.:parent.rows.:name'.replace(':section', row.section || row.slug).replace(':parent', row.parent).replace(':name', row);
 	                
-	                __Set(sections.navigation, keys, row.slug);
+	                _.set(sections.navigation, keys, row.slug);
                 }
             }
 
@@ -117,19 +117,19 @@ module.exports = {
                 Authentication Navigation
             */
 
-            if (row.authentication) __Set(sections.authentication, row.name, row);
+            if (row.authentication) _.set(sections.authentication, row.name, row);
 
             /*
                 User Accounts Navigation
             */
 
-            if (row.accounts) __Set(sections.accounts, row.name, row);
+            if (row.accounts) _.set(sections.accounts, row.name, row);
 
             /*
                 Social Navigation
             */
 
-            if (row.social || row.section === 'social') __Set(sections.social, row.name, row);
+            if (row.social || row.section === 'social') _.set(sections.social, row.name, row);
         });
         
         return sections;

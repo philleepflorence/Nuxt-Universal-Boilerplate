@@ -102,7 +102,7 @@ module.exports = {
 			path: "assets/styles/importer.less"
 		},
 		{
-			path: "assets/styles/project.less",
+			path: "assets/styles/__project.less",
 			create: true,
 			content: "/* Project Specific Styles! */"
 		},
@@ -116,12 +116,12 @@ module.exports = {
 			path: "assets/styles/mixins/utilities.less"
 		},
 		{
-			path: "assets/styles/mixins/colors.less",
+			path: "assets/styles/mixins/__colors.less",
 			create: true,
-			content: "/* Bootstrap Color Definitions - Load from API Colors Endpoint! */"
+			content: "/* Bootstrap Color Definitions - Load from API Colors Endpoint! - /api/webhooks/colors */"
 		},
 		{
-			path: "assets/styles/mixins/project.less",
+			path: "assets/styles/mixins/__project.less",
 			create: true,
 			content: "/* Project Specific Definitions and Mixins! */ \n\n@fontaccent: sans-serif; \n@fontmain: sans-serif;"
 		},

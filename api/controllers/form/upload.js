@@ -21,7 +21,7 @@ module.exports = {
 	*/
 	async run (req, res) {
 		
-		__app.debugger.info('api.controllers.form.upload');
+		__app.debugger.debug('api.controllers.form.upload');
 		
 		const debug = req.query.debug || req.body.debug;
 		const dateformat = _.get(__app.data, 'configuration.application.format.date') || 'LLLL';
