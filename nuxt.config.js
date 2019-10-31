@@ -1,6 +1,9 @@
 const pkg = require('./package');
 const config = require('./app.config.js');
 
+const path = require('path');
+const fs = require('fs');
+
 require('dotenv').config();
 
 module.exports = {
@@ -22,6 +25,10 @@ module.exports = {
 	    host: process.env.SERVER_HOST,
 	    timing: {
 		    total: true
+	    },
+	    https: {
+		    key: process.env.LOCALHOST_KEY === "" ? fs.readFileSync(path.resolve(process.env.LOCALHOST_KEY)) : null,
+			cert: process.env.LOCALHOST_CRT === "" ? fs.readFileSync(path.resolve(process.env.LOCALHOST_CRT)) : null
 	    }
     },
     
@@ -110,7 +117,7 @@ module.exports = {
      ** Customize the progress-bar color
      */
     loading: {
-        color: process.env.APP_COLOR,
+        color: process.env.APP_LOADER_COLOR,
         height: '4px',
         continuous: true
     },
@@ -209,5 +216,22 @@ module.exports = {
     bootstrapVue: {
 	    componentPlugins: config.bootstrapVue.componentPlugins,
 	    directivePlugins: config.bootstrapVue.directivePlugins
+    },
+
+    /*
+     ** PWA Manifest and Meta Configuration
+     */
+    pwa: {
+	    manifest: {
+		    short_name: process.env.APP_SHORT_NAME,
+		    name: process.env.APP_NAME,
+		    start_url: process.env.APP_START_URL,
+		    background_color: process.env.APP_THEME_COLOR,
+		    theme_color: process.env.APP_THEME_COLOR,
+		    display: "standalone",
+		    orientation: "portrait",
+		    prefer_related_applications: true,
+		    screenshots: config.pwa.manifest.screenshots
+	    }
     }
 }

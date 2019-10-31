@@ -2,23 +2,23 @@
 	<div id="navigation" role="app navigation" class="position-relative off" v-bind:key="keys.element">
 		<nav class="navigation-controls transition position-fixed mt-2 h-50px w-100 pointer-events-none d-flex">
 			<button 
-				class="position-relative plain h-50px w-50px bg-primary text-white navigation-controls-open" 
+				class="navigation-controls-button position-relative plain h-50px w-50px bg-primary text-white navigation-controls-open" 
 				v-html="icons.menu.open.icon.icon" 
 				v-on:click="controls('open')">
 			</button>
 			<button 
-				class="position-relative plain h-50px w-50px bg-primary text-white navigation-controls-close position-absolute position-top position-left" 
+				class="navigation-controls-button position-relative plain h-50px w-50px bg-primary text-white navigation-controls-close position-absolute position-top position-left" 
 				v-html="icons.menu.close.icon.icon" 
 				v-on:click="controls('close')">
 			</button>
 			<button 
-				class="position-relative plain h-50px w-50px bg-primary text-white animated fadeIn"
+				class="navigation-controls-button position-relative plain h-50px w-50px bg-primary text-white animated fadeIn"
 				v-show="options.logo">
 				<span class="filter-white"><img v-bind:src="configuration.application.favicon" class="icon-logo"></span>
 				<a class="position-absolute position-full" href="/"></a>
 			</button>
 			<button 
-				class="position-relative plain h-50px w-50px bg-primary text-white navigation-controls-back animated fadeIn animated fadeInRight delay-1s faster" 
+				class="navigation-controls-button position-relative plain h-50px w-50px bg-primary text-white navigation-controls-back animated fadeIn animated fadeInRight delay-1s faster" 
 				v-html="icons.history.back.icon.icon" 
 				v-on:click="navigate(-1)" 
 				v-show="overlayopen || goback">
@@ -27,16 +27,17 @@
 		<nav class="navigation-controls secondary transition position-fixed position-right mt-2 h-50px w-100 pointer-events-none d-flex justify-content-end">
 			<button 
 				v-for="(button, key, index) in buttons"
-				class="position-relative plain h-50px w-50px bg-primary bg-secondary-hover bg-secondary-active text-white animated fadeInRightSmall a-delay"
+				class="navigation-controls-button position-relative plain h-50px w-50px bg-primary bg-secondary-hover bg-secondary-active text-white animated fadeInRightSmall a-delay"
 				v-html="button.icon.icon" 
 				v-bind:data-overlay="button.url"
 				v-bind:key="button.url"
 				v-on:click="onOverlay">
 			</button>
 			<button 
-				class="position-relative navigation-controls-fullscreen plain h-50px w-50px bg-primary bg-secondary-hover bg-secondary-active text-white animated fadeInRightSmall a-delay" 
+				class="navigation-controls-button position-relative navigation-controls-fullscreen plain h-50px w-50px bg-primary bg-secondary-hover bg-secondary-active text-white animated fadeInRightSmall a-delay" 
 				v-html="icons.toggle.fullscreen.icon.icon" 
-				v-on:click="fullscreen()">
+				v-on:click="onfullscreen"
+				v-if="fullscreen">
 			</button>
 		</nav>
 		<nav id="navigation-container" class="navigation-container position-fixed position-full bg-white transform">
@@ -45,13 +46,16 @@
 					
 					<div class="col-lg-4 col-md-5 vh-100 navigation-column">
 						<div class="d-flex flex-column align-items-center vh-100 pt-10">
-							<header class="navigation-column-header spacer w-100 pb-5">
-								<a class="position-relative d-block w-50" href="/">
-									<img v-bind:src="configuration.application.logo" class="navigation-logo d-block w-100">
+							<header class="navigation-column-header position-relative w-100 mb-5">
+								<a class="position-relative d-block" href="/">
+									<span class="d-block spacer bg-primary">
+										<img v-bind:src="configuration.application.logo" class="navigation-logo filter-white d-block w-50">
+									</span>
 								</a>
+								<span class="position-absolute navigation-logo-line"></span>
 							</header>
 							<section v-for="(section, index) in navigation" v-bind:key="index" class="text-secondary navigation-section spacer w-100">
-								<h4 class="navigation-header fancy fancy-left fancy-sm fs-1rem font-weight-book text-primary">
+								<h4 class="navigation-header fancy fancy-left fs-1rem font-weight-book text-primary">
 									<span class="text-primary">{{ index }}</span>
 								</h4>
 								<nav class="navigation-group">
@@ -82,7 +86,7 @@
 									v-html="options.nav.icon.icon" 
 									v-bind:style="style(options.nav, 'background-color')">
 								</span>
-								<p class="navigation-description spacer animated fadeIn" v-html="options.nav.description"></p>
+								<p class="navigation-description spacer animated fadeIn" v-html="format(options.nav.description)"></p>
 							</div>
 						</div>
 					</div>
@@ -90,9 +94,9 @@
 					<div class="col-lg-3 col-md-7 vh-100 border-md-left navigation-column">
 						<div class="d-flex align-items-end flex-column vh-100 position-relative">
 							<footer class="navigation-footer mt-auto w-100 text-secondary bg-white">
-								<div class="p small spacer m-0" v-html="configuration.application.tagline"></div>
-								<div class="p small spacer border-top m-0" v-html="configuration.application.disclaimer.contents" v-if="configuration.application.disclaimer.contents"></div>
-								<p class="p spacer border-top m-0 text-primary"><small class="font-weight-book">{{ `${ date() } &mdash; ${ configuration.application.name } &mdash; v${ configuration.application.app.version }` }}</small></p>
+								<div class="p small spacer m-0" v-html="format(configuration.application.tagline)"></div>
+								<div class="p small spacer border-top m-0" v-html="format(configuration.application.disclaimer.contents)" v-if="configuration.application.disclaimer.contents"></div>
+								<p class="p spacer border-top m-0 text-primary"><small class="font-weight-book" v-html="`${ date() } &mdash; ${ format(configuration.application.name) } &mdash; v${ configuration.application.app.version }`"></small></p>
 							</footer>
 						</div>
 					</div>
@@ -154,6 +158,8 @@
 				routed: false,
 				goback: false,
 				overlayopen: false,
+				fullscreen: false,
+				isFullscreen: false,
 				options: {
 					logo: true,
 					menu: false,
@@ -206,25 +212,28 @@
 					this.$el.classList.add('off');
 				}
 			},
-			fullscreen (e) {		
-				const button = e.currentTarget;
-				
+			onfullscreen (e) {		
 				/*
 					Get the documentElement (<html>) or HTML DOM Element to display the page in fullscreen
 				*/
 				
-				let element = document.documentElement;
-				let target = button.getAttribute('data-toggle-target');
+				let element = document.documentElement;				
 				
-				if (target) element = document.querySelector(target);
+				if (e && e.currentTarget) {
+					let target = e.currentTarget.getAttribute('data-toggle-target');
+					
+					if (target) {
+						element = document.querySelector(target);
+					}
+				}				
 				
-				var isFullscreen = document.fullscreenElement || document.webkitIsFullScreen || document.mozFullScreen || false;
+				this.isFullscreen = document.fullscreenElement || document.webkitIsFullScreen || document.mozFullScreen || false;
 				
 				element.requestFullScreen = element.requestFullScreen || element.webkitRequestFullScreen || element.mozRequestFullScreen || element.msRequestFullscreen || function () { return false; };
 				
 				document.cancelFullScreen = document.cancelFullScreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen || function () { return false; };
 			
-				isFullscreen ? document.cancelFullScreen() : element.requestFullScreen();			
+				this.isFullscreen ? document.cancelFullScreen() : element.requestFullScreen();			
 			},
 			date () {
 				return moment().format( this.configuration.application.format.copyright );
@@ -236,11 +245,23 @@
 					this.options.nav = {
 						id: nav.id,
 						color: nav.color,
-						description: nav.description,
+						description: this.format(nav.description),
 						icon: nav.icon
 					};
 				}
 				else this.options.nav.id = null;
+			},
+			format (string) {
+				return Page.utils.format (string, this.$store.state.api.config.components.display);
+			},
+			initFullscreen () {
+				if (this.$route.query.source === 'pwa') return false;
+				
+				var element = document.documentElement;
+				
+				element.requestFullScreen = element.requestFullScreen || element.webkitRequestFullScreen || element.mozRequestFullScreen || element.msRequestFullscreen;
+				
+				this.fullscreen = (typeof element.requestFullScreen === 'function');
 			},
 			navigate (direction) {
 				if (window.DEBUG) console.log("debug - app.components.core.layouts.Navigation.navigate");
@@ -374,6 +395,8 @@
 			if (this.path !== '/' && this.$route.hash) this.goback = true;
 			
 			this.render();
+			
+			this.initFullscreen();
 						
 			this.$store.commit("app/ROUTES", this.path);
 			
@@ -445,6 +468,10 @@
 					}				
 					.navigation-container {
 						z-index: 2;
+	    
+					    .navigation-logo {
+						    max-width: 150px !important;
+					    }
 						
 						.navigation-row {
 							.navigation-column {
@@ -531,6 +558,47 @@
 			}
 		}
 	}
+	
+    @media (max-width: @breakpoint-sm)
+    {
+	    .navigation-controls-button {
+		    width: 40px !important;
+	        height: 40px !important;
+	    }
+	    
+	    .navigation-group {
+		    .navigation-item {
+			    margin-bottom: 1rem !important;
+			    
+			    .navigation-text {
+				    font-size: 1.5rem !important;
+			    }
+		    }
+	    }
+	    
+	    .navigation-logo {
+		    padding: 1.5rem 0;
+	    }
+    }
+	
+    @media (max-width: @breakpoint-md)
+    {
+	    .navigation-header.fancy {
+		    span {
+			    font-size: 1.5rem !important;
+		    }
+	    }
+	    
+	    .navigation-group {
+		    .navigation-item {
+			    margin-bottom: 0.75rem !important;
+		    }
+	    }
+	    
+	    .navigation-logo {
+		    padding: 0.75rem 0;
+	    }
+    }
 	
     @media (min-width: @breakpoint-md)
     {

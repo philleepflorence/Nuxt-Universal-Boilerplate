@@ -2,6 +2,7 @@
 	<div v-bind:id="`page-${ page.name }`" class="container-fluid vh-100 auth-container" role="wrapper" v-bind:key="keys.element">
 		<ImageLoader 
 			classname="position-fixed position-full bg-cover-center bg-cover-dark" 
+			container="position-fixed position-full page-image-overlay"
 			format="background" 
 			size="cdn" 
 			v-bind:src="page.image.name">

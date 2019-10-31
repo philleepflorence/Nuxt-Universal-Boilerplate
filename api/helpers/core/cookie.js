@@ -35,6 +35,7 @@ module.exports = {
 		options.maxAge = options.maxAge || process.env.APP_COOKIES_EXPIRE;
 		options.path = options.path || process.env.APP_COOKIES_PATH;
 		options.domain = options.domain || process.env.SERVER_DOMAIN;
+		options.sameSite = options.sameSite || process.env.APP_COOKIES_SAMESITE || 'none';
 		
 		res.setHeader('Set-Cookie', cookie.serialize(property, value, options));
 						

@@ -516,7 +516,7 @@ export default {
 			return buf.join('');
 		},
 		format (string, options) {
-			if (!Array.isArray(options) || !string) return string;
+			if (!Array.isArray(options) || typeof string !== 'string') return string;
 			
 			options.forEach(function (obj)
 			{

@@ -96,6 +96,16 @@ html {
 			    margin-bottom: 0.75rem;
 		    }
 		    
+		    a {
+			    display: inline-block;
+		    }
+		    
+		    &.p-anchor {
+			    a {
+				    color: @colorprimary;
+			    }
+		    }
+		    
 			&.lead {
 				font-size: 1.15rem;
 				
@@ -222,11 +232,12 @@ html {
 		    }
 	    }
 	    	    
-	    .options-overlay {
-		    &:before {
+	    .options-overlay, .page-image-overlay {
+		    &:after {
 			    .beforefull(@content:'', @pos: absolute);
 			    background-image: linear-gradient(fade(black, 15), fade(@colorprimary, 15));
 			    pointer-events: none !important;
+			    z-index: 2;
 		    }
 	    }
 	    

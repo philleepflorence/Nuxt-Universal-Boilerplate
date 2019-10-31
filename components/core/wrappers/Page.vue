@@ -5,7 +5,7 @@
 			size="cdn" 
 			format="background" 
 			classname="position-absolute position-full bg-cover-center bg-cover-dark"
-			container="position-fixed position-full"
+			container="position-fixed position-full page-image-overlay"
 			v-if="background">
 		</ImageLoader>
 		<div class="page-container vh-100 position-relative">

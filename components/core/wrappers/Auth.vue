@@ -2,12 +2,13 @@
 	<div v-bind:id="`page-${ page.name }`" class="container-fluid vh-100 auth-container" role="wrapper" v-bind:key="keys.element">
 		<ImageLoader 
 			classname="position-fixed position-full bg-cover-center bg-cover-dark" 
+			container="position-fixed position-full page-image-overlay"
 			format="background" 
 			size="cdn" 
 			v-bind:src="page.image.name">
 		</ImageLoader>
 		<div class="d-flex align-items-center vh-100 spacer">
-			<section class="p w-100 max-w-640px mx-auto spacer animated fadeInUp text-white position-relative">
+			<section class="p w-100 max-w-640px mx-auto spacer animated fadeInUpSmall text-white position-relative">
 				<span class="p-3 text-center d-block" v-html="page.icon.icon"></span>
 				<h1 class="text-center fs-2rem mb-4 cursor-hand" v-on:click="reload">{{ format(page.headline) }}</h1>
 				<div class="p lead sm empty text-center font-weight-book" v-html="format(page.synopsis)"></div>
@@ -15,7 +16,7 @@
 					<slot></slot>
 				</div>
 				<footer class="my-4 text-center transition auth-navigation">
-					<div class="p empty text-center font-weight-book mb-4" v-html="format(page.contents)" v-if="page.contents"></div>
+					<div class="p auth-navigation-content p-anchor empty text-center font-weight-book mb-4" v-html="format(page.contents)" v-if="page.contents"></div>
 					<NavLink 
 						v-for="nav in navigation" 
 						v-bind:nav="nav"
@@ -158,6 +159,16 @@
 				border-bottom: fade(white, 30) 1px solid;
 				width: 25%;
 				margin: 2rem auto 2rem auto;
+			}
+			
+			.auth-navigation-content {
+				&:after {
+					content: '';
+					display: block;
+					border-bottom: fade(white, 30) 1px solid;
+					width: 25%;
+					margin: 2rem auto 2rem auto;
+				}				
 			}
 		}
 		.form {

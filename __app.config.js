@@ -26,6 +26,16 @@ module.exports = {
 		    'VBTooltipPlugin'
 	    ]
 	},
+	pwa: {
+		manifest: {
+			screenshots: [
+				/*
+					PWA App Specific Manifest Screenshots for the Platform Store!
+					Docs: https://developer.mozilla.org/en-US/docs/Web/Manifest/screenshots
+				*/
+			]
+		}
+	},
 	routes (routes, resolve, dirname) {
 		/*
 			Extend non-blueprint routes: https://nuxtjs.org/guide/routing/
