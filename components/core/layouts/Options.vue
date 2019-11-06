@@ -20,6 +20,15 @@
 						v-html="button.icon.icon">
 					</span>
 				</button>
+				<button 
+					class="pointer-events-auto shadow-sm plain h-50px w-50px bg-primary transition position-relative options-overlay-button mb-4"
+					v-on:click="onFullscreen"
+					v-if="fullscreen">
+					<span 
+						class="text-white"
+						v-html="icons.toggle.fullscreen.icon.icon">
+					</span>
+				</button>
 			</div>
 			<button 
 				id="options-button" 
@@ -64,6 +73,7 @@
 		data () {
 			return {
 				loaded: false,
+				fullscreen: true,
 				keys: {
 					element: Page.utils.rand()
 				},
@@ -152,6 +162,18 @@
 				if (process.env[component]) return true;
 				
 				return false;
+			},
+			initFullscreen () {
+				if (this.$route.query.source === 'pwa') return false;
+				
+				var element = document.documentElement;
+				
+				element.requestFullScreen = element.requestFullScreen || element.webkitRequestFullScreen || element.mozRequestFullScreen || element.msRequestFullscreen;
+				
+				this.fullscreen = (typeof element.requestFullScreen === 'function');
+			},
+			onFullscreen () {
+				this.$store.commit('event/SET', ['app:toggle:fullscreen']);
 			},
 			onOverlay (e, curroverlay) {
 				if (window.DEBUG) console.log("debug - app.components.core.layouts.Options.onOverlay");
@@ -246,16 +268,22 @@
 					this.rendered = true;
 				}
 				
-				this.overlay();				
+				this.overlay();							
 			}
 		},
 		mounted () {
 			if (window.DEBUG) console.log("debug - app.components.core.layouts.Options.mounted");
+			
+			this.initFullscreen();
 						
 			this.loaded = this.$store.state.app.loaded;
 						
-			this.$router.afterEach((to, from) => {				
-				this.close();
+			this.$router.beforeEach((to, from, next) => {		
+				if (window.DEBUG) console.log("debug - app.components.core.layouts.Options.beforeEach");
+						
+				if (this.options.open) this.close();
+				
+				next();
 			});	
 			
 			if (this.loaded && this.configuration.overlay && !this.rendered) {
@@ -281,12 +309,16 @@
 			
 			this.$store.subscribe((mutation, state) => {
 				if (mutation.type === 'app/SET' && mutation.payload.key === "app:options:overlay") {
+					if (window.DEBUG) console.log("debug - app.components.core.layouts.Options.subscribe - app:options:overlay");
+					
 					this.onOverlay(null, mutation.payload.data);						
 				}												
 			});
 			
 			this.$store.subscribe((mutation, state) => {
 				if (mutation.type === 'app/SET' && mutation.payload.key === "app:close:overlay") {
+					if (window.DEBUG) console.log("debug - app.components.core.layouts.Options.subscribe - app:close:overlay");
+					
 					this.close(false);						
 				}												
 			});

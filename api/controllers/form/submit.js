@@ -12,7 +12,6 @@
 
 import _ from 'lodash';
 import ip from 'ip';
-import S from 'string';
 import uuid from 'uuid-by-string';
 
 module.exports = {
@@ -84,7 +83,7 @@ module.exports = {
 	    {
 		    previews.push({
 				value: value,
-				label: S(label).humanize().titleCase().s
+				label: _.startCase(label)
 			});
 	    });
 		

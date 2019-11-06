@@ -1,5 +1,5 @@
 <template>
-	<div v-bind:id="`page-${ page.name }`" class="container-fluid vh-100 auth-container" role="wrapper" v-bind:key="keys.element">
+	<div v-bind:id="`page-${ page.name }`" class="container-fluid vh-100 vh-fixed auth-container" role="wrapper" v-bind:key="keys.element">
 		<ImageLoader 
 			classname="position-fixed position-full bg-cover-center bg-cover-dark" 
 			container="position-fixed position-full page-image-overlay"
@@ -7,7 +7,7 @@
 			size="cdn" 
 			v-bind:src="page.image.name">
 		</ImageLoader>
-		<div class="d-flex align-items-center vh-100 spacer">
+		<div class="d-flex align-items-center vh-100 vh-fixed spacer">
 			<section class="p w-100 mx-auto spacer animated fadeInUp">
 				<span class="p-3 text-center d-block text-white" v-html="page.icon.icon"></span>
 				<h1 class="text-center fs-2rem text-white mb-4 cursor-hand" v-on:click="reload">{{ format(page.headline) }}</h1>

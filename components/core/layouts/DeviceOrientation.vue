@@ -44,7 +44,9 @@
 			window.addEventListener("deviceorientation", this.render, true);
 			window.addEventListener('resize', this.render);
 		},
-		onBeforeLeave () {
+		beforeDestroy () {
+			if (window.DEBUG) console.log("debug - app.components.core.layouts.DeviceOrientation.beforeDestroy");
+			
 			window.removeEventListener("deviceorientation", this.render);
 			window.removeEventListener('resize', this.render);
 		}

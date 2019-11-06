@@ -3,7 +3,7 @@
 		<div class="search-overlay-container position-absolute position-full">
 			<CustomScroll name="search">
 				<a href="#" class="position-fixed position-full pointer-events-auto" v-on:click.prevent.stop="close"></a>
-				<div class="page-search-container position-relative vh-100 d-flex pointer-events-none">
+				<div class="page-search-container position-relative vh-100 vh-fixed d-flex pointer-events-none">
 					<div class="page-search-content page-search-form pointer-events-auto max-w-640px w-90 spacer mx-auto transition t-delay">
 						<header class="page-search-contents-header spacer t-delay search-animation">
 							<span 

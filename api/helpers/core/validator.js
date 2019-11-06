@@ -10,7 +10,6 @@
  
 import _ from 'lodash';
 import validator from 'validator';
-import S from 'string';
 
 module.exports = function (input, rows, req) {
 	
@@ -28,7 +27,7 @@ module.exports = function (input, rows, req) {
 	for (let row of rows)
 	{
 		let method = row.validate;
-		let label = S(row.label || row.property).humanize().s;
+		let label = _.startCase(row.label || row.property);
 		let currInput = _.get(input, row.property);
 		let defined = typeof currInput !== "undefined";
 		let declared = defined && currInput !== null;
@@ -80,7 +79,7 @@ module.exports = function (input, rows, req) {
 				
 				if (currInput !== otherinput)
 				{
-					result.error.push(label + ' - Must match <u>' + S(compare).humanize().s + '</u>!');
+					result.error.push(label + ' - Must match <u>' + _.startCase(compare) + '</u>!');
 					
 					continue loopRows;
 				}

@@ -53,6 +53,9 @@ export const state = () => ({
 	},
 	metadata: {},
 	options: {},
+	regex: {
+		iOS: /(CriOS|iPad|iPhone)/
+	},
 	routes: {
 		parent: null,
 		history: []

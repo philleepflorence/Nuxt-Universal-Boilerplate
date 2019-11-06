@@ -1,6 +1,6 @@
 {
   "name": "NuxtPWA",
-  "version": "0.0.9",
+  "version": "0.1.1",
   "description": "Nuxt Universal Express PWA Boilerplate and Framework",
   "author": "Philleep Florence",
   "private": true,
@@ -53,9 +53,9 @@
     "require-all": "^3.0.0",
     "roman-numeral": "^0.2.6",
     "route-parser": "0.0.5",
-    "string": "^3.3.3",
     "string-format": "^0.5.0",
     "string-similarity": "^3.0.0",
+    "striptags": "^3.1.1",
     "superagent": "^3.5.0",
     "systeminformation": "^4.5.1",
     "tensify": "0.0.4",
@@ -63,6 +63,7 @@
     "useragent": "^2.3.0",
     "uuid-by-string": "^2.1.1",
     "validator": "^6.2.1",
+    "vue-meta": "^2.3.1",
     "waypoints": "^4.0.1",
     "webpack": "^4.37.0",
     "winston": "^3.2.1"

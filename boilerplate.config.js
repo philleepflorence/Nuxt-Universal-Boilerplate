@@ -134,7 +134,7 @@ module.exports = {
 			recursive: true
 		},
 		{
-			path: "layouts/app.vue"
+			path: "layouts/default.vue"
 		},
 		{
 			path: "layouts/error.vue"

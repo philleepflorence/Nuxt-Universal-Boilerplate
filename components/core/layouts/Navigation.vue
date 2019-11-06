@@ -3,49 +3,56 @@
 		<nav class="navigation-controls transition position-fixed mt-2 h-50px w-100 pointer-events-none d-flex">
 			<button 
 				class="navigation-controls-button position-relative plain h-50px w-50px bg-primary text-white navigation-controls-open" 
-				v-html="icons.menu.open.icon.icon" 
 				v-on:click="controls('open')">
+				<span v-html="icons.menu.open.icon.icon"></span>
+				<RippleClick></RippleClick>
 			</button>
 			<button 
 				class="navigation-controls-button position-relative plain h-50px w-50px bg-primary text-white navigation-controls-close position-absolute position-top position-left" 
-				v-html="icons.menu.close.icon.icon" 
 				v-on:click="controls('close')">
+				<span v-html="icons.menu.close.icon.icon"></span>
+				<RippleClick></RippleClick>
 			</button>
 			<button 
 				class="navigation-controls-button position-relative plain h-50px w-50px bg-primary text-white animated fadeIn"
 				v-show="options.logo">
 				<span class="filter-white"><img v-bind:src="configuration.application.favicon" class="icon-logo"></span>
-				<a class="position-absolute position-full" href="/"></a>
+				<a class="position-absolute position-full" href="/">
+					<RippleClick></RippleClick>
+				</a>
 			</button>
 			<button 
 				class="navigation-controls-button position-relative plain h-50px w-50px bg-primary text-white navigation-controls-back animated fadeIn animated fadeInRight delay-1s faster" 
-				v-html="icons.history.back.icon.icon" 
 				v-on:click="navigate(-1)" 
 				v-show="overlayopen || goback">
+				<span v-html="icons.history.back.icon.icon"></span>
+				<RippleClick></RippleClick>
 			</button>
 		</nav>
 		<nav class="navigation-controls secondary transition position-fixed position-right mt-2 h-50px w-100 pointer-events-none d-flex justify-content-end">
 			<button 
 				v-for="(button, key, index) in buttons"
 				class="navigation-controls-button position-relative plain h-50px w-50px bg-primary bg-secondary-hover bg-secondary-active text-white animated fadeInRightSmall a-delay"
-				v-html="button.icon.icon" 
 				v-bind:data-overlay="button.url"
 				v-bind:key="button.url"
 				v-on:click="onOverlay">
+				<span v-html="button.icon.icon"></span>
+				<RippleClick></RippleClick>
 			</button>
 			<button 
 				class="navigation-controls-button position-relative navigation-controls-fullscreen plain h-50px w-50px bg-primary bg-secondary-hover bg-secondary-active text-white animated fadeInRightSmall a-delay" 
-				v-html="icons.toggle.fullscreen.icon.icon" 
 				v-on:click="onfullscreen"
 				v-if="fullscreen">
+				<span v-html="icons.toggle.fullscreen.icon.icon"></span>
+				<RippleClick></RippleClick>
 			</button>
 		</nav>
 		<nav id="navigation-container" class="navigation-container position-fixed position-full bg-white transform">
 			<CustomScroll name="navigation">
-				<div class="row no-gutters vh-100 navigation-row">
+				<div class="row no-gutters vh-100 vh-fixed navigation-row">
 					
-					<div class="col-lg-4 col-md-5 vh-100 navigation-column">
-						<div class="d-flex flex-column align-items-center vh-100 pt-10">
+					<div class="col-lg-4 col-md-5 vh-100 vh-fixed navigation-column">
+						<div class="d-flex flex-column align-items-center vh-100 vh-fixed pt-10">
 							<header class="navigation-column-header position-relative w-100 mb-5">
 								<a class="position-relative d-block" href="/">
 									<span class="d-block spacer bg-primary">
@@ -78,8 +85,8 @@
 						</div>
 					</div>
 					
-					<div class="col-lg-5 col-md-7 vh-100 border-lg-right navigation-column navigation-details d-none d-md-block">
-						<div class="d-flex align-items-center vh-100">
+					<div class="col-lg-5 col-md-7 vh-100 vh-fixed border-lg-right navigation-column navigation-details d-none d-md-block">
+						<div class="d-flex align-items-center vh-100 vh-fixed">
 							<div class="lead navigation-message text-center w-100" v-show="options.nav.id">
 								<span 
 									class="navigation-icon d-inline-flex justify-content-center align-items-center h-80px w-80px rounded-circle text-white animated fadeIn" 
@@ -91,8 +98,8 @@
 						</div>
 					</div>
 					
-					<div class="col-lg-3 col-md-7 vh-100 border-md-left navigation-column">
-						<div class="d-flex align-items-end flex-column vh-100 position-relative">
+					<div class="col-lg-3 col-md-7 vh-100 vh-fixed border-md-left navigation-column">
+						<div class="d-flex align-items-end flex-column vh-100 vh-fixed position-relative">
 							<footer class="navigation-footer mt-auto w-100 text-secondary bg-white">
 								<div class="p small spacer m-0" v-html="format(configuration.application.tagline)"></div>
 								<div class="p small spacer border-top m-0" v-html="format(configuration.application.disclaimer.contents)" v-if="configuration.application.disclaimer.contents"></div>
@@ -110,13 +117,15 @@
 	import moment from 'moment';
 	import CustomScroll from "~/components/core/ui/CustomScroll.vue";	
 	import NavLink from "~/components/core/ui/NavLink.vue";
-	import Page from "~/helpers/core/page.js";
+	import Page from "~/helpers/core/page.js";	
+	import RippleClick from "~/components/core/ui/RippleClick.vue";
 	
 	export default {
 		name: "Navigation",
 		components: {
 			CustomScroll,
-			NavLink
+			NavLink,
+			RippleClick
 		},
 		computed: {
 			buttons () {
@@ -212,12 +221,12 @@
 					this.$el.classList.add('off');
 				}
 			},
-			onfullscreen (e) {		
+			onfullscreen (e, element) {		
 				/*
 					Get the documentElement (<html>) or HTML DOM Element to display the page in fullscreen
 				*/
 				
-				let element = document.documentElement;				
+				element = element || document.documentElement;				
 				
 				if (e && e.currentTarget) {
 					let target = e.currentTarget.getAttribute('data-toggle-target');
@@ -431,6 +440,14 @@
 					if (window.DEBUG) console.log("debug - app.components.core.layouts.Navigation.mounted.subscribe - app:closed:overlay");	
 					
 					this.overlayopen = false;					
+				}												
+			});
+			
+			this.$store.subscribe((mutation, state) => {
+				if (mutation.type === 'event/SET' && mutation.payload[0] === "app:toggle:fullscreen") {
+					if (window.DEBUG) console.log("debug - app.components.core.layouts.Navigation.mounted.subscribe - app:toggle:fullscreen");	
+					
+					this.onfullscreen();					
 				}												
 			});
 		}

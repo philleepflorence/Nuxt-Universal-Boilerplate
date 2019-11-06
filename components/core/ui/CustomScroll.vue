@@ -15,6 +15,8 @@
 
 <script>
 	import _ from 'lodash';
+	import { disableBodyScroll, enableBodyScroll, clearAllBodyScrollLocks } from "body-scroll-lock";
+	
 	import Page from "~/helpers/core/page.js";
 	
 	export default {
@@ -34,7 +36,8 @@
 				scrollable: false,
 				scrollback: false,
 				custom: false,
-				axis: 'y'
+				axis: 'y',
+				iOS: false
 			};
 		},
 		computed: {
@@ -92,9 +95,10 @@
 		methods: {
 			initialize () {
 				if (this.direction) this.axis = this.direction;
-			
+				
+				this.iOS = this.$store.state.app.regex.iOS.test(window.navigator.userAgent);
 				this.$content = this.$el.querySelector('.custom-scroll-content');
-				this.custom = ( this.scrollbar > 0 && !this.mobile && typeof window.OverlayScrollbars === 'function' );
+				this.custom = this.iOS ? true : ( this.scrollbar > 0 && !this.mobile && typeof window.OverlayScrollbars === 'function' );
 				
 				let input = this.options || {};
 				
@@ -103,6 +107,10 @@
 						x: "scroll",
 						y: "hidden"
 					});
+				}
+				
+				if (this.iOS) {
+					this.scrollable = false;
 				}
 				
 				const options = _.cloneDeep(this.$store.state.app.scrollBar.options, input);
@@ -127,6 +135,7 @@
 					if (this.axis === "y") {
 						this.$el.addEventListener('mouseenter', this.mouseenter);
 						this.$el.addEventListener('mouseleave', this.mouseleave);
+						//document.addEventListener('touchstart', this.touchstart);
 						window.addEventListener('wheel', this.wheel, { passive: false });
 					}
 					
@@ -163,7 +172,10 @@
 			render (clipped) {
 				let height = Math.max(this.$el.scrollHeight, this.$content.offsetHeight);
 				
-				if (clipped === true && this.overlay && this.$content) {
+				if (this.iOS) {
+					this.scrollable = false;
+				}				
+				else if (clipped === true && this.overlay && this.$content) {
 					this.scrollable = true;
 				}
 				else if (this.overlay && this.$content && height > this.$el.offsetHeight) {
@@ -200,6 +212,14 @@
 				}		
 				else {
 					this.$el[this.position] = 0;
+				}
+			},
+			touchstart (e) {
+				if (e.target.closest("[data-custom-scroll]")) {
+					disableBodyScroll(this.$el);
+				}
+				else {
+					enableBodyScroll(this.$el);
 				}
 			},
 			wheel (e) {
@@ -274,7 +294,10 @@
 				if (this.axis === "y") {
 					this.$el.removeEventListener('mouseenter', this.mouseenter);
 					this.$el.removeEventListener('mouseleave', this.mouseleave);
+					//document.removeEventListener('touchstart', this.touchstart);
 					window.removeEventListener('wheel', this.wheel, { passive: false });
+					
+					clearAllBodyScrollLocks();
 				}
 				
 				if (this.overlay) {

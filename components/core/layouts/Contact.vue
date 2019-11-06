@@ -3,7 +3,7 @@
 		<div class="contact-container position-absolute position-full">
 			<CustomScroll name="contact">
 				<a href="#" class="position-fixed position-full pointer-events-auto" v-on:click.prevent.stop="close"></a>
-				<div class="position-relative contact-wrapper d-flex align-items-center vh-100 pointer-events-auto">
+				<div class="position-relative contact-wrapper d-flex align-items-center vh-100 vh-fixed pointer-events-auto">
 					<div class="contact-parent max-w-480px mx-auto py-10">
 						<div class="flex-item w-100">
 							<header class="contact-contents-header spacer transform t-delay">

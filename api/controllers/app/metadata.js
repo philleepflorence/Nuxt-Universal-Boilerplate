@@ -12,7 +12,7 @@
 
 import _ from 'lodash';
 import scrape from 'html-metadata';
-import S from 'string';
+import striptags from 'striptags';
 import request from 'request';
 import UserAgent from 'user-agents';
 
@@ -52,7 +52,7 @@ module.exports = {
 						
 			_.each(metadata, function (value)
 			{
-				value = value ? S(value).stripTags().s : value
+				value = value ? striptags(value) : value
 			});
 			
 			const duration = ( Date.now() - currtime );

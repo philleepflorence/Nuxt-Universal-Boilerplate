@@ -13,7 +13,6 @@
 import _ from 'lodash';
 import bytes from 'bytes';
 import moment from 'moment';
-import S from 'string';
 
 module.exports = {
 	method: 'POST',
@@ -137,7 +136,7 @@ module.exports = {
 				{
 					previews.push({
 						value: value,
-						label: S(index).humanize().titleCase().s
+						label: _.startCase(index)
 					});
 				}				
 			});
@@ -161,7 +160,7 @@ module.exports = {
 					{
 						previews.push({
 							value: _.get(tag, '0.name'),
-							label: S(index).humanize().titleCase().s
+							label: _.startCase(index)
 						});
 					}
 				}							

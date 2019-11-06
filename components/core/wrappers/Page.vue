@@ -1,5 +1,5 @@
 <template>
-	<div v-bind:class="`page-${ page.slug } vh-100 page-wrapper`" role="wrapper" v-bind:key="keys.element">
+	<div v-bind:class="`page-${ page.slug } vh-100 vh-fixed page-wrapper`" role="wrapper" v-bind:key="keys.element">
 		<ImageLoader 
 			v-bind:src="page.image.name" 
 			size="cdn" 
@@ -8,7 +8,7 @@
 			container="position-fixed position-full page-image-overlay"
 			v-if="background">
 		</ImageLoader>
-		<div class="page-container vh-100 position-relative">
+		<div class="page-container vh-100 vh-fixed position-relative">
 			<slot></slot>
 		</div>
 	</div>
@@ -127,6 +127,8 @@
 			
 			this.$reload = this.$store.subscribe((mutation, state) => {
 				if (Array.isArray(mutation.payload) && mutation.payload[0] === 'app:page:reload') {
+					if (window.DEBUG) console.log("debug - app.components.core.wrappers.Page.subscribe - app:page:reload");
+					
 					this.keys.element = Page.utils.rand();
 				}												
 			});
@@ -137,6 +139,8 @@
 			if (!this.rendered) this.render();	
 		},
 		beforeDestroy () {
+			if (window.DEBUG) console.log("debug - app.components.core.wrappers.Page.beforeDestroy");
+			
 			if (this.$reload) this.$reload();
 		}
 	}

@@ -1,6 +1,6 @@
 <template>
 	<div id="error" class="v-100 bg-dark text-white" v-if="error">
-		<div class="d-flex vh-100 align-items-center">
+		<div class="d-flex vh-100 vh-fixed align-items-center">
 			<section class="mx-auto max-w-640px spacer text-center animated fadeInUpSmall">
 				<header class="py-4">
 					<span class="bg-white d-inline-flex w-60px h-60px justify-content-center align-items-center text-primary rounded-circle" v-html="template.icon.icon"></span>

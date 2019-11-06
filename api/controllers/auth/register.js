@@ -11,7 +11,6 @@
  */
 
 import _ from 'lodash';
-import S from 'string';
 
 module.exports = {
 	method: 'POST',
@@ -75,7 +74,7 @@ module.exports = {
 	    {
 		    previews.push({
 				value: value,
-				label: S(label).humanize().titleCase().s
+				label: _.startCase(label)
 			});
 	    }); 	
         
