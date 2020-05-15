@@ -32,7 +32,7 @@ module.exports = {
 		if (admin && !form) form = test.body.form;
 		if (admin && !user.id) user = test.body.form;		
 		
-		const responses = _.get(__app.data, 'labels.app.form.auth', {});
+		const responses = _.get(__app.data, 'responses.user.settings');
 		const redirect = req.session.redirect || req.body.redirect || _.get(__app.data, "redirects.route.settings.url");
 	
 		if (!form) 
@@ -78,7 +78,7 @@ module.exports = {
 			form.image = _.get(response, 'data.id');			
 		}
 		
-		let endpoint = __app.helpers.core.api.endpoint('auth.settings');
+		let endpoint = __app.helpers.core.api.endpoint('user.settings');
 	
 		const validations = _.get(__app.config.form.validations, 'settings');		
 		const validate = __app.helpers.core.validator(form, validations, req);
@@ -101,12 +101,12 @@ module.exports = {
 			result: 'body'
 		}, req);
 		
-		if (!response.user || response.error) return res.status(400).json({
+		if (!response.data || response.error) return res.status(400).json({
 			error: _.get(responses, 'settings-error.value'),
-			response: response.error
+			response: response.message
 		});	
 		
-		user = await __app.helpers.core.login.user(response.user.id, req, res);    
+		user = await __app.helpers.core.login.user(response.data.id, req, res);    
         
         return res.json({
             message: _.get(responses, 'settings-success.value'),

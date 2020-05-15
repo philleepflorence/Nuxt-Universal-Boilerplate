@@ -10,8 +10,14 @@
  *
  */
 
-import _ from 'lodash';
-import ip from 'ip';
+import {
+	forEach,
+	get,
+	size,
+	template as _template, 
+	templateSettings
+} from 'lodash';
+
 import uuid from 'uuid-by-string';
 
 module.exports = {
@@ -22,7 +28,7 @@ module.exports = {
 	async run (req, res) {
 		
 		__app.debugger.debug('api.controllers.form.submit');
-		
+				
 		const admin = req.query.debug === 'test' && req.query.token === process.env.APP_TOKEN;
 		
 		let form = req.body.form;
@@ -30,62 +36,86 @@ module.exports = {
 		let referer = req.headers.referrer || req.headers.referer;
 		
 		if (admin && !form) form = test.body.form;
+		
+		const formname = form.form;
 				
-		if (!_.size(form))	
+		let notifications = req.body.notifications || form.notification || formname;
+			notifications = get(__app.data, `notifications.${ notifications }.email`);
+			
+		let responses = req.body.responses || form.responses || formname;		
+			responses = get(__app.data, `responses.form.${ responses }`);
+			responses = responses || get(__app.data, `responses.form.responses`);
+		
+		if (!size(form))	
 		{
 			return res.status(400).json({
 				error: true,
-				message: _.get(responses, 'error.value'),
-				response: "Form object is required!"
+				message: get(responses, 'process-error-empty.value')
 			});
 		}
 		
-		const formname = form.form;
+		if (!form.notification && notifications) form.notification = notifications;
 		
-		let template = req.body.template || formname;		
-			template = _.get(__app.data, `templates.${ template }`);
+		let template = req.body.template || form.template || get(form, 'notification.template') || formname;		
+			template = get(__app.data, `templates.${ template }`);
 		
-		let inputs = _.get(__app.config.form, `inputs.${ formname }`);		
-		let methods = _.get(__app.config.form, `methods.${ formname }`);
+		let inputs = get(__app.config.form, `inputs.${ formname }`);		
+		let methods = get(__app.config.form, `methods.${ formname }`);
 		
 		if (inputs) form = Object.assign(form, inputs);
 		
 		if (methods) form = methods(form, template);
-				
-		let notifications = _.get(__app.data, `notifications.${ formname }`);		
-		let responses = _.get(__app.data, `labels.app.form.${ formname }`);
 		const redirect = req.body.redirect;
-		let previews = [];
 		
 		/*
 			Validate form data
 		*/
 		
-		const validations = _.get(__app.config.form.validations, formname);		
+		const validations = get(__app.config.form.validations, formname);		
 		const validate = __app.helpers.core.validator(form, validations);
+		
+		__app.debugger.debug('api.controllers.form.submit - validate');
 		
 		if (validate.error) 
 		{
 			return res.json({
 				error: true,
-				message: _.get(responses, 'error-invalid.value'),
+				message: get(responses, 'error-invalid.value'),
 				list: validate.error
 			});
 		}
 		
-		form.ip_address = req.ip || ip.address();
+		form.ip_address = req.ip_address;
 		form.uuid = form.uuid || uuid(Date.now() + JSON.stringify(form));
 		form.url = form.url || referer;
 		
 		let endpoint = __app.helpers.core.api.endpoint('form.submit');
 	    
-	    _.forEach(form, function (value, label)
-	    {
-		    previews.push({
-				value: value,
-				label: _.startCase(label)
+	    /*
+		    Create preview using the form inputs
+	    */
+	    
+	    __app.debugger.debug('api.controllers.form.submit - previews');
+	    
+		let previews = [];
+			inputs = get(__app.data, `forms.${ formname }.inputs`);
+		
+		if (inputs) {
+			forEach(inputs, (input) => {
+				let property = input.property || input.slug;
+				let value = get(form, property);
+				
+				if (input.preview && value) {
+					let compiled = _template(input.preview, { interpolate: /{{([\s\S]+?)}}/g });
+						value = compiled(form);
+					
+					previews.push({
+						value: value,
+						label: input.value
+					});
+				}
 			});
-	    });
+		}
 		
 		if (req.query.debug === 'form') return res.json({
 			"endpoint": endpoint,
@@ -98,19 +128,22 @@ module.exports = {
 			method: 'post',
 			url: endpoint,
 			send: {
-				form: form
+				form: form,
+				previews: previews
 			},
 			result: 'body'
 		}, req);
 		
 		if (!response || response.error) return res.status(502).json({
-            error: _.get(responses, 'error.value'),
-            response: response ? response.error : response
-        });	
+            error: get(responses, 'error.value'),
+            response: response ? response.message : response
+        });
         
         if (notifications) 
         {
-	        endpoint = __app.helpers.core.api.endpoint('notifications');
+	        endpoint = __app.helpers.core.api.endpoint('notifications');	
+        
+			__app.debugger.debug(`api.controllers.form.submit - notifications: ${ endpoint }`);
 	        
 	        __app.helpers.core.api.connect({
 				method: 'post',
@@ -118,7 +151,7 @@ module.exports = {
 				send: {
 					form: {
 				        params: {
-					        notifications: _.get(notifications, 'id')
+					        notifications: get(notifications, 'id')
 				        },
 				        user: form,
 				        editor: req.me,
@@ -132,7 +165,7 @@ module.exports = {
         }
         
         return res.status(201).json({
-            message: _.get(responses, 'success.value'),
+            message: get(responses, 'success.value'),
             success: true,
             navigate: redirect,
             response: response

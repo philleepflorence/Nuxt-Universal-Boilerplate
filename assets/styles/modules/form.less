@@ -18,6 +18,10 @@ html
 				position: relative;
 				padding-bottom: 1.8rem;
 				margin-bottom: 0;
+					
+				:disabled {
+					color: fade(@colorsecondary, 80) !important;
+				}
 				
 				label
 				{
@@ -88,7 +92,15 @@ html
 					}
 				}
 				
-				.form-control
+				.form-hint,
+				.form-icon,
+				[readonly] {
+					color: fade(@colorsecondary, 60) !important;
+				}
+				
+				.form-control,
+				.custom-label,
+				.custom-select
 				{
 					background: white;
 					border-width: 2px;
@@ -103,6 +115,10 @@ html
 					.placeholder({
 						color: fade(@colorsecondary, 80) !important;
 					});
+					
+					&:disabled {
+						color: fade(@colorsecondary, 80) !important;
+					}
 					
 					&:focus, &.focus
 					{
@@ -234,7 +250,7 @@ html
 			{
 				.form-group
 				{
-					padding-bottom: 0.6rem;
+					padding-bottom: 1rem;
 					
 					.form-text
 					{
@@ -256,7 +272,7 @@ html
 			{
 				.form-group
 				{
-					padding-bottom: 0.875rem;
+					padding-bottom: 1.25rem;
 					
 					.form-text
 					{

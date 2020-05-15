@@ -5,20 +5,20 @@
 				class="navigation-controls-button position-relative plain h-50px w-50px bg-primary text-white navigation-controls-open" 
 				v-on:click="controls('open')">
 				<span v-html="icons.menu.open.icon.icon"></span>
-				<RippleClick></RippleClick>
+				<app-component-ui-ripple-click></app-component-ui-ripple-click>
 			</button>
 			<button 
 				class="navigation-controls-button position-relative plain h-50px w-50px bg-primary text-white navigation-controls-close position-absolute position-top position-left" 
 				v-on:click="controls('close')">
 				<span v-html="icons.menu.close.icon.icon"></span>
-				<RippleClick></RippleClick>
+				<app-component-ui-ripple-click></app-component-ui-ripple-click>
 			</button>
 			<button 
 				class="navigation-controls-button position-relative plain h-50px w-50px bg-primary text-white animated fadeIn"
 				v-show="options.logo">
 				<span class="filter-white"><img v-bind:src="configuration.application.favicon" class="icon-logo"></span>
 				<a class="position-absolute position-full" href="/">
-					<RippleClick></RippleClick>
+					<app-component-ui-ripple-click></app-component-ui-ripple-click>
 				</a>
 			</button>
 			<button 
@@ -26,7 +26,7 @@
 				v-on:click="navigate(-1)" 
 				v-show="overlayopen || goback">
 				<span v-html="icons.history.back.icon.icon"></span>
-				<RippleClick></RippleClick>
+				<app-component-ui-ripple-click></app-component-ui-ripple-click>
 			</button>
 		</nav>
 		<nav class="navigation-controls secondary transition position-fixed position-right mt-2 h-50px w-100 pointer-events-none d-flex justify-content-end">
@@ -37,18 +37,19 @@
 				v-bind:key="button.url"
 				v-on:click="onOverlay">
 				<span v-html="button.icon.icon"></span>
-				<RippleClick></RippleClick>
+				<app-component-ui-ripple-click></app-component-ui-ripple-click>
 			</button>
 			<button 
 				class="navigation-controls-button position-relative navigation-controls-fullscreen plain h-50px w-50px bg-primary bg-secondary-hover bg-secondary-active text-white animated fadeInRightSmall a-delay" 
 				v-on:click="onfullscreen"
 				v-if="fullscreen">
 				<span v-html="icons.toggle.fullscreen.icon.icon"></span>
-				<RippleClick></RippleClick>
+				<app-component-ui-ripple-click></app-component-ui-ripple-click>
 			</button>
 		</nav>
+		
 		<nav id="navigation-container" class="navigation-container position-fixed position-full bg-white transform">
-			<CustomScroll name="navigation">
+			<app-component-ui-custom-scroll name="navigation">
 				<div class="row no-gutters vh-100 vh-fixed navigation-row">
 					
 					<div class="col-lg-4 col-md-5 vh-100 vh-fixed navigation-column">
@@ -66,7 +67,7 @@
 									<span class="text-primary">{{ index }}</span>
 								</h4>
 								<nav class="navigation-group">
-									<NavLink
+									<app-component-ui-nav-link
 										v-for="(nav, key) in section"
 										v-bind:nav="nav" 
 										v-bind:key="nav.slug" 
@@ -79,7 +80,7 @@
 											v-bind:data-index="`${index}.${key}`">
 											{{ nav.title }}
 										</span>
-									</NavLink>
+									</app-component-ui-nav-link>
 								</nav>
 							</section>
 						</div>
@@ -102,37 +103,44 @@
 						<div class="d-flex align-items-end flex-column vh-100 vh-fixed position-relative">
 							<footer class="navigation-footer mt-auto w-100 text-secondary bg-white">
 								<div class="p small spacer m-0" v-html="format(configuration.application.tagline)"></div>
-								<div class="p small spacer border-top m-0" v-html="format(configuration.application.disclaimer.contents)" v-if="configuration.application.disclaimer.contents"></div>
+								<div class="p small spacer border-top m-0 empty" v-html="format(disclaimer.contents)" v-if="disclaimer"></div>
 								<p class="p spacer border-top m-0 text-primary"><small class="font-weight-book" v-html="`${ date() } &mdash; ${ format(configuration.application.name) } &mdash; v${ configuration.application.app.version }`"></small></p>
 							</footer>
 						</div>
 					</div>
 				</div>
-			</CustomScroll>
+			</app-component-ui-custom-scroll>
 		</nav>
+		
 	</div>
 </template>
 
-<script>
+<script>	
+	import { forEach, get } from 'lodash';
 	import moment from 'moment';
-	import CustomScroll from "~/components/core/ui/CustomScroll.vue";	
-	import NavLink from "~/components/core/ui/NavLink.vue";
+	
+	import ComponentUICustomScroll from "~/components/core/ui/CustomScroll.vue";	
+	import ComponentUINavLink from "~/components/core/ui/NavLink.vue";
+	import ComponentUIRippleClick from "~/components/core/ui/RippleClick.vue";
+	
 	import Page from "~/helpers/core/page.js";	
-	import RippleClick from "~/components/core/ui/RippleClick.vue";
 	
 	export default {
 		name: "Navigation",
 		components: {
-			CustomScroll,
-			NavLink,
-			RippleClick
+			'app-component-ui-custom-scroll': ComponentUICustomScroll,
+			'app-component-ui-nav-link': ComponentUINavLink,
+			'app-component-ui-ripple-click': ComponentUIRippleClick
 		},
 		computed: {
 			buttons () {
-				return this.$store.state.api.labels.app.button.options;
+				return this.$store.state.api.labels.button.options;
 			},
 			configuration () {
 				return this.$store.state.api.config;
+			},
+			disclaimer () {
+				return this.configuration.application.disclaimer;
 			},
 			domain () {
 				return process.env.SERVER_DOMAIN || window.location.origin;
@@ -158,6 +166,7 @@
 		},
 		data () {
 			return {
+				activeNav: null,
 				components: {
 					hash: '/#!/:overlay'
 				},
@@ -253,15 +262,19 @@
 				if (nav) {
 					this.options.nav = {
 						id: nav.id,
-						color: nav.color,
+						color: nav.page.color || nav.page.color,
 						description: this.format(nav.description),
-						icon: nav.icon
+						icon: nav.page.icon || nav.icon
 					};
 				}
 				else this.options.nav.id = null;
 			},
 			format (string) {
-				return Page.utils.format (string, this.$store.state.api.config.components.display);
+				let format = get(this.configuration, 'components.display');
+				
+				if (format) return Page.utils.format(string, format);
+				
+				return string;
 			},
 			initFullscreen () {
 				if (this.$route.query.source === 'pwa') return false;
@@ -339,7 +352,7 @@
 					this.goback = false;
 					this.routed = false;
 					
-					if (process.env.LOGO_HIDE) {
+					if (process.env.LOGO_HIDE === 'true') {
 						this.options.logo = true;
 					}
 				}
@@ -347,7 +360,7 @@
 					this.goback = true;
 					this.routed = true;
 					
-					if (process.env.LOGO_HIDE) {
+					if (process.env.LOGO_HIDE === 'true') {
 						this.options.logo = false;
 					}
 				}
@@ -355,40 +368,43 @@
 				this.routedActive();
 			},
 			routedActive () {
+				if (window.DEBUG) console.log("debug - app.components.core.layouts.Navigation.routedActive");
+				
 				let elements = document.querySelectorAll('.navigation-item');
 				let currpath = this.path;
 				let active;
 				
-				_.forEach(elements, (node) => {
+				forEach(elements, (node) => {
 					if (node.getAttribute('href') === currpath) active = node;
-	
+					
 					node.classList.remove('active');
 				});
 				
 				if (!active) return false;
 				
+				this.activeNav = active;
+				
 				active.classList.add('active');
 				
 				let index = active.getAttribute('data-index');
-				let nav = _.get(this.navigation, index);
+				let nav = get(this.navigation, index);
 								
 				if (nav) setTimeout(() => {
 					this.details(nav);
 					this.options.active = nav;
 				}, 100);
 			},
-			style (nav, prop) {
-				prop = prop || 'color';
-				
-				let style = {};			
-				style[prop] = `#${ nav.color }`;
+			style (nav, prop = 'color') {				
+				let style = {};	
+						
+				style[prop] = `${ nav.color }`;
 							
 				return style;
 			},
 			onMouseover (e) {
 				let element = e.currentTarget;
 				let index = element.getAttribute('data-index');
-				let nav = _.get(this.navigation, index);
+				let nav = get(this.navigation, index);
 				
 				this.details(nav);			
 			},
@@ -398,7 +414,7 @@
 		},
 		mounted () {
 			if (window.DEBUG) console.log("debug - app.components.core.layouts.Navigation.mounted");
-									
+												
 			this.options.nav.id = 0;	
 			
 			if (this.path !== '/' && this.$route.hash) this.goback = true;
@@ -410,12 +426,12 @@
 			this.$store.commit("app/ROUTES", this.path);
 			
 			this.$store.subscribe((mutation, state) => {
-				if (mutation.type === 'app/CONTENT' && !this.options.nav.id) {
+				if (mutation.type === 'app/CONTENT') {
 					this.options.nav = {
 						id: mutation.payload.id,
-						color: mutation.payload.color,
+						color: get(mutation.payload, 'page.color', mutation.payload.color),
 						description: mutation.payload.headline,
-						icon: mutation.payload.icon
+						icon: get(mutation.payload, 'page.icon', mutation.payload.icon)
 					};
 					this.options.content = this.options.nav;					
 				}												
@@ -450,6 +466,9 @@
 					this.onfullscreen();					
 				}												
 			});
+		},
+		updated () {
+			if (window.DEBUG) console.log("debug - app.components.core.layouts.Navigation.updated");
 		}
 	}	
 </script>
@@ -513,7 +532,7 @@
 												pointer-events: none;
 											}
 												
-											&:hover, &:active, &.active {
+											&.active {
 												.navigation-text {
 													&:before {
 														background: @colorsecondary;
@@ -599,13 +618,7 @@
     }
 	
     @media (max-width: @breakpoint-md)
-    {
-	    .navigation-header.fancy {
-		    span {
-			    font-size: 1.5rem !important;
-		    }
-	    }
-	    
+    {	      
 	    .navigation-group {
 		    .navigation-item {
 			    margin-bottom: 0.75rem !important;

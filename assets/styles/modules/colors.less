@@ -177,8 +177,8 @@
 	.bg-@{selector}-gradient
 	{
 		background: @color;
-	    background: -webkit-linear-gradient(to left, @color ,@gradientcolor);
-	    background: linear-gradient(to left, @color ,@gradientcolor);
+	    background: -webkit-linear-gradient(170deg, @color, @gradientcolor);
+	    background: linear-gradient(170deg, @color, @gradientcolor);
 	}
 	
 	.border-@{selector}
@@ -236,6 +236,71 @@
 			&, * {
 				color: @color !important;
 			}
+		}
+	}
+	
+	[data-color-mode="@{selector}"]
+	{
+		.bg-primary,
+		.bg-primary-hover:hover,
+		.bg-primary-hover:active,
+		.bg-primary-active.active,
+		.dropdown-icon .dropdown-menu,
+		.tooltip[role="tooltip"] .tooltip-inner {
+			background-color: @color !important;
+		}
+		
+		blockquote,
+		.border-primary,
+		.border-primary-hover:hover,
+		.border-primary-hover:active,
+		.border-primary-active.active {
+			border-color: @color !important;
+		}
+		
+		.custom-control-input:checked ~ .custom-control-label:before {
+			background-color: @color !important;
+			border-color: @color !important;
+		}
+		
+		.btn-primary {
+			background-color: @color !important;
+			border-color: @color !important;
+		
+			&:hover, 
+			&:focus, 
+			&.active,
+			&.focus
+			{
+				box-shadow: none;				
+				background-color: darken(@color, @darken) !important;
+				border-color: darken(@color, @darken) !important;
+			}
+			
+			&.disabled, 
+			&:disabled
+			{
+				background-color: lighten(@color, @lighten) !important;
+				border-color: lighten(@color, @lighten) !important;
+			}
+		}
+		
+		.text-primary,
+		.text-primary-hover:hover,
+		.text-primary-hover:active,
+		.text-primary-active.active {
+			color: @color !important;
+			
+			* {
+				color: @color !important;
+			}
+		}
+	
+		.bg-primary-gradient
+		{
+			background: @color;
+		    background: -webkit-linear-gradient(170deg, fade(black, 90), @gradientcolor, @color);
+		    background: linear-gradient(170deg, fade(black, 90), @gradientcolor, @color);
 		}
 	}
 	

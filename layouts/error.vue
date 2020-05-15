@@ -13,12 +13,14 @@
 </template>
 
 <script>
-	import _ from 'lodash';
+	import { get } from 'lodash';
 	import Page from "~/helpers/core/page.js";
 	
 	export default {
 		name: "Error",
-		props: ['error'],
+		props: [
+			'error'
+		],
 		data () {
 			return {
 				content: {}
@@ -30,7 +32,7 @@
 				
 				let index = typeof this.error === "number" ? this.error : this.error.statusCode;
 				
-				let template = _.get(templates, index || 500);
+				let template = get(templates, index || 500);
 				
 				return template;
 			}

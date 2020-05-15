@@ -30,7 +30,7 @@ module.exports = {
 		
 		if (admin && !form) form = test.body.form;	
 		
-		const responses = _.get(__app.data, 'labels.app.form.auth');
+		const responses = _.get(__app.data, 'responses.auth.register');
 		const redirect = req.session.redirect || req.body.redirect || _.get(__app.data, "redirects.route.register.url");
 		const notifications = _.get(__app.data, "notifications.register");
 		const previews = [];
@@ -61,12 +61,12 @@ module.exports = {
 			result: 'body'
 		}, req);
 		
-		if (!response.user || response.error) return res.status(400).json({
+		if (!response.data || response.error) return res.status(400).json({
 			error: _.get(responses, 'register-error.value'),
-			message: response.error
+			response: response.message
 		});
 		
-		const user = await __app.helpers.core.user(response.user, "session", req); 
+		const user = await __app.helpers.core.user(response.data, "session", req); 
 		
 		req.session.registered = user;  
     

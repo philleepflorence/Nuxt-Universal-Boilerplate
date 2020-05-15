@@ -26,7 +26,7 @@ module.exports = {
 		const debug = req.query.debug;
 		let form = req.body.form;
 		const test = await this.test(req, res);
-		const responses = _.get(__app.data, 'labels.app.form.auth');
+		const responses = _.get(__app.data, 'responses.auth.credentials');
 		
 		if (admin && !form) form = test.body.form;
 		
@@ -58,13 +58,25 @@ module.exports = {
 			result: 'body'
 		}, req);
 		
-		if (response.error) return res.status(400).json({ error: _.get(responses, 'credentials-error.value'), response: response.error });
+		let user = _.get(response, 'data.0');
+		
+		if (response.error || !user) return res.status(400).json({ error: _.get(responses, 'credentials-error.value'), response: response.message });
 		
 		if (debug === 'test') return res.json(response);
 		
+		user = await __app.helpers.core.user(user, 'account', req);
+		
+		let link = _.get(response, 'meta.link');
+		
+		let message = form.email_access === true ? _.get(responses, 'credentials-success-reset.value') : _.get(responses, 'credentials-success.value');
+			redirect = link && form.email_access === true ? link.replace(process.env.SERVER_DOMAIN, '') : redirect;
+			
+		if (!redirect) redirect = _.get(__app.data, 'pages.login.path');
+		
 		return res.json({
-			success: _.get(responses, 'credentials-success.value'),
-			navigate: redirect
+			message: message,
+			navigate: redirect,
+			user: user.id
 		});
 	},
 	/*

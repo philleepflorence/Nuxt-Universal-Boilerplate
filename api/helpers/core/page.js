@@ -7,7 +7,7 @@
  *
  */
  
-import _ from 'lodash';
+import { filter, forEach, get, intersection, size } from 'lodash';
 
 module.exports = {
 	
@@ -25,21 +25,21 @@ module.exports = {
 		let Paths = String(req.path).split('/').filter(Boolean);
 		let max = 0;
 		
-		page = _.filter(pages, function (row)
+		page = filter(pages, function (row)
 		{
 			return row.path === req.path;
 		});
 		
-		if (_.size(page) === 1) return page[0];
+		if (size(page) === 1) return page[0];
 		
-		_.forEach(pages, function(row)
+		forEach(pages, function(row)
 		{ 
 			let num = (row.path.match(/:/g) || []).length;			
 			let paths = String(row.path).split('/').filter(Boolean);
-			let intersection = _.intersection(Paths, paths);
+			let currintersection = intersection(Paths, paths);
 			let diff = paths.length - num;
 			
-			if (num && Paths.length === paths.length && Paths[0] == paths[0] && intersection.length === diff)
+			if (num && Paths.length === paths.length && Paths[0] == paths[0] && currintersection.length === diff)
 			{
 				max = max < diff ? diff : max;
 							
@@ -48,12 +48,12 @@ module.exports = {
 			else row.intersection;							
 		});
 		
-		let filtered = _.filter(pages, function(row)
+		let filtered = filter(pages, function(row)
 		{ 
 			return row.intersection === max;
 		});
 		
-		page = _.get(filtered, 0, {});	
+		page = get(filtered, 0, {});	
 			
 		return page;		
 	},
@@ -68,8 +68,8 @@ module.exports = {
 	forbidden: function (page, req)
 	{
 		let path = req.path;
-		let userprivilege = _.get(req.me, 'privilege', 0);		
-		let privilege = _.get(page, 'privilege') || 0;
+		let userprivilege = Number(get(req.me, 'privilege', 0));		
+		let privilege = Number(get(page, 'privilege', 0));
 		
 		__app.debugger.info('api.helpers.core.page.forbidden - Page Privilege: %s - User Privilege: %s - Current Path: %s', privilege, userprivilege, path);
 		

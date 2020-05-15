@@ -1,7 +1,7 @@
 <template>
 	<div class="page-ticker-template overflow-hidden cursor-hand" v-bind:key="keys.element">
 		<header class="page-ticker-header px-4 animated animated fadeIn a-delay" v-if="headline">
-			<p class="p page-ticker-headline text-muted font-weight-book m-0" v-html="format(headline.plaintext)"></p>
+			<p class="p page-ticker-headline text-muted font-weight-book m-0" v-html="format(headline.value)"></p>
 		</header>
 		<div class="page-ticker-container text-primary font-accent text-uppercase animated fadeIn a-delay" v-on:click="onDetails">
 			<div class="page-ticker-row d-inline-block" v-bind:style="style" v-bind:key="`column-01`" data-column="column-01">

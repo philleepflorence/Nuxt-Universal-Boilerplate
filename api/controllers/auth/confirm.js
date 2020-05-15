@@ -23,40 +23,32 @@ module.exports = {
 		
 		const debug = req.query.debug;
 		const salt = req.params.salt || req.query.salt;
-		const responses = _.get(__app.data, 'labels.app.form.auth');
+		const responses = _.get(__app.data, 'responses.auth.confirm');
 		
 		if (!salt) return res.status(400).send(_.get(responses, 'confirm-error-token.value'));
 		
-		const redirect = req.session.redirect || req.query.redirect || _.get(__app.data, 'redirects.route.authenticated.url');
-		let endpoint = __app.helpers.core.api.endpoint('items', { collection: 'users.rows' });
-						
+		const redirect = req.session.redirect || req.query.redirect || _.get(__app.data, 'redirects.route.confirmed.url');
+		
+		let endpoint = __app.helpers.core.api.endpoint('auth.confirm');
+		
 		let response = await __app.helpers.core.api.connect({
-			method: 'get',
+			method: 'post',
 			url: endpoint,
-			query: {
-	            filter: {
-		            reset_token: salt
+			send: {
+	            form: {
+		            token: salt
 	            }
 	        },
 			result: 'body'
 		}, req);
 		
-		if (!_.size(response.data)) return res.status(400).send(_.get(responses, 'confirm-error.value'));
+		let user = _.get(response, 'data', {});
 		
-		const user = __app.helpers.core.user(response.data[0], 'session', req);
+		if (!user.id) return res.status(400).send(_.get(responses, 'confirm-error.value'));
+		
+		user = __app.helpers.core.user(user, 'session', req);
 		
 		if (debug === 'user') return res.json(user);
-		
-		endpoint = __app.helpers.core.api.endpoint('item', { collection: 'users.rows', id: user.id });
-		
-		response = await __app.helpers.core.api.connect({
-			method: 'put',
-			url: endpoint,
-			send: {
-	            status: 1
-	        },
-			result: 'body'
-		}, req);
 		
 		if (debug === 'test') return res.json({ redirect: redirect });
 		

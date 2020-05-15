@@ -10,7 +10,7 @@
 						<div class="form-group pointer-events-auto">
 							<b-form-input 
 								v-model="form.address" 
-								v-bind:placeholder="labels.address.plaintext" 
+								v-bind:placeholder="labels.address.value" 
 								class="form-control" 
 								v-b-tooltip.focus v-bind:title="labels.address.hint">
 							</b-form-input>
@@ -18,18 +18,18 @@
 						<div class="form-group pointer-events-auto mb-0" v-show="options.geolocation">
 							<b-form-checkbox 
 								v-model="form.geolocation" 
-								switch>{{ labels.geolocation.plaintext }}
+								switch>{{ labels.geolocation.value }}
 							</b-form-checkbox>
 						</div>
 						<hr class="w-50 border-white opacity-50 my-4">
 						<div class="form-group pointer-events-auto">
 							<b-form-checkbox 
 								v-model="form.cookie" 
-								switch>{{ labels.cookie.plaintext }}
+								switch>{{ labels.cookie.value }}
 							</b-form-checkbox>
 						</div>
 						<div class="form-group form-footer text-center pointer-events-auto">
-							<b-button type="button" variant="primary" class="w-100 text-uppercase font-weight-book form-button font-accent" v-on:click="onSubmit">{{ labels.submit.plaintext }}</b-button>
+							<b-button type="button" variant="primary" class="w-100 text-uppercase font-weight-book form-button font-accent" v-on:click="onSubmit">{{ labels.submit.value }}</b-button>
 						</div>
 					</div>
 				</div>
@@ -43,7 +43,7 @@
 		name: "GoogleMapsGeolocation",
 		computed: {
 			labels () {
-				return this.$store.state.api.labels.app.form.maps;
+				return this.$store.state.api.labels.form.maps;
 			},
 			geolocation () {
 				return this.$store.state.app.options.geolocation;

@@ -4,16 +4,16 @@
 			<CustomScroll name="contact">
 				<a href="#" class="position-fixed position-full pointer-events-auto" v-on:click.prevent.stop="close"></a>
 				<div class="position-relative contact-wrapper d-flex align-items-center vh-100 vh-fixed pointer-events-auto">
-					<div class="contact-parent max-w-480px mx-auto py-10">
+					<div class="contact-parent max-w-600px mx-auto py-10">
 						<div class="flex-item w-100">
 							<header class="contact-contents-header spacer transform t-delay">
 								<span 
 									class="d-flex align-items-center justify-content-center bg-white text-secondary h-70px w-70px rounded-circle mx-auto" 
-									v-html="labels.app.button.options.contact.icon.icon">
+									v-html="labels.button.options.contact.icon.icon">
 								</span>
 							</header>
-							<section class="contact-contents plain-form w-100 bg-dark bg-overlay spacer transform t-delay">
-								<Contact name="contact-overlay"></Contact>
+							<section class="contact-contents plain-form w-100 bg-overlay spacer transform t-delay">
+								<ContactForm page="contact-overlay" formname="contact" container="bg-content p-4"></ContactForm>
 							</section>
 						</div>						
 					</div>
@@ -25,20 +25,18 @@
 
 <script>
 	import Page from "~/helpers/core/page.js";
-	import Form from "~/components/core/forms/Form.vue";
-	import Contact from "~/components/core/forms/Contact.vue";
+	import ContactForm from "~/components/core/forms/Contact.vue";
 	import CustomScroll from "~/components/core/ui/CustomScroll.vue";
 	import _ from "lodash";
 	
 	export default {
 		name: "ContactOverlay",
 		props: [
-		
+			
 		],
 		components: {
-			Contact,
-			CustomScroll,
-			Form
+			ContactForm,
+			CustomScroll
 		},
 		computed: {
 			configuration () {

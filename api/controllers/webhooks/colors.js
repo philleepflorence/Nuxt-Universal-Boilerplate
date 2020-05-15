@@ -29,7 +29,11 @@ module.exports = {
 		let response = await __app.helpers.core.api.connect({
 			method: 'get',
 			url: endpoint,
-			result: 'text'
+			result: 'text',
+			query: {
+				write: true,
+				mode: 'less'
+			}
 		}, req);	
 		
 		if (debug === 'test') return res.json({

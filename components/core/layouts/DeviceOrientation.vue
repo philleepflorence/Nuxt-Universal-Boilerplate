@@ -1,10 +1,11 @@
 <template>
 	<div id="device-orientation" class="position-fixed" role="app device-orientation" v-bind:key="keys.element">
-		<div class="position-fixed position-full bg-primary animated fadeIn d-flex align-items-center" v-if="landscape">
+		<div class="position-fixed position-full bg-dark animated fadeIn d-flex align-items-center" v-if="landscape">
 			<div class="device-orientation-content position-relative text-center text-white flex-grow-1">
-				<div class="p animated fadeInUpSmall a-delay max-w-768px mx-auto spacer" v-html="icon.icon.icon"></div>
+				<div class="p animated fadeInUpSmall a-delay max-w-768px mx-auto spacer" v-html="label.icon.icon"></div>
 			</div>	
 		</div>
+		<footer class="p position-fixed position-bottom w-100 p-3 text-muted text-center font-weight-book animated fadeInUpSmall a-delay" v-html="label.value" v-if="landscape"></footer>
 	</div>
 </template>
 
@@ -12,10 +13,10 @@
 	import Page from "~/helpers/core/page.js";
 	
 	export default {
-		name: "DeviceOrientation",
+		name: "DeviceOrientationComponent",
 		computed: {
-			icon () {
-				return this.$store.state.api.icons.orientation;
+			label () {
+				return this.$store.state.api.labels.content.disclaimer.orientation;
 			}
 		},
 		data () {
@@ -33,7 +34,6 @@
 				let touchscreen = (('ontouchstart' in window) || (navigator.MaxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0));
 				
 				this.landscape = touchscreen && window.innerHeight < 500 && window.innerWidth / window.innerHeight > 1.5;
-				console.log("debug - app.components.core.layouts.DeviceOrientation.render", this.landscape);
 			}
 		},
 		mounted () {
@@ -60,8 +60,8 @@
 	#device-orientation[role="app device-orientation"] {
 		.device-orientation-content {
 			.mdi {
-				font-size: 45vh;
-				line-height: 40vh;
+				font-size: 20vh;
+				line-height: 15vh;
 			}
 		}
 	}

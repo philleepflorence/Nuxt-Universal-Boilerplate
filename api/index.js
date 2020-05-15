@@ -11,11 +11,15 @@
 
 const bodyParser = require('body-parser');
 const express = require('express');
+
+const redis = require('redis');
 const session = require('express-session');
 const RedisStore = require('connect-redis')(session);
 const app = express();
 
-import _ from 'lodash';
+import { forEach, get, set } from 'lodash';
+import ip from 'request-ip';
+import IP from 'public-ip';
 
 global.__app = global.__app || {};
 
@@ -27,14 +31,21 @@ app.use(bodyParser.json({ limit: process.env.MAX_UPLOAD_SIZE }));
 	Saving in memory will cause leaks and conflicts/duplicates.
 */
 
+let redisClient = redis.createClient({
+	host: process.env.REDIS_HOST,
+	port: process.env.REDIS_PORT,
+	password: process.env.REDIS_PASSWORD,
+	db: process.env.REDIS_DB
+});
+redisClient.unref();
+redisClient.on('error', console.log);
+
+let $store = new RedisStore({ client: redisClient });
+
 app.use(session({
 	name: 'redis-session-id',
-    store: new RedisStore({
-        host: process.env.REDIS_HOST,
-        port: process.env.REDIS_PORT
-    }),
-    secret: process.env.REDIS_SECRET,
-    
+    store: $store,
+    secret: process.env.REDIS_SECRET,    
     cookie: { 
         maxAge: process.env.APP_COOKIES_EXPIRE * 1000
     },
@@ -56,6 +67,14 @@ app.use(async function (req, res, next)
 	__app.debugger.info('api.index - Middleware - Request Path: `%s` - Request Type: `%s`', req.path, req.method);
 		
 	const method = req.method.toLowerCase();
+	const ip_v4 = await IP.v4();
+	
+	if (process.env.SERVER_ENVIRONMENT === "development") {
+		req.session.ip_address = req.session.ip_address || ip_v4;
+		
+		req.ip_address = req.session.ip_address;
+	}
+	else req.ip_address = ip.getClientIp(req);
 	
 	let referrer = req.get('Referrer') || '';
 	let reload = req.query.reload || req.body.reload;
@@ -65,9 +84,15 @@ app.use(async function (req, res, next)
 	
 	if (!['get', 'post'].includes(method)) return res.status(405).send();
 	
-	__app.data = await __app.helpers.core.app.initialize(req, res, xhr);
+	let initialized = await __app.helpers.core.app.initialize(req, res, xhr);
 	
-	if (__app.data === false) return res.status(500).send("Initialization Data Failure - See Logs for details!");
+	if (initialized === false) return res.status(500).send("Initialization Data Failure - See Logs for details!");
+	
+	__app.data = {};
+	
+	forEach(initialized.data, (row, key) => {
+		set(__app.data, key, row.data);
+	});
 	
 	next();
 });
@@ -119,7 +144,7 @@ app.all('*', async function (req, res, next) {
 	
 	const data = __app.helpers.core.cache.$.get('app');
 	const path = req.path.replace(/^\/|\/$/g, '').replace(/\//g, '.');
-	const controller = _.get(__app.controllers, path);
+	const controller = get(__app.controllers, path);
 	const validated = typeof controller.token === "boolean" ? req.query.token === process.env.APP_TOKEN : 
 		( typeof controller.token === "string" ? req.query.token === controller.token : true );
 	

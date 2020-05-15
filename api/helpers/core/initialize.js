@@ -7,7 +7,7 @@
  *
  */
  
-import _ from 'lodash';
+import { cloneDeep, forEach, get, set } from 'lodash';
 
 module.exports = {
 	/*
@@ -32,9 +32,9 @@ module.exports = {
 			social: {}
 		};
         let keys, path;
-        let authenticated = _.get(req, 'session.user.id', false);
+        let authenticated = get(req, 'session.user.id', false);
         let override = req.query.debug === 'navigation' && req.query.token === process.env.TOKEN;
-        let privilege = Number( _.get(req, 'session.user.privilege', 0) );
+        let privilege = Number( get(req, 'session.user.privilege', 0) );
         let processed = 0;
         
         __app.debugger.info('api.helpers.core.initialize.navigation - Authenticated: %s - Privilege: %s', authenticated, privilege);
@@ -43,15 +43,17 @@ module.exports = {
             Group Navigation into sections using parent/section
         */
 
-        input.forEach(function (currow)
+        forEach(input, function (currow)
         {
-	        const row = _.cloneDeep(currow);
+	        const row = cloneDeep(currow);
 	        
             /*
                 Only add navigation if public and private parameters pass
             */
             
-            let path = _.get(row, 'url') || _.get(row, 'path');
+            let path = get(row, 'url') || get(row, 'path');
+            
+            if (row.url) row.url = row.url.replace(':domain', process.env.SERVER_DOMAIN);
             
             path = path.replace(':domain', process.env.SERVER_DOMAIN);
             
@@ -60,18 +62,14 @@ module.exports = {
             let pagePrivilege = Number( row.privilege || 0);
             
             if (!override && ( ( (authenticated && !row.private) || (!authenticated && !row.public) ) || !path || pagePrivilege > privilege )) return;
-                                                	
-            if (row.pageicon && !row.icon) _.set(row, 'icon', row.pageicon);
-            
-            if (row.icon && row.pageicon) row.pageicon = null;
-            
-            if (row.pageColor && !row.color) row.color = row.pageColor;
-            
-            if (row.pageColor && row.color) row.pageColor = null;
-            
+                                                
             if (!row.description) row.description = row.title;
             
-            row.headline = row.headline || _.get(row, 'page.headline');
+            row.color = row.color || get(row, 'page.color');
+            
+            row.headline = row.headline || get(row, 'page.headline');
+            
+            row.icon = row.icon || get(row, 'page.icon');
             
             if (req.path === path) row.active = true;
             else row.active = false;
@@ -86,14 +84,14 @@ module.exports = {
             {
                 keys = row.parent && row.dropdown ? ':parent.rows.:name'.replace(':parent', row.parent).replace(':name', row.name) : row.name;
 
-                if (!row.parent) _.set(sections.header, keys, row);
+                if (!row.parent) set(sections.header, keys, row);
             }
 
             /*
                 Footer Navigation grouped only by Section or Self
             */
 
-            if (row.footer) _.set(sections.footer, row.name, row);
+            if (row.footer) set(sections.footer, row.name, row);
 
             /*
                 Main Navigation grouped only by Section or Self
@@ -103,13 +101,13 @@ module.exports = {
             {
                 keys = ':section.:name'.replace(':section', row.section || 0).replace(':name', row);
 
-                _.set(sections.navigation, ':section.:name'.replace(':section', row.section || row.slug).replace(':name', row.slug), row);
+                set(sections.navigation, ':section.:name'.replace(':section', row.section || row.slug).replace(':name', row.slug), row);
                 
                 if (row.parent) 
                 {
 	                keys = ':section.:parent.rows.:name'.replace(':section', row.section || row.slug).replace(':parent', row.parent).replace(':name', row);
 	                
-	                _.set(sections.navigation, keys, row.slug);
+	                set(sections.navigation, keys, row.slug);
                 }
             }
 
@@ -117,21 +115,21 @@ module.exports = {
                 Authentication Navigation
             */
 
-            if (row.authentication) _.set(sections.authentication, row.name, row);
+            if (row.authentication) set(sections.authentication, row.name, row);
 
             /*
                 User Accounts Navigation
             */
 
-            if (row.accounts) _.set(sections.accounts, row.name, row);
+            if (row.accounts) set(sections.accounts, row.name, row);
 
             /*
                 Social Navigation
             */
 
-            if (row.social || row.section === 'social') _.set(sections.social, row.name, row);
+            if (row.social || row.section === 'social') set(sections.social, row.name, row);
         });
         
         return sections;
-	}	
+	}
 }

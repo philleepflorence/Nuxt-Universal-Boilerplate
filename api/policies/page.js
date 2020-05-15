@@ -24,7 +24,7 @@ export default async function (req, res, next)
 	
 	let page = __app.helpers.core.page.get(pages, req);
 	
-	if (!page || !page.name) return res.status(500).send("Initialization Error - Unable to connect to API or Locate Page Configuration!");
+	if (!page || !page.name) return res.status(500).send("Initialization Error - Unable to connect to Locate Page Configuration!");
 	
 	__app.debugger.warn('api.policies.page - Page: %s', page.name);
 	
@@ -41,7 +41,7 @@ export default async function (req, res, next)
 	let forbidden = __app.helpers.core.page.forbidden(page, req);
 	let redirectpath = _.get(redirects, 'route.forbidden.url', '/');
 	
-	__app.debugger.warn('api.policies.page - Forbidden: %s', forbidden);
+	__app.debugger.warn('api.policies.page - Forbidden: %s - Redirect Path: %s', forbidden, redirectpath);
 	
 	if (forbidden === 'login')
 	{

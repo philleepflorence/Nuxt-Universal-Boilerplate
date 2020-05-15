@@ -1,37 +1,18 @@
 <template>
 	<div class="page-container" v-bind:key="keys.page">
 		<AuthWrapper>
-			<div class="max-w-360px mx-auto my-4 plain-form">
-				<Form v-bind:id="form.id" v-bind:path="form.path" autocomplete="off">
-					<template v-slot:inputs>
-						<div class="row">
-							<div class="col-span col-md-12" v-for="input in inputs" v-bind:key="input.slug">
-								<div class="form-group">
-									<b-form-group 
-										v-bind:id="`credentials-form-group-${ input.slug }`" 
-										v-bind:label="input.plaintext" 
-										v-bind:label-for="`form-${ input.slug }`" class="form-no-label">
-										<b-form-input 
-											class="input"
-											v-bind:id="`credentials-form-${ input.slug }`" 
-											v-bind:type="input.input_type" 
-											v-bind:placeholder="input.plaintext"
-											v-bind:v-model="`form.${ input.slug }`" 
-											v-bind:name="`form.${ input.slug }`" 
-											v-b-tooltip.focus v-bind:title="input.hint"
-											v-bind="attributes(input.attributes)">
-										</b-form-input>
-									</b-form-group>
-								</div>
-							</div>
-						</div>
-					</template>
-					<template v-slot:footer>
-						<div class="form-group form-footer text-center">
-							<b-button type="submit" variant="primary" class="w-100 text-uppercase font-weight-book form-button">{{ labels.credentials.form.label.submit.plaintext }}</b-button>
-						</div>
-					</template>
-				</Form>
+			<div class="max-w-360px mx-auto my-4 plain-form form-no-hint form-dark">
+				<Form 
+					v-bind:button="inputs.submit"
+					v-bind:formname="form.slug" 
+					v-bind:formtemplate="form.template"
+					v-bind:formnotification="notification"
+					v-bind:id="form.slug" 
+					v-bind:inputs="inputs.inputs" 
+					v-bind:path="endpoint" 
+					v-bind:captcha="true"
+					autocomplete="off">			
+				</Form>				
 			</div>
 		</AuthWrapper>
 	</div>
@@ -44,25 +25,37 @@
 	import Page from "~/helpers/core/page.js";
 	
 	export default {
-		name: "Credentials",
+		name: "PageCredentials",
 		components: {
-			Form, AuthWrapper
+			AuthWrapper,
+			Form
 		},
 		computed: {
 			configuration () {
 				return this.$store.state.api.config;
 			},
+			endpoint () {
+				return this.$store.state.app.endpoints.auth.credentials;
+			},
+			form () {
+				return this.$store.state.api.forms.credentials;
+			},
 			inputs () {
-				let inputs = this.$store.state.api.labels.credentials.form.label;
-				
-				inputs = _.filter(inputs, function (row) {
-					return row.form_type === 'input';
-				});
-				
-				return inputs;
+				return Page.inputs(this.form.inputs);
 			},
 			labels () {
-				return this.$store.state.api.labels;
+				return this.page.labels;
+			},
+			notification () {
+				if (!this.form.notifications) return null;
+				
+				let notification;
+				
+				_.forEach(this.form.notifications, (row) => {
+					if (row.status === "published") notification = row.slug;
+				});	
+				
+				return notification;
 			},
 			page () {
 				return Page.get(this.pages, true, 'credentials');
@@ -76,10 +69,6 @@
 		},
 		data () {
 			return {
-				form: {
-					id: 'credentials-form',
-					path: this.$store.state.app.endpoints.auth.credentials
-				},
 				keys: {
 					page: Page.utils.rand()
 				}
@@ -92,16 +81,3 @@
 		}
 	}
 </script>
-
-<style lang="less" scoped>
-	@spacer: 5px;
-	.row {
-		margin-right: -@spacer;
-		margin-left: -@spacer;
-		
-		.col-span {
-			padding-right: @spacer;
-			padding-left: @spacer;
-		}
-	}
-</style>

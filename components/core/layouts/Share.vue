@@ -1,11 +1,15 @@
 <template>
-	<div id="share" class="options-overlay position-fixed position-full bg-dark bg-overlay off" role="app share" v-bind:key="keys.element">
-		<PreventScroll classname="position-fixed position-full">
-			<a href="#" class="position-absolute position-full" v-on:click.prevent.stop="close"></a>
+	<div id="share" class="options-overlay position-fixed position-full bg-overlay off" role="app share" v-bind:key="keys.element">
+		
+		<app-component-ui-prevent-scroll classname="position-fixed position-full">
+		
+			<a href="#" class="position-absolute position-full" v-on:click.prevent.stop="onClickClose"></a>
+			
 			<div class="share-container d-flex position-absolute position-full align-items-center justify-content-center pointer-events-none" v-if="buttons">
 				<section class="d-flex-item position-relative max-w-640px mx-auto">
+					
 					<header class="share-header pointer-events-auto transition t-delay" v-if="header">
-						<ImageLoader
+						<app-component-ui-image-loader
 							size="cdn"
 							format="background"
 							classname="position-absolute position-full"
@@ -17,14 +21,16 @@
 									<p class="p font-weight-book">{{ header.description }}</p>
 								</section>
 							</div>
-						</ImageLoader>					
+						</app-component-ui-image-loader>					
 					</header>
+					
 					<header class="share-contents-header spacer transition t-delay" v-else>
 						<span 
 							class="d-flex align-items-center justify-content-center bg-white text-secondary h-70px w-70px mx-auto rounded-circle" 
-							v-html="labels.app.button.options.share.icon.icon">
+							v-html="labels.button.options.share.icon.icon">
 						</span>
 					</header>
+					
 					<div class="share-row w-100 row no-gutters justify-content-center" v-if="content">
 						<a class="share-anchor col-lg-4 col-6 t-delay pointer-events-auto transition"
 							v-for="nav in buttons"
@@ -54,34 +60,36 @@
 			<footer class="share-footer position-absolute position-bottom w-100 spacer" v-if="description">
 				<p class="p lead text-center text-white">{{ description }}</p>
 			</footer>
-		</PreventScroll>
+		</app-component-ui-prevent-scroll>
+		
 	</div>
 </template>
 
 <script>
-	import Page from "~/helpers/core/page.js";
-	import PreventScroll from "~/components/core/ui/PreventScroll.vue";
-	import Handlebars from 'handlebars/dist/handlebars.min.js';
-	import ImageLoader from "~/components/core/ui/ImageLoader.vue";
-	import _ from "lodash";
+	import { cloneDeep, forEach, get } from "lodash";
 	
+	import ComponentUIPreventScroll from "~/components/core/ui/PreventScroll.vue";
+	import ComponentUIImageLoader from "~/components/core/ui/ImageLoader.vue";
+	
+	import Page from "~/helpers/core/page.js";
+		
 	export default {
-		name: "ShareOverlay",
+		name: "ShareLayoutComponent",
 		components: {
-			ImageLoader,
-			PreventScroll
+			'app-component-ui-image-loader': ComponentUIImageLoader,
+			'app-component-ui-prevent-scroll': ComponentUIPreventScroll
 		},
 		computed: {
 			clipboard () {
 				if (!document.execCommand) return null;
 				
-				return _.get(this.$store.state.api.icons, 'social.copy.clipboard');
+				return get(this.$store.state.api.icons, 'social.copy.clipboard');
 			},
 			configuration () {
 				return this.$store.state.api.config.application;
 			},
 			description () {
-				return _.get(this.labels, 'app.button.options.share.hint');
+				return get(this.labels, 'button.options.share.hint');
 			},			
 			icons () {
 				return this.$store.state.api.icons;
@@ -111,7 +119,7 @@
 			};
 		},
 		methods: {
-			close (e) {
+			onClickClose (e) {
 				this.$emit('close', 'share');
 			},
 			copy (e) {
@@ -129,6 +137,9 @@
 			render (path, metadata) {
 				if (window.DEBUG) console.log("debug - app.components.core.layouts.Share.render");
 				
+				path = path || this.$route.path;
+				metadata = metadata || this.$store.state.app.metadata[this.$route.path];
+				
 				if (!path || !metadata) return false;
 				
 				let description = metadata.meta.filter( (row) => row.hid === "share:description" ).map( (row) => row.content ).shift();
@@ -136,9 +147,9 @@
 				let imageurl = metadata.meta.filter( (row) => row.hid === "share:image" ).map( (row) => row.content ).shift();
 				let title = metadata.title;
 			
-				let buttons = _.get(this.icons, 'social.share');
-					buttons = buttons ? _.cloneDeep(buttons) : buttons;
-				
+				let buttons = get(this.icons, 'social.share');
+					buttons = buttons ? cloneDeep(buttons) : buttons;
+					
 				let data = {
 					title: title,
 					description: description,
@@ -148,7 +159,7 @@
 				
 				this.content = {...data};
 				
-				_.forEach(data, (row, property) => {
+				forEach(data, (row, property) => {
 					if (row) data[`${ property }_encoded`] = encodeURI(row);
 				});
 				
@@ -162,10 +173,8 @@
 				else this.header = null;
 				
 				if (buttons) {
-					_.forEach(buttons, (button) => {
-						let template = Handlebars.compile(button.url);
-						
-						button.url = template(data);
+					forEach(buttons, (button) => {
+						button.url = Page.template(button.url, data);
 					});
 					
 					this.buttons = buttons;					
@@ -180,7 +189,9 @@
 				if (mutation.type === 'app/METADATA') {
 					this.render(this.$route.path, mutation.payload.data);
 				}												
-			});		
+			});	
+			
+			this.render();	
 		}
 	}
 </script>

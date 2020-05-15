@@ -9,9 +9,7 @@
  *
  */
  
-import _ from 'lodash';
-import ip from 'ip';
-import useragent from 'useragent';
+import { cloneDeep, get, merge, set, size } from 'lodash';
 
 module.exports = {
 	
@@ -36,27 +34,25 @@ module.exports = {
 	
 		const endpoint = __app.helpers.core.api.endpoint('compile');
 		
-		let initialize = _.cloneDeep(__app.config.initialize);		
-			initialize = _.merge(initialize, __app.config.app.initialize);
+		let initialize = cloneDeep(__app.config.initialize);		
+			initialize = merge(initialize, __app.config.app.initialize);
+		let query = merge({ reload: true }, initialize.params);
 				
 		const response = await __app.helpers.core.api.connect({
-			method: 'post',
-			query: {
-				reload: true
-			},
-			url: endpoint,
-			send: initialize
+			method: 'get',
+			query: query,
+			url: endpoint
 		}, req);
 		
 		const data = response.body;
-		const error = _.get(response, 'response.text');
+		const error = get(response, 'text');
 		
-		if (error) __app.debugger.info('api.helpers.core.app.initialize - Error Message: `%s`', error);
+		if (!size(data) && error) __app.debugger.info('api.helpers.core.app.initialize - Error Message: `%s`', error);
 				
-		if (!data) return false;
+		if (!size(data)) return false;
 		
 		if (debug === 'initialize' && token) return res.json(data);
-		else if (token && debug && _.get(data, debug)) return res.json(_.get(data, debug));	
+		else if (token && debug && get(data, debug)) return res.json(get(data, debug));	
 		
 		const success = __app.helpers.core.cache.$.set('app', data);
 				
@@ -65,6 +61,7 @@ module.exports = {
 	
 	/*
 		Process the application initialization data for the specific response
+		User Specific Processing!
 	*/
 	
 	async process (req, res, data) {
@@ -75,13 +72,13 @@ module.exports = {
 		{
 			__app.debugger.info('api.helpers.core.app.process - Method: `%s`', method);
 			
-			const Method = _.get(__app.helpers, `app.initialize.${ method }`) || _.get(__app.helpers, `core.initialize.${ method }`);
+			const Method = get(__app.helpers, `app.initialize.${ method }`) || get(__app.helpers, `core.initialize.${ method }`);
 			
-			let row = _.get(data, method);
+			let row = get(data, method);
 			
-			if (typeof Method !== 'function' || !_.size(row)) continue;
+			if (typeof Method !== 'function' || !size(row)) continue;
 			
-			_.set(data, method, Method(row, req, data));
+			set(data, method, Method(row, req, data));
 		}
 		
 		return data;

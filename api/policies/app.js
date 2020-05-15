@@ -40,14 +40,22 @@ export default async function (req, res, next)
 			
 	__app.debugger.warn('api.policies.app - Path: `%s` - XHR: `%s` - REFERRER: `%s`', req.path, xhr, referrer);
 	
-	__app.data = await __app.helpers.core.app.initialize(req, res, xhr);	
+	let initialized = await __app.helpers.core.app.initialize(req, res, xhr);
 		
-	if (__app.data === false) return res.status(500).send("Initialization Data Failure - Unable to load Application Data - See Logs for details!");
+	if (initialized === false) return res.status(500).send("Initialization Data Failure - Unable to load Application Data - See Logs for details!");
 	
 	req.store = {};
+	__app.data = {};
 	
-	let exclude = __app.config.initialize.server;
-	
+	let exclude = [];
+
+	_.forEach(initialized.data, function (row, key)
+	{
+		if (_.get(row, 'meta.server')) exclude.push(key);
+		
+		_.set(__app.data, key, row.data);
+	});
+		
 	let data = await __app.helpers.core.app.process(req, res, _.cloneDeep(__app.data));
 	
 	_.forEach(data, function (row, key)

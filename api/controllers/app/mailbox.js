@@ -10,7 +10,7 @@
  *
  */
 
-import _ from 'lodash';
+import { get } from 'lodash';
 const axios = require('axios');
 
 module.exports = {
@@ -30,8 +30,8 @@ module.exports = {
 		const response = await __app.helpers.core.api.connect({
 			method: 'get',
 			query: {
-		        single: 1,
-		        filters: {
+		        limit: 1,
+		        filter: {
 			        "uuid": {
 				        "eq": uuid
 			        }
@@ -40,7 +40,7 @@ module.exports = {
 			url: endpoint
 		}, req);
 		
-		const body = _.get(response, 'body.data.body');
+		const body = get(response, 'body.data.body');
 		
 		if (!body) return res.status(400).send();
 		

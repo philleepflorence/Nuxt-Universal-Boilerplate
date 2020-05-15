@@ -1,23 +1,27 @@
 <template>
-	<div class="form-subscribe" v-bind:key="keys.element">							
+	<div class="form-subscribe form-no-label" v-bind:key="keys.element">							
 		<Form 
 			v-bind:id="`subscribe-form-${ name }`" 
+			v-bind:formname="form.slug"
+			v-bind:formtemplate="form.template"
+			v-bind:formnotification="notification"
 			path="/api/form/submit" 
 			captcha="true" 
 			clearonsuccess="true" 
 			autocomplete="off">
+				
 			<template v-slot:header>
-				<div class="p lead pb-4 text-white" v-html="button.hint"></div>
+				<div class="p lead pb-4 text-white" v-html="form.content"></div>
 			</template>
+			
 			<template v-slot:inputs>
 				<div class="form-inputs">
-					<input type="hidden" value="subscribe" name="form.form" class="input">
 					<div v-bind:id="`form-group-${ input.slug }`" class="form-subscribe-row position-relative mb-4">
 						<b-form-input 
 							class="input form-subscribe-input page-inline-input position-relative text-dark text-left lead bg-white-80 h-50px w-100 font-weight-book"
 							v-bind:id="`subscribe-form-${ input.slug }`" 
 							v-bind:type="input.input_type" 
-							v-bind:placeholder="input.plaintext"
+							v-bind:placeholder="input.value"
 							v-bind:v-model="`form.${ input.slug }`"
 							v-bind:name="`form.${ input.slug }`" 
 							autocomplete="off">
@@ -30,9 +34,11 @@
 					</div>
 				</div>
 			</template>	
+			
 			<template v-slot:footer>
 				<div class="p pb-4 text-white" v-html="input.hint"></div>
-			</template>																
+			</template>	
+																		
 		</Form>		
 	</div>
 </template>
@@ -51,17 +57,34 @@
 			Form
 		},
 		computed: {
-			button () {
-				return _.get(this.labels, "app.button.options.subscribe");
-			},
 			icons () {
 				return this.$store.state.api.icons;
 			},
+			form () {
+				return _.get(this.forms, 'subscribe');
+			},
+			forms () {
+				return this.$store.state.api.forms;
+			},
 			input () {
-				return _.get(this.labels, "app.form['subscribe-overlay'].email");
+				return _.get(this.pages, "app.labels.form['subscribe-overlay'].email");
 			},
 			labels () {
 				return this.$store.state.api.labels;
+			},
+			notification () {
+				if (!this.form.notifications) return null;
+				
+				let notification;
+				
+				_.forEach(this.form.notifications, (row) => {
+					if (row.status === "published") notification = row.slug;
+				});	
+				
+				return notification;
+			},
+			pages () {
+				return this.$store.state.api.pages;
 			}
 		},
 		data () {

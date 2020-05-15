@@ -13,83 +13,86 @@ module.exports = {
 		domain: process.env.API_URL,		
 		endpoints: {
 			analytics: {
-				url: ':domain/api/analytics'
+				url: ':domain/app/custom/analytics/set'
 			},
 			colors: {
-				url: ':domain/api/styles/colors'
+				url: ':domain/app/custom/styles/variables'
 			},
 			compile: {
-				url: ':domain/api/compile'
+				url: ':domain/app/custom/collections/compile'
 			},
 			notifications: {
-				url: ':domain/api/notifications'
+				url: ':domain/app/custom/notifications/send'
 			},
 			items: {
-				url: ':domain/api/1.1/tables/:collection/rows'
+				url: ':domain/app/items/:collection'
 			},
 			item: {
-				url: ':domain/api/1.1/tables/:collection/rows/:id'
+				url: ':domain/app/items/:collection/:id'
 			},
 			bulk: {
-				url: ':domain/api/1.1/tables/:collection/rows/bulk'
+				url: ':domain/app/custom/collections/bulk'
 			},
 			thumbnailer: {
 				url: ':domain/thumbnail/{{width}}/{{height}}/contain/{{image}}'
 			},
 			auth: {
-				settings: {
-			        url: ':domain/api/auth/settings'
-		        },
-		        confirm: {
-			        url: ':domain/api/auth/confirm'
+				confirm: {
+			        url: ':domain/app/custom/auth/confirm'
 		        },
 		        credentials: {
-			        url: ':domain/api/auth/credentials'
+			        url: ':domain/app/custom/auth/credentials'
 		        },
 		        login: {
-			        url: ':domain/api/auth/login'
+			        url: ':domain/app/custom/auth/login'
 		        },
 		        logout: {
-			        url: ':domain/api/auth/logout'
-		        },
-		        metadata: {
-			        url: ':domain/api/auth/metadata'
+			        url: ':domain/app/custom/auth/logout'
 		        },
 		        reset: {
-			        url: ':domain/api/auth/reset'
+			        url: ':domain/app/custom/auth/reset'
 		        },
 		        register: {
-			        url: ':domain/api/auth/register'
+			        url: ':domain/app/custom/auth/register'
+		        }
+			},
+			user: {
+				settings: {
+			        url: ':domain/app/custom/user/settings'
+		        },
+		        metadata: {
+			        url: ':domain/app/custom/user/metadata'
 		        }
 			},
 	        form: {
 				submit: {
-			        url: ':domain/api/form/submit'
+			        url: ':domain/app/custom/form/submit'
 		        },
 		        update: {
-			        url: ':domain/api/form/update'
+			        url: ':domain/app/custom/form/update'
 		        },
 		        upload: {
-			        url: ':domain/api/1.1/files'
+			        url: ':domain/app/files'
 		        }
 	        },
 	        search: {
-		        app: {
-			        url: ':domain/api/search/app'
-		        },
 		        cache: {
-			        url: ':domain/api/search/cache'
+			        url: ':domain/app/custom/search/cache'
+		        },
+		        database: {
+			        url: ':domain/app/custom/search/database'
 		        }
 	        }
 		},	
 		collections: {
 			activity: 'directus_activity',
+			revisions: 'directus_revisions',
 			error: 'app_errors',
 			files: 'directus_files',
 			mailbox: 'app_mailbox',
 			users: {
 				rows: 'app_users',
-				metadata: 'joins_app_users_metadata'
+				metadata: 'app_users_metadata'
 			}
 		},			
 		credentials: {

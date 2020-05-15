@@ -7,15 +7,27 @@
  *
  */
  
-import _ from 'lodash';
+import {
+	cloneDeep, 
+	forEach, 
+	get, 
+	intersection, 
+	isElement, 
+	set, 
+	size, 
+	template, 
+	trimEnd, 
+	unescape, 
+	uniq
+} from 'lodash';
 import superagent from 'superagent';
-import handlebars from 'handlebars/dist/handlebars.min.js';
-import Image from "~/helpers/core/image.js";
 import StringCompare from 'string-similarity';
+
+import Image from "~/helpers/core/image.js";
 
 export default {
 	/*
-		Parse HTML Attributes in JSON
+		Parse HTML Attributes in JSON - Vue Attributes Format
 	*/
 	attributes (input) {
 		let attributes = input.attributes;
@@ -38,6 +50,50 @@ export default {
 		return results;
 	},
 	/*
+		Process classlist for dynamic contents
+		PARAMETERS:
+			input - Array of Objects
+			classname - Array of classes to add to input
+			
+	*/
+	classname (input, classname = []) {				
+		if (Array.isArray(input)) classname = classname.concat(input);
+		
+		let col = false;
+		
+		classname.forEach((value) => {
+			if (value.substring(0, 4) === "col-") col = true;
+		});
+		
+		if (!col) classname = classname.concat(['col-12']);
+		
+		return classname;
+	},
+	/*
+		Change the color of the application depending on the color mode
+		PRARAMETERS:
+			color - the color name to use (HEX Definitions should be in the styles)
+			delay - the delay in milliseconds before applying the change to the document
+	*/
+	color (color, delay = 300) {
+		const wrapper = document.getElementById('wrapper');
+		
+		if (color) {
+			setTimeout(() => {
+				wrapper.setAttribute('data-color-mode', color);
+			}, 
+			delay);
+		}
+		else {
+			setTimeout(() => {
+				wrapper.removeAttribute('data-color-mode');
+			}, 
+			delay);
+		}
+		
+		return document.body.getAttribute('data-color-mode');
+	},
+	/*
 		Process dynamic page contents - blogs et al
 		PARAMETERS:
 			Page - incoming page
@@ -45,23 +101,47 @@ export default {
 	*/
 	content (Page, content) {
 		let currrow, page = {};
-		
-		_.forEach(Page, function (row, index)
+				
+		forEach(Page, function (row, index)
 		{
 			if (typeof row === 'string' && /{([^{}]*)}/.test(row))
 			{
-				let template = handlebars.compile(row);
-				
-				currrow = template(content);
+				let compile = template(row, { interpolate: /{{([\s\S]+?)}}/g });
+					currrow = compile(content);
 			}
 			else currrow = row;
 			
-			_.set(page, index, currrow);
+			set(page, index, currrow);
 		});
 		
-		if (Page.content_image && content.image) page.image = content.image;
+		if (size(content.icon)) page.icon = content.icon;
+		
+		if (size(content.image)) page.image = content.image;
 		
 		return page;
+	},
+	/*
+		Parse the inputs for a form
+		PARAMETERS:
+			input - array of inputs (objects) to parse
+	*/
+	inputs (input) {
+		if (!Array.isArray(input)) return [];
+		
+		let inputs = {
+			inputs: []
+		};
+		
+		forEach(input, (row) => {
+			if (['input', 'select', 'textarea', 'editor', 'file'].includes(row.form_type)) {
+				inputs.inputs.push(row);
+			}
+			else if (row.form_type === "submit") {
+				inputs.submit = row;
+			}
+		});
+		
+		return inputs;
 	},
 	/*
 		Send page or form data to server - Wrapper
@@ -74,7 +154,11 @@ export default {
 		
 		options.headers = options.headers || {};
 		options.headers = Object.assign({
-			'Content-type': 'application/json'
+			'Content-type': 'application/json',
+			'Screen-Height': screen.height,
+			'Screen-Width': screen.width,
+			'Window-Height': window.innerHeight,
+			'Window-Width': window.innerWidth
 		}, options.headers); 
 		
 		try {
@@ -83,12 +167,12 @@ export default {
 			.set(options.headers)
 			.send(post);
 			
-			if (options.response) return _.get(result, options.response);
+			if (options.response) return get(result, options.response);
 			
 			return result;	        
         }
         catch (err) {
-	        if (err.response && options.response) return _.get(err.response, options.response);
+	        if (err.response && options.response) return get(err.response, options.response);
 	        
 	        return null;
         }
@@ -99,36 +183,36 @@ export default {
 	get (Pages, path, name) {
 		if (!path || !Pages) return null;
 		
-		if (path === true && typeof name === 'string') return _.get(Pages, name);
+		if (path === true && typeof name === 'string') return get(Pages, name);
 		
 		let pages = {...Pages};
 		let page = {};
 		
-		path = path === '/' ? path : _.trimEnd(path, '/');
+		path = path === '/' ? path : trimEnd(path, '/');
 		
-		_.forEach(pages, function (row)
+		forEach(pages, function (row)
 		{
 			if (row.path === path) page = row;
 		});
 		
-		if (page.id) return _.cloneDeep(page);
+		if (page.id) return cloneDeep(page);
 			
 		let Paths = String(path).split('/').filter(Boolean);
 		
-		_.forEach(pages, function(row)
+		forEach(pages, function(row)
 		{ 
 			let num = (row.path.match(/:/g) || []).length;			
 			let paths = String(row.path).split('/').filter(Boolean);
-			let intersection = _.intersection(Paths, paths);
-			let sum = intersection.length + num;
+			let $intersection = intersection(Paths, paths);
+			let sum = $intersection.length + num;
 			
-			if (num && intersection.length && Paths.length === sum) {
+			if (num && $intersection.length && Paths.length === sum) {
 				page = row;	
 				return;
 			}						
 		});	
 			
-		return _.cloneDeep(page);
+		return cloneDeep(page);
 	},
 	/*
 		Get the current location pathname and hash
@@ -136,25 +220,9 @@ export default {
 			hash - the hash to append to the current path
 	*/
 	hash (hash) {
-		let path = _.trimEnd(window.location.pathname, '/');
+		let path = trimEnd(window.location.pathname, '/');
 		
 		return path + hash;
-	},
-	/*
-		Get the current location pathname and hash
-		PARAMETER:
-			hash - the hash to append to the current path
-	*/
-	path (path) {
-		path = path || window.location.pathname;
-		
-		if (path === '/') return path;
-		
-		path = path.split('/!#');
-		
-		path = _.trimEnd(_.get(path, 0, ''), '/');
-		
-		return path;
 	},
 	/*
 		Process page head metadata and image configuration
@@ -164,12 +232,12 @@ export default {
 	*/
 	metadata (page, config) {
 		
-		let title = _.unescape(_.get(page, 'title'));
-		let description = _.unescape(_.get(page, 'description'));
-		let image = _.get(page, 'image', {});
+		let title = unescape(get(page, 'title'));
+		let description = unescape(get(page, 'description'));
+		let image = get(page, 'image', {});
 		
-		let imageurl = _.get(config, 'application.cdn.images.metadata.url');
-		let imagewidth = _.get(config, 'application.cdn.images.metadata.width');
+		let imageurl = get(config, 'application.cdn.images.metadata.url');
+		let imagewidth = get(config, 'application.cdn.images.metadata.width');
 		let height = image.height;
 		let width = image.width;
 		
@@ -187,36 +255,83 @@ export default {
 			width = Math.round(width * ratio);
 		}
 		
-		return {
+		let metadata = {
 			title: title,
 			link: [
-				{ hid: 'icon', rel: 'icon', type: 'image/png', content: _.get(config, 'application.favicon') },
-				{ hid: 'shortcut icon', rel: 'shortcut icon', type: 'image/png', content: _.get(config, 'application.favicon') }
+				{ hid: 'icon', rel: 'icon', type: 'image/png', content: get(config, 'application.favicon') },
+				{ hid: 'shortcut icon', rel: 'shortcut icon', type: 'image/png', content: get(config, 'application.favicon') }
 			],
 			meta: [
-				{ hid: 'share:description', name: 'share:description', content: description },
-				{ hid: 'share:title', name: 'share:title', content: title },
-				{ hid: 'share:image', name: 'share:image', content: imageurl },
-				{ hid: 'share:image:name', name: 'share:image:name', content: image.name },
-				{ hid: 'description', name: 'description', content: description },
-				{ hid: 'twitter:card', name: 'twitter:card', content: 'summary_large_image' },
-				{ hid: 'twitter:site', name: 'twitter:site', content: _.get(config, 'application.website') },
-				{ hid: 'twitter:title', name: 'twitter:title', content: title },
-				{ hid: 'twitter:description', name: 'twitter:description', content: description },
-				{ hid: 'twitter:image:src', name: 'twitter:image:src', content: imageurl },
-				{ hid: 'twitter:image:alt', name: 'twitter:image:alt', content: image.title },
-				{ hid: 'og:type', name: 'og:type', content: 'website' },
-				{ hid: 'og:site_name', name: 'og:site_name', content: _.get(config, 'application.name') },
-				{ hid: 'og:url', name: 'og:url', content: _.get(config, 'application.website') },
-				{ hid: 'og:title', name: 'og:title', content: title },
-				{ hid: 'og:description', name: 'og:description', content: description },
-				{ hid: 'og:image', name: 'og:image', content: imageurl },
-				{ hid: 'og:image:secure_url', name: 'og:image:secure_url', content: imageurl },
-				{ hid: 'og:image:width', name: 'og:image:width', content: width },
-				{ hid: 'og:image:height', name: 'og:image:height', content: height },
-				{ hid: 'og:image:type', name: 'og:image:type', content: image.type }
+				{ hid: 'share:description', property: 'share:description', name: 'share:description', content: description },
+				{ hid: 'share:title', property: 'share:title', name: 'share:title', content: title },
+				{ hid: 'share:image', property: 'share:image', name: 'share:image', content: imageurl },
+				{ hid: 'share:image:name', property: 'share:image:name', name: 'share:image:name', content: image.name },
+				{ hid: 'description', property: 'description', name: 'description', content: description },
+				{ hid: 'twitter:card', property: 'twitter:card', name: 'twitter:card', content: 'summary_large_image' },
+				{ hid: 'twitter:site', property: 'twitter:site', name: 'twitter:site', content: get(config, 'application.website') },
+				{ hid: 'twitter:title', property: 'twitter:title', name: 'twitter:title', content: title },
+				{ hid: 'twitter:description', property: 'twitter:description', name: 'twitter:description', content: description },
+				{ hid: 'twitter:image:src', property: 'twitter:image:src', name: 'twitter:image:src', content: imageurl },
+				{ hid: 'twitter:image:alt', property: 'twitter:image:alt', name: 'twitter:image:alt', content: image.title },
+				{ hid: 'og:type', property: 'og:type', name: 'og:type', content: 'website' },
+				{ hid: 'og:site_name', property: 'og:site_name', name: 'og:site_name', content: get(config, 'application.name') },
+				{ hid: 'og:url', property: 'og:url', name: 'og:url', content: get(config, 'application.website') },
+				{ hid: 'og:title', property: 'og:title', name: 'og:title', content: title },
+				{ hid: 'og:description', property: 'og:description', name: 'og:description', content: description },
+				{ hid: 'og:image', property: 'og:image', name: 'og:image', content: imageurl },
+				{ hid: 'og:image:secure_url', property: 'og:image:secure_url', name: 'og:image:secure_url', content: imageurl },
+				{ hid: 'og:image:width', property: 'og:image:width', name: 'og:image:width', content: width },
+				{ hid: 'og:image:height', property: 'og:image:height', name: 'og:image:height', content: height },
+				{ hid: 'og:image:type', property: 'og:image:type', name: 'og:image:type', content: image.type }
 			]				
 		};
+		
+		return metadata;
+	},
+	/*
+		Process Array of Objects into an Object of Objects
+		PARAMETERS:
+			input - array of object
+			keys - array of fields to use to create the new object
+			row - the key(s) to use to find the row to get
+	*/
+	object (input, keys, row) {
+		if (!Array.isArray(input)) return input;
+		
+		let object = {};
+		
+		input.forEach((item) => {
+			let curritem = row ? get(item, row) : item;
+			let currkeys = [];
+			
+			keys.forEach((currkey) => {
+				let prop = get(curritem, currkey);
+				
+				if (prop) currkeys.push(prop);
+			});
+			
+			currkeys = currkeys.join('.');
+			
+			set(object, currkeys, curritem);
+		});
+		
+		return object;
+	},
+	/*
+		Get the current location pathname and hash
+		PARAMETER:
+			hash - the hash to append to the current path
+	*/
+	path (path) {
+		path = path || window.location.pathname;
+		
+		if (path === '/') return path;
+		
+		path = path.split('/!#');
+		
+		path = trimEnd(get(path, 0, ''), '/');
+		
+		return path;
 	},
 	/*
 		Require - Makes sure external scripts and assets are loaded before continuation of a script. 
@@ -232,8 +347,8 @@ export default {
 		paths = paths && paths.paths ? paths.paths : paths;
 		
 		let currTime = Date.now();		
-		let configuration = _.get(store, 'configuration');
-		let cache = _.get(store, 'cache.page.require', []);
+		let configuration = get(store, 'configuration');
+		let cache = get(store, 'cache.page.require', []);
 		let loadpaths = [];
 		
 		for (let path of paths) {
@@ -326,7 +441,7 @@ export default {
 			strict - must match the query as is - case insensitive - relevance: 0		
 	*/
 	search (data, keys, query, mode = "any") {
-		let array = _.cloneDeep(data);
+		let array = cloneDeep(data);
 		
 		if (!Array.isArray(array)) return null;
 		
@@ -344,7 +459,7 @@ export default {
 						relevance = 0;
 						
 						for (let key of keys) {
-							let value = _.get(row, key);
+							let value = get(row, key);
 							let matched = null;
 							
 							if (typeof value === "number" || typeof value === "string") {
@@ -361,7 +476,7 @@ export default {
 						else if (relevance && !row.relevance) row.relevance = 1;
 					}
 					
-					if (matches.length) row.matches = _.uniq(matches);
+					if (matches.length) row.matches = uniq(matches);
 					
 					if (row.relevance) row.relevance = Number( (row.relevance / strings.length).toFixed(2) );
 					
@@ -375,7 +490,7 @@ export default {
 					max = 0;
 					
 					for (let key of keys) {
-						let value = _.get(row, key);
+						let value = get(row, key);
 						let matched = null;
 						
 						if (typeof value === "number" || typeof value === "string") {
@@ -383,14 +498,14 @@ export default {
 						}
 						
 						if (matched && matched.length) {
-							max = _.uniq(matched).length;
+							max = uniq(matched).length;
 							matches = matches.concat(matched);
 						}
 						
 						if (max >= relevance) relevance = max;
 					}
 					
-					if (matches.length) row.matches = _.uniq(matches);
+					if (matches.length) row.matches = uniq(matches);
 						
 					if (row.matches && row.matches.length === strings.length) {
 						row.relevance = StringCompare.compareTwoStrings($query, row.matches.join(' '));
@@ -406,7 +521,7 @@ export default {
 					max = 0;
 					
 					for (let key of keys) {
-						let value = _.get(row, key);
+						let value = get(row, key);
 						let matched = null;
 						
 						if (typeof value === "number" || typeof value === "string") {
@@ -421,7 +536,7 @@ export default {
 						if (max >= relevance) relevance = Number( max.toFixed(2) );
 					}
 					
-					if (matches.length) row.matches = _.uniq(matches);
+					if (matches.length) row.matches = uniq(matches);
 						
 					if (relevance) row.relevance = relevance;
 					
@@ -434,12 +549,22 @@ export default {
 		
 		return result;
 	},
+	/*
+		Scroll to an element on the page
+		PARAMETERS:
+			e - event or element
+			top - scroll top integer value
+			offset - offset interger value to subtract from the top
+			behavior - the scroll animation behavior
+	*/
 	scrollTo (e, top = 0, offset = 0, behavior = 'smooth') {
 		
-		if (_.isElement(e)) {
+		if (typeof offset === 'string') offset = Number(offset);
+		
+		if (isElement(e)) {
 			let rect = e.getBoundingClientRect();
-			
-			top = rect.top + offset;
+
+			top = rect.y + offset;
 		}
 		else if (e && (e.currentTarget || e.target)) {
 			let button = (e.currentTarget || e.target);
@@ -447,8 +572,10 @@ export default {
 			
 			let rect = element ? element.getBoundingClientRect() : button.getBoundingClientRect();
 			
-			top = rect.top + offset;
+			top = rect.y + offset;
 		}
+		
+		if (window.scrollY) top = Math.abs(window.scrollY + top);
 		
 		window.scrollTo({
 			top: top,
@@ -463,24 +590,26 @@ export default {
 			data - @String - Layout in which to place compiled template - OPTIONAL
 			key - @String - Dot syntax key to use when adding source to layout - OPTIONAL
 	*/
-	template (source, data, layout, key) {
+	template (source, data, layout, key, options = { escape: /{{{([\s\S]+?)}}}/g, interpolate: /{{([\s\S]+?)}}/g }) {
 		if (!data) return '';
 		
-		let template = handlebars.compile(source);
-		let result = template(data);
+		let compile = template(source, options);
+		let result = compile(data);
 		
 		if (!key || typeof layout !== 'string') return result;
-		
-		template = handlebars.compile(layout);
-		
+				
 		let _data = Object.assign(data, {
 			key: result
 		});
 		
-		result = template(_data);
+		compile = template(layout, options);
+		result = compile(_data);
 		
 		return result;
 	},
+	/*
+		Page Utilities
+	*/
 	utils: {
 		attributes (attributes) {
 			if (!attributes) return null;
@@ -501,6 +630,21 @@ export default {
 			
 			return results;
 		},
+		datetime (string) {
+			const regexps = {
+				datetime: /^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) (0[0-9]|1[0-9]|2[1-4]):(0[0-9]|[1-5][0-9]):(0[0-9]|[1-5][0-9]))$/,
+				date: /([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))/,
+				time: /(?:[01]\d|2[0123]):(?:[012345]\d):(?:[012345]\d)/
+			};
+			
+			let format = null;
+			
+			forEach(regexps, (regexp, index) => {
+				if (!format && regexp.test(string)) format = index;
+			});
+			
+			return format;
+		},
 		decode (str) {
 			return str.replace(/&#(\d+);/g, (match, dec) => {
 				return String.fromCharCode(dec);
@@ -520,7 +664,7 @@ export default {
 			
 			options.forEach(function (obj)
 			{
-				_.forEach(obj, function (display, node)
+				forEach(obj, function (display, node)
 				{
 					var pattern = new RegExp(node, 'gi');
 					var span = `<span class="${ display }" data-component-format>${ node }</span>`;
@@ -535,6 +679,33 @@ export default {
 			prefix = prefix || Math.random().toString(36).replace(/[^a-z]+/g, '').substring(0, 8);
 			
 			return prefix + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+		},
+		roman (input) {
+			const roman = {
+				M: 1000,
+				CM: 900,
+				D: 500,
+				CD: 400,
+				C: 100,
+				XC: 90,
+				L: 50,
+				XL: 40,
+				X: 10,
+				IX: 9,
+				V: 5,
+				IV: 4,
+				I: 1
+			};
+			let output = '';
+			
+			forEach(roman, (number, index) => {
+				let q = Math.floor(input / number);
+				
+				input -= q * number;
+				output += index.repeat(q);
+			});
+			
+			return output;
 		},
 		striptags (input = '') {
 			return input.replace(/(<([^>]+)>)/ig,"");

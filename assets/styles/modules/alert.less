@@ -20,8 +20,8 @@ html
 			.noty_bar
 			{
 				box-shadow: 0 1px 1px fade(black, 10);
-				width: 300px !important;
-				max-width: 90vw !important;
+				width: 360px !important;
+				max-width: ~"calc(100vw - 30px)" !important;
 				padding: 0 !important;
 				margin-top: 15px;
 				background: fade(@colordark, 90);
@@ -62,12 +62,13 @@ html
 				{
 					overflow: hidden;
 					padding: 1rem 2rem 1rem 1rem;
-					font-size: 0.75rem;
+					font-size: 0.875rem;
 					font-weight: 500;
+					line-height: 1.25rem;
 					white-space: pre-wrap;
 					
 					* {
-						font-size: 0.75rem;
+						font-size: 0.875rem;
 					}
 					
 					p:not(:last-of-type) {
@@ -84,6 +85,10 @@ html
 					
 					br:last-of-kind {
 						line-height: 0;
+					}
+					
+					ul, ol {
+						padding-left: 0 !important;
 					}
 					
 					li

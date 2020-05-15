@@ -8,6 +8,8 @@
 
 require('dotenv').config();
 
+import moment from 'moment';
+
 module.exports = {
 	directus: {	
 		collections: {

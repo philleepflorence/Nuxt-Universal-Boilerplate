@@ -21,7 +21,7 @@ module.exports = {
 		
 		__app.debugger.debug('api.controllers.app.search - Query:  `%s`', req.query.query);
 		
-		let endpoint = __app.helpers.core.api.endpoint('search.app');
+		let endpoint = __app.helpers.core.api.endpoint('search.cache');
 		
 		const response = await __app.helpers.core.api.connect({
 			method: 'get',
@@ -32,21 +32,8 @@ module.exports = {
 			},
 			result: 'body'
 		}, req);
-		return res.json(response);
 				
-		if (!_.get(response, 'data') && server === true) return null;
-		else if (!_.get(response, 'data')) return res.status(404).json(response);
-		
-		const articles = await __app.helpers.app.articles.feed(response.data);
-		const content = {
-			feed: articles
-		};
-		
-		if (server === true) return content;
-		
-		return res.json(content);
-		
-		
+		if (!_.get(response, 'data')) return res.status(404).json(response);		
 		
 		return res.json(response);
 	},

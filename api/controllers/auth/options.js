@@ -25,73 +25,39 @@ module.exports = {
 		
 		const debug = req.query.debug;
 		let form = req.body.form;
-		let user = req.me;
+		let user = req.session.user;
 		let redirect = req.body.redirect;
 		let refresh = req.body.refresh;
 		
 		const test = await this.test(req, res);
-		const responses = _.get(__app.data, 'labels.app.form.auth');
+		const responses = _.get(__app.data, 'responses.user.settings');
 		
 		if (admin && !form) form = test.body.form;		
 		if (admin && !user) user = test.body.user;
 		
-		let endpoint = __app.helpers.core.api.endpoint('items', { collection: 'users.metadata' });
+		let endpoint = __app.helpers.core.api.endpoint('user.metadata');
+		
+		/*
+			Update options and metadata!
+		*/
 						
 		let response = await __app.helpers.core.api.connect({
-			method: 'get',
-			url: endpoint,
-			query: {
-	            user: form,
-	            depth: 0
-	        },
-			result: 'body'
-		}, req);
-		
-		if (response.error) return res.status(400).json({ error: _.get(responses, 'settings-error.value'), response: response.error });
-		
-		let data = {
-			form: form,
-			user: user
-		};
-		let rows = [];
-		
-		_.forEach(form, function (row, index)
-		{
-			if (response.data.length)
-			{
-				let currow = {};
-				
-				response.data.forEach(function (curr)
-				{
-					if (index === curr.key) currow = curr;
-				});
-				
-				if (currow.id) row.id = currow.id;				
-			}
-			
-			_.forEach(row, function (value, key)
-			{
-				if (typeof value === "string" && Array.isArray(value.match(/{{\s*[\w\.]+\s*}}/g))) row[key] = __app.helpers.core.api.handlebars.render(value, data);
-			});
-			
-			rows.push(row);
-		});
-
-		endpoint = __app.helpers.core.api.endpoint('bulk', { collection: 'users.metadata' });
-						
-		response = await __app.helpers.core.api.connect({
 			method: 'post',
 			url: endpoint,
 			send: {
-	            rows: rows
+	            form: form
 	        },
 			result: 'body'
 		}, req);
 		
-		if (response.error) return res.status(400).json({ error: _.get(responses, 'settings-error.value'), response: response.error });
+		if (response.error) return res.status(400).json({ error: _.get(responses, 'settings-error.value'), response: response.message });
 		
+		/*
+			Authenticate the user and update the metadata
+		*/
+			
 		user = await __app.helpers.core.login.user(user.id, req);
-		
+					
 		return res.json({
 			success: _.get(responses, 'settings-success.value'),
 			navigate: redirect,

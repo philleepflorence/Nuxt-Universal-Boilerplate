@@ -24,28 +24,31 @@ module.exports = {
 		const debug = req.query.debug;
 		const admin = debug === 'test' && req.query.token === process.env.APP_TOKEN;
 		
-		let form = req.body.form;
+		let form = req.query.form;
 		
 		const test = await this.test(req, res);
 		
-		if (admin && !form) form = test.body.form;
+		if (admin && !form) form = test.query.form;
 		
 		let endpoint = __app.helpers.core.api.endpoint('items', { collection: 'users.rows' });
+		let query = {
+			limit: 1,
+            filter: form,
+            fields: '*.*.*'
+        };
 		
-		const response = await __app.helpers.core.api.connect({
+		let response = await __app.helpers.core.api.connect({
 			method: 'get',
 			url: endpoint,
-			query: {
-				single: 1,
-				limit: 1,
-	            filters: form
-	        },
+			query: query,
 			result: 'body'
 		}, req);
 		
-		if (!_.get(response, 'data.id')) return res.status(404).send();
+		response = _.get(response, 'data.0');
 		
-		const user = await __app.helpers.core.user(response.data, 'account', req);
+		if (!response || !response.id) return res.status(404).send();
+		
+		const user = await __app.helpers.core.user(response, 'account', req);
 		
 		return res.json(user);
 	},
@@ -57,9 +60,7 @@ module.exports = {
 		return {
 			query: {
 				debug: "test",
-				token: process.env.APP_TOKEN
-			},
-			body: {
+				token: process.env.APP_TOKEN,
 				form: {
 					email: "email@philleepflorence.com"
 				}

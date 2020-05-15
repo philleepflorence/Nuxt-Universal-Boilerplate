@@ -1,11 +1,11 @@
 <template>
 	<div class="page-list-group d-flex">
-		<div class="flex-grow-0 text-primary cursor-hand" v-on:click="toggle">
+		<div class="flex-grow-0 text-muted cursor-hand" v-on:click="toggle">
 			<div class="page-list-group-button" v-show="collapsed" v-html="icons.plus.icon.icon"></div>
 			<div class="page-list-group-button" v-show="expanded" v-html="icons.minus.icon.icon"></div>
 		</div>
 		<section class="flex-grow-1 pl-2">
-			<header class="page-list-header p lead font-weight-book cursor-hand position-relative" v-html="format(headline)" v-on:click="toggle" v-bind:data-after-content="count"></header>
+			<header class="page-list-header p lead cursor-hand position-relative" v-html="format(headline)" v-on:click="toggle" v-bind:data-after-content="count"></header>
 			<div class="position-relative animated fadeIn" v-show="expanded">
 				<div class="p font-weight-book mt-2" v-html="format(content)"></div>
 				<footer class="position-relative">
@@ -18,6 +18,7 @@
 </template>
 
 <script>
+	import _ from 'lodash';	
 	import Page from "~/helpers/core/page.js";
 	
 	export default {
@@ -34,7 +35,11 @@
 		},
 		methods: {
 			format (string) {
-				return Page.utils.format(string, this.$store.state.api.config.components.display);
+				let format = _.get(this.$store.state.api.config, 'components.display');
+				
+				if (format) return Page.utils.format(string, format);
+				
+				return string;
 			},
 			toggle () {
 				if (this.expanded) {
@@ -56,7 +61,10 @@
 	}
 </script>
 
-<style lang="less" scoped>
+<style lang="less">	
+	
+	@import '../../../assets/styles/mixins/mixins.less';
+	
 	.page-list-group {
 		.page-list-group-button {
 			padding: 0.1rem;

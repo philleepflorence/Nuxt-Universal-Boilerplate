@@ -1,76 +1,95 @@
 <template>
 	<div id="disclaimer" class="pointer-events-none position-fixed position-bottom pointer-events-none" role="app disclaimer" v-bind:key="keys.element">
 		
-		<PreventScroll classname="disclaimer-container position-fixed position-full pointer-events-none animated fadeIn pointer-events-auto" v-if="display()">
-		
-			<div class="position-fixed position-bottom w-100 text-white d-flex justify-content-end text-left pointer-events-auto p-1 shadow">
-				<div class="disclaimer-content p flex-grow-1 max-w-768px cursor-hand bg-primary animated fadeInUpSmall a-delay" v-if="display() === 'gdpr'" v-html="gdpr" v-on:click="onclick"></div>
-				<div class="disclaimer-content p flex-grow-1 max-w-768px cursor-hand bg-primary animated fadeInUpSmall a-delay" v-if="display() === 'update'" v-html="update" v-on:click="onclick"></div>
-				<button 
-					class="disclaimer-button position-absolute position-right h-40px w-40px rounded-circle plain bg-primary text-white m-1 animated fadeInUpSmall a-delay" 
-					v-html="icons.toggle.options.close.icon.icon" 
-					v-on:click.stop.prevent="onclick">
-				</button>
+		<app-component-ui-prevent-scroll classname="disclaimer-container position-fixed position-full pointer-events-none animated fadeIn pointer-events-auto" v-if="display()">
+			
+			<button class="plain position-absolute position-full" v-on:click="onClick"></button>
+			
+			<div class="position-fixed position-bottom w-100 text-white d-flex justify-content-center text-left pointer-events-auto p-1 shadow">
+				<div class="disclaimer-content flex-grow-1 mx-auto cursor-hand animated fadeInUpSmall a-delay" v-on:click="onClick">
+					<div class="p bg-primary py-3 d-flex align-items-center">
+						<div class="flex-grow-1 border-right border-disclaimer-content py-1 px-4" v-html="display().value"></div>
+						<div class="flex-grow-0 px-4" v-html="display().icon.icon"></div>
+					</div>
+				</div>
 			</div>
 			
-		</PreventScroll>
+		</app-component-ui-prevent-scroll>
 		
 	</div>
 </template>
 
 <script>
-	import PreventScroll from "~/components/core/ui/PreventScroll.vue";
+	import { get } from "lodash";
+	
+	import ComponentUIPreventScroll from "~/components/core/ui/PreventScroll.vue";
+	
 	import Page from "~/helpers/core/page.js";
-	import _ from "lodash";
 	
 	export default {
-		name: "Disclaimer",
+		name: "DisclaimerLayoutsComponent",
 		components: {
-			PreventScroll
+			'app-component-ui-prevent-scroll': ComponentUIPreventScroll
 		},
 		data () {
 			return {
 				keys: {
 					element: Page.utils.rand()
-				}
+				},
+				loaded: null,
+				installed: null
 			};
 		},
 		computed: {
 			configuration () {
 				return this.$store.state.api.config;
 			},
-			gdpr () {
-				let string = _.get(this.configuration.application, "disclaimer.gdpr");
-				
-				string = Page.utils.format(string, this.configuration.components.display);
-				
-				return string;
-			},
 			icons () {
 				return this.$store.state.api.icons;
 			},
-			update () {
-				let string = _.get(this.configuration.application, "disclaimer.update");
-				
-				string = Page.utils.format(string, this.configuration.components.display);
-				
-				return string;
+			labels () {
+				return this.$store.state.api.labels;
 			},
 			version () {
-				return _.get(this.configuration.application, "app.version");
+				return get(this.configuration.application, "app.version");
 			}
 		},
-		methods: {
+		methods: {	
 			display () {
+				let loaded = window.localStorage.getItem('app:loaded');	
 				let gdpr = window.localStorage.getItem('app:gdpr');
 				let version = window.localStorage.getItem('app:version');
+				let format = get(this.configuration, 'components.display');
+				let $gdpr = get(this.labels, "content.disclaimer.gdpr");
+				let $update = get(this.labels, "content.disclaimer.update");
+				let string = '';
 				
-				if (!gdpr) return 'gdpr';
-				else if (this.version !== version) return 'update';
-				else return null;
-			},
-			onclick (e) {
-				if (window.DEBUG) console.log("debug - app.components.core.layouts.Disclaimer.onclick");
+				if ($gdpr && !gdpr) {
+					string = $gdpr.value;
+					
+					if (string && format) string = Page.utils.format(string, format);
+					
+					return {
+						name: 'gdpr',
+						value: string,
+						icon: $gdpr.icon
+					};
+				}
+				else if (this.loaded && $update && this.version !== version) {
+					string = $update.value;
+					
+					if (string && format) string = Page.utils.format(string, format);
+					
+					return {
+						name: 'update',
+						value: string.replace('{{version}}', this.version),
+						icon: $update.icon
+					};
+				}
+				else return null;			
+			},		
+			onClick (e) {
+				if (window.DEBUG) console.log("debug - app.components.core.layouts.Disclaimer.onClick");
 				
 				e.preventDefault();
 				
@@ -84,12 +103,12 @@
 				else if (href) {
 					window.location.href = href;
 				}
-				else if (this.display() === "gdpr") {
+				else if (this.display().name === "gdpr") {
 					window.localStorage.setItem('app:gdpr', Date.now());
 					
 					this.keys.element = Page.utils.rand();
 				}
-				else if (this.display() === "update") {
+				else if (this.display().name === "update") {
 					window.localStorage.setItem('app:version', this.version);
 					
 					window.location.reload(true);
@@ -97,7 +116,15 @@
 			}
 		},
 		mounted () {
-			if (window.DEBUG) console.log("debug - app.components.core.layouts.Disclaimer.mounted");			
+			if (window.DEBUG) console.log("debug - app.components.core.layouts.Disclaimer.mounted");
+			
+			this.installed = window.localStorage.getItem('app:installed');
+			this.loaded = window.localStorage.getItem('app:loaded');
+			
+			if (window.location.search.indexOf('source=pwa') && !this.installed) window.localStorage.setItem('app:installed', Date.now());
+			
+			if (!this.loaded) window.localStorage.setItem('app:loaded', Date.now());
+			else if (this.version) window.localStorage.setItem('app:version', this.version);		
 		}
 	}
 </script>
@@ -111,8 +138,16 @@
 			background-image: linear-gradient(fade(black, 0), fade(black, 65));
 			
 			.disclaimer-content {
-				padding: 1.5rem;
 				
+				div.p {
+					p:not(:last-child) {
+						margin-bottom: 0.5rem;
+					}
+					
+					.border-disclaimer-content {
+						border-color: fade(white, 30) !important;
+					}
+				}				
 				a {
 					border-bottom: 1px solid white; 
 					display: inline-block;
@@ -124,10 +159,10 @@
 				* {
 					font-weight: 500 !important;
 				}
-			}
-			
-			.disclaimer-button {
-				top: -44px;
+				
+				@media (min-width: @breakpoint-md) {
+					max-width: 540px !important;
+				}
 			}
 		}		
 	}

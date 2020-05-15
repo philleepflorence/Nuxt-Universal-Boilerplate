@@ -1,46 +1,52 @@
 <template>
-	<nuxt-link v-bind:to="nav.path" v-bind="attributes(nav)" v-bind:data-index="index" v-bind:class="classname">
+	<a v-bind:href="path" v-bind="attributes" v-bind:class="classname" v-if="anchor">
+		<slot></slot>
+	</a>
+	<nuxt-link v-bind:to="path" v-bind="attributes" v-bind:data-index="index" v-bind:class="classname" v-else>
 		<slot></slot>
 	</nuxt-link>
 </template>
 
 <script>
-	import _ from 'lodash';	
 	import Page from "~/helpers/core/page.js";
 	
 	export default {
-		name: "NavLink",
-		props: ['nav', 'index', 'classname'],
+		name: "ComponentNavLink",
+		props: [
+			'classname',
+			'index',
+			'internal', 
+			'nav'
+		],
 		computed: {
-			domain () {
-				return process.env.SERVER_DOMAIN || window.location.origin;
-			}
-		},
-		methods: {
-			attributes (nav) {
+			anchor () {
+				return !this.nav.internal && !this.internal;
+			},
+			attributes () {
 				let attributes = {};
 				
-				if (nav.internal) {
-					attributes['to'] = nav.path;
+				if (this.nav.internal || this.internal) {
+					attributes['to'] = this.path;
 				}
-				else if (nav.path.indexOf(this.domain) === 0) {
-					attributes['href'] = nav.path;
+				else if (this.path.indexOf(this.domain) === 0) {
+					attributes['href'] = this.nav.path;
 					attributes['target'] = "_self";
 				}
 				else {
-					attributes['href'] = nav.path;
+					attributes['href'] = this.path;
 					attributes['target'] = "_blank";
 				}
 				
 				return attributes;
+			},
+			domain () {
+				return process.env.SERVER_DOMAIN || window.location.origin;
+			},
+			path () {
+				if (this.nav.url) return this.nav.url;
+				
+				return this.nav.path;
 			}
-		},
-		data () {
-			return {
-				keys: {
-					element: Page.utils.rand()
-				}
-			};
 		}
 	}
 </script>

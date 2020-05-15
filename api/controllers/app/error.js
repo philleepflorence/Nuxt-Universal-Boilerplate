@@ -10,7 +10,7 @@
  *
  */
 
-import _ from 'lodash';
+import { size } from 'lodash';
 import UserAgent from 'user-agents';
 
 module.exports = {
@@ -28,7 +28,7 @@ module.exports = {
 		
 		if (req.query.debug === 'test' && !form) form = test.body.form;
 				
-		if (!_.size(form)) return res.status(400).send("Form object is required!");
+		if (!size(form)) return res.status(400).send("Form object is required!");
 				
 		const response = await __app.helpers.core.api.connect({
 			method: 'post',

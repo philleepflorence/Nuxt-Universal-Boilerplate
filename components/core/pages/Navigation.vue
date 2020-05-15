@@ -5,7 +5,7 @@
 			v-on:click.stop.prevent="navigate"
 			v-for="row in labels">
 			<span v-html="row.icon.icon"></span>
-			<span class="page-navigation-span fs-10px d-block font-weight-bold" v-html="row.plaintext"></span>
+			<span class="page-navigation-span fs-10px d-block font-weight-bold" v-html="row.value"></span>
 			<RippleClick></RippleClick>
 		</nav>	
 	</div>

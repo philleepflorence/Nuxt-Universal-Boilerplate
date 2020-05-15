@@ -1,59 +1,22 @@
 <template>
 	<div id="options" class="position-relative" role="app options" v-bind:key="keys.element" data-open="false" data-overlay="false">
 		
-		<component v-bind:if="display('OPTIONS_CONTACT')" v-bind:is="contact" v-on:close="close"></component>
-		<component v-bind:if="display('OPTIONS_FILTER')" v-bind:is="filter" v-on:close="close"></component>
-		<component v-bind:if="display('OPTIONS_SEARCH')" v-bind:is="search" v-on:close="close"></component>
-		<component v-bind:if="display('OPTIONS_SHARE')" v-bind:is="share" v-on:close="close"></component>
-		<component v-bind:if="display('OPTIONS_SUBSCRIBE')" v-bind:is="subscribe" v-on:close="close"></component>
+		<aside class="options-overlays position-static" v-if="buttons">
 		
-		<nav class="options-menu position-fixed position-bottom position-right w-50px m-4 transform pointer-events-none" v-if="buttons">
-			<div class="options-overlay-buttons">
-				<button 
-					class="pointer-events-auto shadow-sm plain h-50px w-50px bg-primary transition position-relative options-overlay-button mb-4"
-					v-for="(button, key, index) in buttons"
-					v-on:click="onOverlay"
-					v-bind:key="button.slug"
-					v-bind:data-overlay="button.url">
-					<span 
-						class="text-white"
-						v-html="button.icon.icon">
-					</span>
-				</button>
-				<button 
-					class="pointer-events-auto shadow-sm plain h-50px w-50px bg-primary transition position-relative options-overlay-button mb-4"
-					v-on:click="onFullscreen"
-					v-if="fullscreen">
-					<span 
-						class="text-white"
-						v-html="icons.toggle.fullscreen.icon.icon">
-					</span>
-				</button>
-			</div>
-			<button 
-				id="options-button" 
-				class="pointer-events-auto shadow-sm plain h-50px w-50px bg-primary transition animated zoomIn position-relative options-toggle-button"
-				v-if="loaded"
-				v-on:click="onToggle">
-				<span 
-					class="options-button options-button-close position-absolute position-center text-white animated fadeIn" 
-					v-html="icons.toggle.options.close.icon.icon">
-				</span>
-				<span 
-					v-for="(button, key, index) in buttons" 
-					v-bind:key="button.slug"
-					class="options-button options-button-open position-absolute position-center text-white"
-					v-html="button.icon.icon">
-				</span>
-			</button>			
-		</nav>
+			<component v-bind:if="display('OPTIONS_CONTACT', 'contact')" v-bind:is="componentContact" v-on:close="onClickClose"></component>
+			<component v-bind:if="display('OPTIONS_FILTER', 'filter')" v-bind:is="componentFilter" v-on:close="onClickClose"></component>
+			<component v-bind:if="display('OPTIONS_SEARCH', 'search')" v-bind:is="componentSearch" v-on:close="onClickClose"></component>
+			<component v-bind:if="display('OPTIONS_SHARE', 'share')" v-bind:is="componentShare" v-on:close="onClickClose"></component>
+			<component v-bind:if="display('OPTIONS_SUBSCRIBE', 'subscribe')" v-bind:is="componentSubscribe" v-on:close="onClickClose"></component>
+			
+		</aside>
 		
-		<nav class="options-overlay-menu position-fixed position-bottom position-right w-50px m-4 transform" v-if="buttons">
+		<nav class="options-overlay-menu position-fixed position-bottom position-right w-50px mr-3 mb-3 transform" v-if="buttons">
 			<button 
 				id="options-close-button" 
-				class="pointer-events-auto shadow-sm plain h-50px w-50px bg-primary transition animated zoomIn position-relative options-toggle-button a-delay"
+				class="pointer-events-auto shadow-sm plain h-50px w-50px rounded-circle bg-primary transition animated zoomIn position-relative options-toggle-button a-delay"
 				v-if="curroverlay"
-				v-on:click="close">
+				v-on:click="onClickClose">
 				<span 
 					class="overlay-close-button position-absolute position-center text-white animated fadeIn" 
 					v-html="icons.toggle.options.close.icon.icon">
@@ -61,15 +24,39 @@
 			</button>			
 		</nav>
 		
+		<nav id="options-navigation" class="position-fixed position-bottom w-100 transform">
+			<div class="options-navigation h-50px bg-primary m-3 d-flex flex-row rounded shadow-sm">
+				<button 
+					class="options-navigation-button flex-fill plain h-100 transition position-relative border-left text-white"
+					v-for="(button, key, index) in buttons"
+					v-on:click="onClickOverlay"
+					v-bind:key="button.slug"
+					v-bind:refs="`button-${ button.slug }`"
+					v-bind:data-overlay="button.url">
+					<span v-html="button.icon.icon"></span>
+					<span class="options-navigation-text fs-12px text-lowercase d-none d-md-block">{{ button.value }}</span>
+				</button>
+				<button 
+					class="options-navigation-button flex-fill plain h-100 transition position-relative border-left text-white"
+					v-on:click="onClickFullscreen" 
+					refs="button-fullscreen"
+					v-if="fullscreen">
+					<span v-html="icons.toggle.fullscreen.icon.icon"></span>
+					<span class="options-navigation-text fs-12px text-lowercase d-none d-md-block">{{ icons.toggle.fullscreen.name }}</span>
+				</button>
+			</div>
+		</nav>
+		
 	</div>
 </template>
 
 <script>
+	import { forEach, get } from "lodash";
+	
 	import Page from "~/helpers/core/page.js";
-	import _ from "lodash";
 	
 	export default {
-		name: "Options",
+		name: "OptionsLayoutComponent",
 		data () {
 			return {
 				loaded: false,
@@ -86,21 +73,33 @@
 		},
 		computed: {
 			buttons () {
-				return this.$store.state.api.labels.app.button.options;
+				return this.$store.state.api.labels.button.options;
+			},
+			componentContact () {
+				if (process.env.OPTIONS_CONTACT && this.buttons.contact) return () => import(process.env.OPTIONS_CONTACT);
+				else return null;
+			},
+			componentFilter () {
+				if (process.env.OPTIONS_FILTER && this.buttons.filter) return () => import(process.env.OPTIONS_FILTER);
+				else return null;
+			},
+			componentSearch () {
+				if (process.env.OPTIONS_SEARCH && this.buttons.search) return () => import(process.env.OPTIONS_SEARCH);
+				else return null;
+			},
+			componentShare () {
+				if (process.env.OPTIONS_SHARE && this.buttons.share) return () => import(process.env.OPTIONS_SHARE);
+				else return null;
+			},
+			componentSubscribe () {
+				if (process.env.OPTIONS_SUBSCRIBE && this.buttons.subscribe) return () => import(process.env.OPTIONS_SUBSCRIBE);
+				else return null;
 			},
 			configuration () {
 				return this.$store.state.api.config.application.options;
 			},
-			contact () {
-				if (process.env.OPTIONS_CONTACT) return () => import(process.env.OPTIONS_CONTACT);
-				else return null;
-			},
 			dirname () {
 				return (process.env.INIT_CWD || process.env.PWD);
-			},
-			filter () {
-				if (process.env.OPTIONS_FILTER) return () => import(process.env.OPTIONS_FILTER);
-				else return null;
 			},
 			icons () {
 				return this.$store.state.api.icons;
@@ -116,31 +115,22 @@
 			},
 			path () {
 				return this.$route.path;
-			},
-			search () {
-				if (process.env.OPTIONS_SEARCH) return () => import(process.env.OPTIONS_SEARCH);
-				else return null;
-			},
-			share () {
-				if (process.env.OPTIONS_SHARE) return () => import(process.env.OPTIONS_SHARE);
-				else return null;
-			},
-			subscribe () {
-				if (process.env.OPTIONS_SUBSCRIBE) return () => import(process.env.OPTIONS_SUBSCRIBE);
-				else return null;
 			}
 		},
 		methods: {
-			close (e) {
-				if (window.DEBUG) console.log("debug - app.components.core.layouts.Options.close");
+			/*
+				Close the overlay and reset all the buttons
+			*/
+			onClickClose (e) {
+				if (window.DEBUG) console.log("debug - app.components.core.layouts.Options.onClickClose");
 				
 				let $overlays = this.$el.querySelectorAll('.options-overlay');
-				let $buttons = this.$el.querySelectorAll('.options-overlay-button');
+				let $buttons = this.$el.querySelectorAll('.options-navigation-button');
 				
-				_.forEach($overlays, (element) => {
+				forEach($overlays, (element) => {
 					element.classList.add('off');
 				});
-				_.forEach($buttons, (element) => {
+				forEach($buttons, (element) => {
 					element.classList.remove('active');
 				});
 				
@@ -158,11 +148,17 @@
 				
 				this.curroverlay = null;
 			},
-			display (component) {
-				if (process.env[component]) return true;
+			/*
+				Check if the path of the component file is defined
+			*/
+			display (component, overlay) {
+				if (typeof process.env[component] === 'string') return true;
 				
 				return false;
 			},
+			/*
+				Initialize Fullscreen Control
+			*/
 			initFullscreen () {
 				if (this.$route.query.source === 'pwa') return false;
 				
@@ -172,33 +168,43 @@
 				
 				this.fullscreen = (typeof element.requestFullScreen === 'function');
 			},
-			onFullscreen () {
+			/*
+				Launch the Fullscreen
+			*/
+			onClickFullscreen () {
 				this.$store.commit('event/SET', ['app:toggle:fullscreen']);
 			},
-			onOverlay (e, curroverlay) {
-				if (window.DEBUG) console.log("debug - app.components.core.layouts.Options.onOverlay");
+			/*
+				Launch an overlay related to the button clicked
+			*/
+			onClickOverlay (e, curroverlay) {
+				if (window.DEBUG) console.log("debug - app.components.core.layouts.Options.onClickOverlay");
 				
-				this.close(true);
+				this.onClickClose(true);
 				
 				this.curroverlay = curroverlay || e.currentTarget.getAttribute('data-overlay');
-											
+
 				this.overlay();				
 			},
+			/*
+				Overlay Control - Opens an overlay that matches the button clicked or triggered
+			*/
 			overlay () {
 				if (window.DEBUG) console.log("debug - app.components.core.layouts.Options.overlay");
 				
 				if (this.curroverlay) {
-					let $overlay = this.$el.querySelector(`[role="app ${ this.curroverlay }"]`);
-					let $buttons = this.$el.querySelectorAll('.options-overlay-button');
 					let $button = this.$el.querySelector(`[data-overlay="${ this.curroverlay }"]`);
+					let $buttons = this.$el.querySelectorAll('.options-navigation-button');
+					let $overlay = this.$el.querySelector(`[role="app ${ this.curroverlay }"]`);
 					
-					_.forEach($buttons, (button) => {
+					forEach($buttons, (button) => {
 						button.classList.remove('active');
 					});
 					
 					if ($overlay) {					
 						this.options.open = true;
 						this.$el.setAttribute('data-overlay', this.curroverlay);
+						this.$el.classList.add('active');
 						
 						setTimeout(() => {
 							$overlay.classList.remove('off');
@@ -213,22 +219,6 @@
 							data: this.curroverlay
 						});							
 					}
-				}
-			},
-			onToggle () {
-				if (window.DEBUG) console.log("debug - app.components.core.layouts.Options.onToggle");
-								
-				if (this.options.open) {
-					this.options.open = false;
-					
-					this.$el.setAttribute('data-open', 'false');
-					this.$el.setAttribute('data-overlay', 'false');
-				}
-				else {
-					this.options.open = true;
-					
-					this.$el.setAttribute('data-open', 'true');
-					this.$el.setAttribute('data-overlay', 'false');
 				}
 			},
 			render () {
@@ -255,15 +245,6 @@
 					}, delay);				
 				}
 				
-				if ($buttons.length) {
-					_.forEach($buttons, (button, index) => {
-						let currindex = $buttons.length - (index);
-						
-						button.style.transform = `translateY(${ transform * currindex }px)`;
-						button.style.transitionDelay = `${ tdelay * currindex }ms`;
-					});
-				}
-				
 				if ($buttons.length && $icons.length && delay) {
 					this.rendered = true;
 				}
@@ -281,7 +262,7 @@
 			this.$router.beforeEach((to, from, next) => {		
 				if (window.DEBUG) console.log("debug - app.components.core.layouts.Options.beforeEach");
 						
-				if (this.options.open) this.close();
+				if (this.options.open) this.onClickClose();
 				
 				next();
 			});	
@@ -311,7 +292,7 @@
 				if (mutation.type === 'app/SET' && mutation.payload.key === "app:options:overlay") {
 					if (window.DEBUG) console.log("debug - app.components.core.layouts.Options.subscribe - app:options:overlay");
 					
-					this.onOverlay(null, mutation.payload.data);						
+					this.onClickOverlay(null, mutation.payload.data);						
 				}												
 			});
 			
@@ -319,7 +300,7 @@
 				if (mutation.type === 'app/SET' && mutation.payload.key === "app:close:overlay") {
 					if (window.DEBUG) console.log("debug - app.components.core.layouts.Options.subscribe - app:close:overlay");
 					
-					this.close(false);						
+					this.onClickClose(false);						
 				}												
 			});
 		}
@@ -330,66 +311,55 @@
 		
 	@import '../../../assets/styles/mixins/mixins.less';
 	
-	#options[role="app options"] {
-		button {
-			&.options-overlay-button,
-			&.options-toggle-button {
-				border-radius: 50% !important;
+	body {
+		&[data-page-mode="app"] {
+			@media (min-width: @breakpoint-lg) {
+				#options-navigation {
+					width: 58.33333% !important;
+					right: 0 !important;
+				}
 			}
 			
-			&.options-toggle-button {			
-				.options-button-open {
-					opacity: 0 !important;
-					transition-duration: 2s;
+			@media (min-width: @breakpoint-xl) {
+				#options-navigation {
+					width: 50% !important;
+					right: 0 !important;
+				}
+			}
+		}
+	
+		#options[role="app options"] {
+			#options-navigation {
+				.options-navigation {
+					border-radius: 25px !important;
 					
-					&.active {
-						opacity: 1 !important;
+					.options-navigation-button {
+						border-color: fade(white, 30) !important;
+						
+						&:first-child {
+							border: none !important;
+						}
 					}
-				}				
+				}
 			}
 			
-			&.options-overlay-button {
+			.options-overlay {
+				backdrop-filter: blur(10px);
 				transition-duration: 800ms;
 			}
+			
+			&:not([data-overlay="false"]) {
+				#options-navigation {
+					transform: translateY(100%) !important;
+					opacity: 0;
+				}
+			}
 		}
 		
-		.options-overlay {
-			transition-duration: 800ms;
-		}
-		
-		@transform: 74px;
-		
-		&:not([data-overlay="false"]) {
-			.options-menu {
-				transform: translateY(50%);
-				transition-delay: 50ms;
-				transition-duration: 600ms;
+		&[data-scroll-direction="down"] {
+			#options-navigation {
+				transform: translateY(100%) !important;
 				opacity: 0;
-			}
-		}
-		
-		&[data-open="true"] {
-			.options-overlay-button {
-				transform: translateY(0) !important;
-				opacity: 1;
-			}
-			.options-button-open {
-				display: none;
-			}
-			.options-button-close {
-				display: inline;
-			}
-		}
-		
-		&[data-open="false"] {
-			.options-overlay-button {
-				opacity: 0;
-			}
-			.options-button-open {
-				display: inline;
-			}
-			.options-button-close {
-				display: none;
 			}
 		}
 	}

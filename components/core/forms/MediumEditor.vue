@@ -1,23 +1,17 @@
 <template>
-	<div v-bind:data-editor-container="id">
-		<b-form-group 
-			v-bind:id="`form-group-${ id }`"
-			v-bind:label="label" 
-			v-bind:label-for="id" 
-			class="form-no-label">
-			<b-form-textarea 
-				class="input form-control form-medium-editor" 
-				v-bind:id="id" 
-				v-bind:placeholder="placeholder" 
-				v-bind:v-model="model" 
-				v-bind:name="model" 
-				v-b-tooltip.focus v-bind:title="title"
-				data-content-mode="block" 
-				v-bind:data-after-content="labels.editor.plaintext" 
-				v-html="value"
-				v-bind="attributes">
-			</b-form-textarea>
-		</b-form-group>		
+	<div class="form-no-label" v-bind:data-editor-container="id">
+		<b-form-textarea 
+			class="input form-control form-medium-editor" 
+			v-bind:id="id" 
+			v-bind:placeholder="placeholder" 
+			v-bind:v-model="model" 
+			v-bind:name="model" 
+			v-b-tooltip.focus v-bind:title="title"
+			data-content-mode="block" 
+			v-bind:data-after-content="labels.editor.value" 
+			v-html="value"
+			v-bind="attributes">
+		</b-form-textarea>	
 	</div>
 </template>
 
@@ -27,12 +21,21 @@ import Page from "~/helpers/core/page.js";
 export default {
 	name: 'MediumEditor',
 	components: {},
+	props: [
+		'id', 
+		'placeholder', 
+		'model', 
+		'label', 
+		'title', 
+		'attributes', 
+		'value'
+	],
 	computed: {
 		cdn () {
 			return this.$store.state.api.config.application.cdn.url;
 		},
 		labels () {
-			return this.$store.state.api.labels.app.form.medium;
+			return this.$store.state.api.labels.form.medium;
 		}
 	},
 	data () {
@@ -47,9 +50,9 @@ export default {
 			http://yabwe.github.io/medium-editor/
 		*/
 		Page.require([
-			`${ this.cdn }/vendors/medium-editor/dist/css/medium-editor.min.css`,
-			`${ this.cdn }/vendors/medium-editor/dist/css/themes/beagle.min.css`,
-			`${ this.cdn }/vendors/medium-editor/dist/js/medium-editor.min.js`
+			`${ this.cdn }/app/vendors/medium-editor/dist/css/medium-editor.min.css`,
+			`${ this.cdn }/app/vendors/medium-editor/dist/css/themes/beagle.min.css`,
+			`${ this.cdn }/app/vendors/medium-editor/dist/js/medium-editor.min.js`
 		], 
 		this.$store, 
 		(paths, error) => {
@@ -109,8 +112,7 @@ export default {
 				this.Editable.style.minHeight = this.Editable.scrollHeight
 			}
 		}
-	},
-	props: ['id', 'placeholder', 'model', 'label', 'title', 'attributes', 'value']
+	}
 }
 </script>
 

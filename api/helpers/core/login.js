@@ -23,6 +23,10 @@ module.exports = {
 			const response = await __app.helpers.core.api.connect({
 				method: 'get',
 				url: endpoint,
+				query: {
+					limit: 1,
+		            fields: '*.*.*'
+		        },
 				result: 'body'
 			}, req);
 			
@@ -37,9 +41,11 @@ module.exports = {
 		
 		req.session.user = user;
 		
-		if (res && user.id) __app.helpers.core.cookie.set('user', user.id, {
-	        maxAge: expires
-        }, req, res);	
+		if (res && user.id) {
+			__app.helpers.core.cookie.set('user', user.id, {
+		        maxAge: expires
+	        }, req, res);
+		}	
 		
 		return user;
 	}	

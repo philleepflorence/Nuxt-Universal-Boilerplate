@@ -1,42 +1,57 @@
 <template>
-	<div id="wrapper" class="animated off bg-dark bg-content" v-bind:key="keys.element">
-		<Analytics v-if="analytics"></Analytics>
-		<Introduction v-bind:elements="elements" v-bind:delay="delay" v-if="apploaded"></Introduction>
-		<LegacyBrowser v-if="applegacy"></LegacyBrowser>
-		<Navigation></Navigation>
-		<Disclaimer v-if="apploaded" v-show="apprendered"></Disclaimer>
-		<DeviceOrientation v-if="apploaded"></DeviceOrientation>
-		<Options v-show="apprendered"></Options>
-		<div id="content" class="vh-100 position-relative bg-dark bg-content animated fadeIn" role="app content" v-show="apprendered">
+	<div id="wrapper" class="animated off bg-content" v-bind:key="keys.element">
+		
+		<app-component-layout-analytics v-if="analytics"></app-component-layout-analytics>
+		
+		<app-component-layout-introduction v-bind:elements="introduction" v-bind:delay="delay" v-if="apploaded"></app-component-layout-introduction>
+		
+		<app-component-layout-legacy-browser v-if="applegacy"></app-component-layout-legacy-browser>
+		
+		<app-component-layout-navigation></app-component-layout-navigation>
+		
+		<app-component-layout-disclaimer v-if="apploaded" v-show="apprendered"></app-component-layout-disclaimer>
+		
+		<app-component-layout-device-orientation v-if="apploaded"></app-component-layout-device-orientation>
+		
+		<app-component-layout-options v-show="apprendered"></app-component-layout-options>
+		
+		<app-component-layout-notifications v-show="apprendered"></app-component-layout-notifications>
+		
+		<div id="content" class="vh-100 position-relative bg-content transition animated fadeIn" role="app content" v-show="apprendered">
 			<nuxt />
 		</div>
+		
 	</div>
 </template>
 
 <script>
+	import { get } from "lodash";
+	
+	import ComponentLayoutAnalytics from "~/components/core/layouts/Analytics.vue";
+	import ComponentLayoutDeviceOrientation from "~/components/core/layouts/DeviceOrientation.vue";
+	import ComponentLayoutDisclaimer from "~/components/core/layouts/Disclaimer.vue";
+	import ComponentLayoutIntroduction from "~/components/core/layouts/Introduction.vue";
+	import ComponentLayoutLegacyBrowser from "~/components/core/layouts/LegacyBrowser.vue";
+	import ComponentLayoutNavigation from "~/components/core/layouts/Navigation.vue";
+	import ComponentLayoutNotifications from "~/components/core/layouts/Notifications.vue";
+	import ComponentLayoutOptions from "~/components/core/layouts/Options.vue";
+	
+	import Alert from "~/helpers/core/alert.js";
 	import Page from "~/helpers/core/page.js";
 	
-	import Analytics from "~/components/core/layouts/Analytics.vue";
-	import DeviceOrientation from "~/components/core/layouts/DeviceOrientation.vue";
-	import Disclaimer from "~/components/core/layouts/Disclaimer.vue";
-	import Introduction from "~/components/core/layouts/Introduction.vue";
-	import LegacyBrowser from "~/components/core/layouts/LegacyBrowser.vue";
-	import Navigation from "~/components/core/layouts/Navigation.vue";
-	import Options from "~/components/core/layouts/Options.vue";
-	import _ from "lodash";
-	
 	export default {
-		name: "Layout",
+		name: "LayoutDefault",
 		components: {
-			Analytics,
-			DeviceOrientation,
-			Disclaimer,
-			Introduction,
-			LegacyBrowser,
-			Navigation,
-			Options
+			'app-component-layout-analytics': ComponentLayoutAnalytics,
+			'app-component-layout-device-orientation': ComponentLayoutDeviceOrientation,
+			'app-component-layout-disclaimer': ComponentLayoutDisclaimer,
+			'app-component-layout-introduction': ComponentLayoutIntroduction,
+			'app-component-layout-legacy-browser': ComponentLayoutLegacyBrowser,
+			'app-component-layout-navigation': ComponentLayoutNavigation,
+			'app-component-layout-notifications': ComponentLayoutNotifications,
+			'app-component-layout-options': ComponentLayoutOptions
 		},
-		data() {
+		data () {
 			return {
 				keys: {
 					element: Page.utils.rand()
@@ -44,18 +59,26 @@
 				supported: false,
 				applegacy: false,
 				apploaded: false,
-				apprendered: false
+				apprendered: false,
+				scroll: {
+					direction: null,
+					top: 0
+				},
+				timers: {
+					loaded: 0,
+					scroll: 0
+				}
 			};
 		},
 		computed: {
 			analytics () {
-				return process.env.APP_ANALYTICS === true;
+				return process.env.APP_ANALYTICS === 'true';
 			},
 			delay () {
-				return _.get(this.$store.state.api.config, 'application.introduction.delay');
+				return get(this.$store.state.api.config, 'application.introduction.delay');
 			},
-			elements () {
-				return _.get(this.$store.state.api.config, 'application.introduction.elements');
+			introduction () {
+				return get(this.$store.state.api.labels, 'content.introduction');
 			},
 			touchscreen () {
 				return (('ontouchstart' in window) || (navigator.MaxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0));
@@ -149,6 +172,10 @@
 					});
 					this.$store.commit('event/SET', ['app:loaded', 'Layout']);
 				}, 500);
+			
+				this.$router.afterEach((to, from) => {
+					window.document.body.setAttribute('data-scroll-direction', 'down');
+				});
 			},
 			mousemove (e) {
 				if (document.body.getAttribute('data-device-control') !== 'touch') {
@@ -157,21 +184,38 @@
 					this.$store.commit('app/SET', {
 						key: "control",
 						data: 'mouse'
-					});					
+					});	
+					
+					this.focus();				
 				}
 				
 				window.removeEventListener('mousemove', this.mousemove);
+			},
+			onScroll (e) {
+				clearTimeout(this.timers.scroll);
+				
+				this.timers.scroll = setTimeout(() => {
+					if (typeof window.pageYOffset !== "number") return false;
+					
+					if (!window.pageYOffset || window.pageYOffset > this.scroll.top) this.scroll.direction = 'down';
+					else this.scroll.direction = 'up';
+					
+					this.scroll.top = window.pageYOffset;
+					
+					window.document.body.setAttribute('data-scroll-direction', this.scroll.direction);
+				}, 
+				100);
 			},
 			render () {
 				if (window.DEBUG) console.log("debug - app.layouts.default.render");
 				
 				this.$el.classList.remove('off');
-				this.$el.classList.add('fadeIn');
+				this.$el.classList.add('fadeIn', 'on');
 				
 				if (!this.supported) {
 					this.applegacy = true;
 				}
-				else if (this.delay && this.elements) {
+				else if (this.delay && this.introduction) {
 					setTimeout(() => {
 						this.apprendered = true;
 					}, this.delay);
@@ -180,13 +224,26 @@
 					this.apprendered = true;
 				}
 				
-				setTimeout(() => {
-					this.$store.commit('app/SET', {
-						key: "rendered",
-						data: Date.now()
-					});
-					this.$store.commit('event/SET', ['app:rendered', 'Layout']);
-				}, this.delay || 10);			
+				setTimeout(this.rendered, this.delay || 10);			
+			},
+			rendered () {
+				if (window.DEBUG) console.log("debug - app.layouts.default.rendered");
+				
+				if (process.env.LOADED_MESSAGE) {
+					clearTimeout(this.timers.loaded);
+					
+					this.timers.loaded = setTimeout(() => {
+						Alert.show(process.env.LOADED_MESSAGE, false, 5000);
+					}, 
+					100);
+				}
+				
+				this.$store.commit('app/SET', {
+					key: "rendered",
+					data: Date.now()
+				});
+				
+				this.$store.commit('event/SET', ['app:rendered', 'Layout']);
 			},
 			touchstart (e) {
 				document.body.setAttribute('data-device-control', 'touch');
@@ -206,7 +263,15 @@
 		beforeMount () {
 			if (window.DEBUG) console.log("debug - app.layouts.default.beforeMount - ENVIRONMENT", process.env.SERVER_ENVIRONMENT);
 			
-			if (process.env.SERVER_ENVIRONMENT === 'development') window.DEBUG = true;
+			if (['development', 'staging', 'qa'].includes(process.env.SERVER_ENVIRONMENT)) window.DEBUG = true;
+			
+			const urlParams = new URLSearchParams(window.location.search);
+			const source = urlParams.get('source') === "pwa" ? "pwa" : "browser";
+				
+			this.$store.commit('app/SET', {
+				key: "source",
+				data: source
+			});
 			
 			if (this.touchscreen) document.body.setAttribute('data-device-control', 'touch');
 			else {
@@ -214,14 +279,15 @@
 				window.addEventListener('touchstart', this.touchstart);
 			}
 			
-			this.supported = typeof Array.prototype.find === "function" && typeof Array.prototype.includes === "function" && typeof JSON.parse === "function" && window.localStorage;
+			this.supported = typeof Array.prototype.find === "function" && typeof Array.prototype.includes === "function" && typeof JSON.parse === "function" && window.localStorage && "Notification" in window && window.navigator.geolocation; 
 			
 			if (this.supported) {
 				window.addEventListener('load', this.loaded);
 				window.addEventListener("beforeunload", this.unload);
 				window.addEventListener('error', this.error);
+				window.addEventListener('scroll', this.onScroll);
 				
-				this.focus();
+				window.document.body.setAttribute('data-scroll-direction', 'down');
 			}
 		},
 		mounted () {			
@@ -283,8 +349,20 @@
 					z-index: 2000;
 				}
 				
-				#legacy-browser[role="app legacy-browser"] {
+				#notifications[role="app notifications"] {
 					z-index: 3000;
+				}
+				
+				#legacy-browser[role="app legacy-browser"] {
+					z-index: 4000;
+				}
+				
+				.page-enter-active,
+				.page-leave-active, 
+				.page-enter,
+				.page-leave-to {
+					animation: none;
+					transition: none;
 				}
 			}
 		}

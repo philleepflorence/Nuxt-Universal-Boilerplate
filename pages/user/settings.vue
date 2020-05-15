@@ -1,112 +1,80 @@
 <template>
-	<div>
-		<UserWrapper v-bind:content="content">
-			<div class="max-w-540px mx-auto my-4 plain-form">
-				<Form v-bind:id="form.id" v-bind:path="form.path" v-bind:autocomplete="form.autocomplete" v-bind:options="form.options" v-bind:formdata="formdata" v-bind:skipEmpty="form.skipEmpty">
-					<input type="hidden" class="input" name="form.id" v-bind:value="content.user.id">
-					<input type="hidden" class="input" name="redirect" v-bind:value="redirect">
-					<div class="row">
-						<div class="col-span col-md-6" v-for="input in inputs" v-bind:key="input.slug">
-							<div class="form-group">
-								<b-form-group 
-									v-bind:id="`form-group-${ input.slug }`" 
-									v-bind:label="input.plaintext" 
-									v-bind:label-for="`form-${ input.slug }`" 
-									class="form-no-label">
-									<b-form-input 
-										class="input"
-										v-bind:id="`form-${ input.slug }`" 
-										v-bind:type="input.input_type" 
-										v-bind:placeholder="input.plaintext"
-										v-bind:name="`form.${ input.slug }`" 
-										v-bind:value="user(input)" 
-										v-b-tooltip.focus v-bind:title="input.hint"
-										v-bind="attributes(input.attributes)">
-									</b-form-input>
-								</b-form-group>
-							</div>
-						</div>
-						<div class="col-span col-md-12" v-if="labels.label.image">
-							<div class="form-group">
-								<FileInput 
-									v-bind:id="`form-group-${ labels.label.image.slug }`" 
-									v-bind:label="labels.label.image.plaintext" 
-									v-bind:placeholder="labels.label.image.plaintext"
-									v-bind:model="`form.${ labels.label.image.slug }`" 
-									v-bind:title="labels.label.image.hint" 
-									v-bind:attributes="attributes(labels.label.image.attributes)">
-								</FileInput>
-							</div>
-						</div>
-						<div class="col-span col-md-12" v-if="labels.label.bio">
-							<div class="form-group">
-								<MediumEditor 
-									v-bind:id="labels.label.bio.slug" 
-									v-bind:label="labels.label.bio.plaintext" 
-									v-bind:placeholder="labels.label.bio.plaintext"
-									v-bind:model="`form.${ labels.label.bio.slug }`"
-									v-bind:attributes="attributes(labels.label.bio.attributes)" 
-									v-bind:title="labels.label.bio.hint" 
-									v-bind:value="user(labels.label.bio)">
-								</MediumEditor>
-							</div>
-						</div>
-					</div>					
-					<div class="form-group form-footer text-center">
-						<b-button type="submit" variant="primary" class="w-100 text-uppercase font-weight-book form-button">{{ labels.label.submit.plaintext }}</b-button>
-					</div>
-				</Form>
-			</div>
-		</UserWrapper>
+	<div class="page-container" v-bind:key="keys.page">
+		<PageWrapper v-bind:page="page" v-bind:background="true" v-bind:contents="page.contents" v-bind:synopsis="page.synopsis" v-bind:subnavigation="subnavigation">
+		
+			<template v-slot:contents>
+			
+				<div class="plain-form form-line bg-white p-4 mb-2">
+					<Form 
+						v-if="section == 'profile'"
+						v-bind:id="`${ form.slug }-form`" 
+						v-bind:formname="form.slug"
+						v-bind:inputs="inputs.inputs"
+						v-bind:button="inputs.submit"
+						v-bind:path="endpoint" 
+						v-bind:defaults="content" 
+						options="true" 
+						clearonsuccess="true" 
+						autocomplete="off"
+						data-tooltip-container="width">
+							
+						<template v-slot:hidden>
+							<input type="hidden" class="input" name="form.id" v-bind:value="content.user.id">
+							<input type="hidden" class="input" name="form.template" v-bind:value="form.template">
+							<input type="hidden" class="input" name="redirect" v-bind:value="redirect">
+						</template>
+																						
+					</Form>
+				</div>
+							
+			</template>
+			
+		</PageWrapper>
 	</div>
 </template>
 
-<script>	
-	import _ from 'lodash';	
-	import UserWrapper from "~/components/core/wrappers/User.vue";
-	import MediumEditor from "~/components/core/forms/MediumEditor.vue";
-	import FileInput from "~/components/core/forms/FileInput.vue";
-	import Form from "~/components/core/forms/Form.vue";
-	import Page from "~/helpers/core/page.js";
+<script>
+	import { get } from 'lodash';
+	import moment from 'moment';
+	
+	import Page from "~/helpers/core/page.js";	
+		
+	import Form from "~/components/core/forms/Form.vue";	
+	import Loader from "~/components/core/pages/Loader.vue";
+	import PageWrapper from "~/components/core/wrappers/Page.vue";
 	
 	export default {
-		name: "SettingsProfile",
+		name: "PageProfileSettings",
 		components: {
-			Form, UserWrapper, MediumEditor, FileInput
+			Form,
+			Loader,
+			PageWrapper
 		},
 		computed: {
 			configuration () {
 				return this.$store.state.api.config;
 			},
+			endpoint () {
+				return this.$store.state.app.endpoints.user.settings;
+			},
 			icons () {
 				return this.$store.state.api.icons;
 			},
-			formdata () {
-				let inputs = this.$store.state.api.labels['settings-profile'].form.label;
-				let data = {};
-				
-				_.forEach(inputs, (input) => {
-					let password = typeof input.attributes === 'string' && input.attributes.includes('new-password');
-					
-					if (!password && ['input', 'textarea', 'select'].includes(input.form_type)) _.set(data, input.slug, _.get(this.content.user, input.slug));
-				});
-				
-				return { form: data };
+			form () {
+				return get(this.$store.state.api.forms, 'settings-profile');
 			},
 			inputs () {
-				let inputs = this.$store.state.api.labels['settings-profile'].form.label;
+				let form = get(this.forms, 'settings-profile');
 				
-				inputs = _.filter(inputs, (row) => {
-					return row.form_type === 'input';
-				});
+				let inputs = Page.inputs(this.form.inputs);
 				
 				return inputs;
 			},
 			labels () {
-				return this.$store.state.api.labels['settings-profile'].form;
+				return this.page.labels;
 			},
 			page () {
-				return Page.get(this.pages, true, 'profile');
+				return Page.get(this.pages, true, 'settings-profile');
 			},
 			pages () {
 				return this.$store.state.api.pages;
@@ -115,72 +83,80 @@
 				return this.$route.path;
 			},
 			redirect () {
-				return this.$store.state.api.redirects.route.settings.url
+				return get(this.$store.state.api.redirects, 'route.settings.url');
+			},
+			section () {
+				if (!this.content) return null;
+				
+				if (this.$route.params.section) return this.$route.params.section;
+				
+				return 'profile';
+			},
+			subnavigation () {
+				let navigation = this.$store.state.api.navigation;
+				
+				if (navigation && "accounts" in navigation) return navigation.accounts;
+				
+				return null;
+			},
+			username () {
+				return get(this.$store.state.user, 'username');
 			}
 		},
-		async asyncData ({ params, error, req }) {
-			
+		methods: {
+			async load () {
+				if (window.DEBUG) console.log("debug - app.pages.user.settings.load");
+				
+				this.loading = true;
+				
+				let user = await this.$store.dispatch('contents/LOAD', {
+					url: '/api/auth/user',
+					collection: 'users',
+					query: {
+						form: {
+							username: {
+								eq: this.username
+							}
+						}
+					},
+					cache: false
+				});
+				
+				if (window.DEBUG) console.log("debug - app.pages.user.settings.loaded");
+				
+				if (!user || !user.id) return window.$nuxt.error({statusCode: 404, message: '--' });
+				
+				this.content = {
+					user: user
+				};
+				
+				this.loading = false;
+				
+				this.keys.page = Page.utils.rand();
+				
+				return this.content;
+			}
+		},
+		async asyncData ({ params, error, req, store, route, from }) {
 			if (req && req.contents) {
 				return {
 					content: req.contents
 				};
-			}
-			else if (!process.server) {																
-				let content = await store.dispatch('contents/LOAD', {
-					url: '/api/contents/profile',
-					collection: 'users',
-					cache: false
-				});
-				
-				if (!content) return error(500);
-				
-				let cache = from.path.indexOf(route.path) === 0;
-						
-				return {
-					content: content,
-					cache: cache
-				};
-			}
+			}			
 		},
 		data () {
 			return {
-				form: {
-					autocomplete: 'off',
-					id: 'user-settings-form',
-					options: true,
-					path: this.$store.state.app.endpoints.user.settings,
-					skipEmpty: true
+				content: null,
+				keys: {
+					form: Page.utils.rand(),
+					page: Page.utils.rand()
 				}
 			};
 		},
-		methods: {
-			attributes (attributes) {
-				return Page.utils.attributes(attributes);
-			},
-			user (input) {
-				if (typeof input.attributes === 'string' && input.attributes.includes('new-password')) return '';
-				
-				return _.get(this.content.user, input.slug);
-			}
-		},
 		mounted () {		
 			if (window.DEBUG) console.log("debug - app.pages.user.settings.mounted");
-		},
-		updated () {			
-			if (window.DEBUG) console.log("debug - app.pages.user.settings.updated");
+			
+			if (!this.content && !this.loading) this.load();
 		}
 	}
 </script>
-
-<style lang="less" scoped>
-	@spacer: 5px;
-	.row {
-		margin-right: -@spacer;
-		margin-left: -@spacer;
-		
-		.col-span {
-			padding-right: @spacer;
-			padding-left: @spacer;
-		}
-	}
-</style>

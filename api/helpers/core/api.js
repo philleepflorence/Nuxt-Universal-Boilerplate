@@ -9,9 +9,8 @@
  *
  */
  
-import _ from 'lodash';
-import ip from 'ip';
-import useragent from 'useragent';
+import { forEach, get, merge, set } from 'lodash';
+import UAParser from 'ua-parser-js';
 import superagent from 'superagent';
 import queryString from 'query-string';
 
@@ -25,9 +24,9 @@ module.exports = {
 		
 		api = api || 'directus';
 		
-		let config = _.merge(__app.config.api, __app.config.app);
+		let config = merge(__app.config.api, __app.config.app);
 		
-		return _.get(config, `${api}.collections.${ collection }`);
+		return get(config, `${api}.collections.${ collection }`);
 	},
 	
 	/*
@@ -38,9 +37,9 @@ module.exports = {
 		
 		api = api || 'directus';
 		
-		let config = _.merge(__app.config.api, __app.config.app);
+		let config = merge(__app.config.api, __app.config.app);
 		
-		return _.get(config, `${api}.credentials`);
+		return get(config, `${api}.credentials`);
 	},
 	
 	/*
@@ -51,9 +50,9 @@ module.exports = {
     {
 	    api = api || 'directus';
 		
-		let config = _.merge(__app.config.api, __app.config.app);
+		let config = merge(__app.config.api, __app.config.app);
         	    
-	    return _.get(config, `${api}.domain`);
+	    return get(config, `${api}.domain`);
     },
 	
 	/*
@@ -73,19 +72,37 @@ module.exports = {
 	    env = env || process.env.SERVER_ENVIRONMENT || 'production';
 	    
 	    let domain = this.domain(api, env);
-	    let config = _.merge(__app.config.api, __app.config.app);
+	    let config = merge(__app.config.api, __app.config.app);
 	    
-	    endpoint = _.get(config, `${api}.endpoints.${endpoint}.url`);	    
+	    endpoint = get(config, `${api}.endpoints.${endpoint}.url`);	    
 	    endpoint = endpoint.replace(':domain', domain);
 	    
-	    if (params) _.forEach(params, function (value, key)
+	    if (params) forEach(params, function (value, key)
 	    {
-		    if (key === 'collection') value = _.get(config, `${api}.collections.${value}`);
+		    if (key === 'collection') value = get(config, `${api}.collections.${value}`);
 		    
 		    endpoint = endpoint.replace(`:${key}`, value);
 	    });
         	    
 	    return endpoint;
+    },
+	
+	/*
+        Get the fields to load from a collection - allows other helpers to be agnostic of the API database
+        PARAMETERS:
+        	collection: collection alias or name
+        	api: the API to connect with
+    */
+
+    fields (collection, api)
+    {
+	    api = api || 'directus';
+	    
+	    let config = merge(__app.config.api, __app.config.app);
+	    
+	    let fields = get(config, `${api}.fields.${collection}`);
+        	    
+	    return fields;
     },
     
     /*
@@ -99,12 +116,25 @@ module.exports = {
 	        	headers: additional headers to send - see default values below
         	}
         DEPENDENTS:
-            axios - npm install @nuxtjs/axios --save
+            superagent - npm install superagents --save
     */
     
 	async connect (options, req) {
 		
 		__app.debugger.info('api.helpers.core.api.connect - Endpoint: `%s`', options.url);
+		
+		const uaparser = new UAParser(get(req.headers, 'user-agent'));
+		
+		let agent = uaparser.getResult();	
+		let user = get(req.session, 'user') || req.me || {};
+		let userData = user ? {
+			id: user.id,
+			first_name: user.first_name,
+			last_name: user.last_name,
+			username: user.username,
+			email: user.email,
+			name: user.name
+		} : {};
 		
 		options.method = options.method || 'get';
 		options.send = options.send || {};
@@ -112,9 +142,13 @@ module.exports = {
 		options.headers = options.headers || {};
 		options.headers = options.method === 'get' ? options.headers : Object.assign({
 			'Content-type': 'application/json',
-			'User-Agent': _.get(req, 'headers[user-agent]', 'SuperAgent'),
-			'Ip-Address': ip.address(),
-			'App-User': _.get(req, 'me.id', 0),
+			'Browser': get(agent.browser, 'name', ''),
+			'Operating-System': get(agent.os, 'name', ''),
+			'Device': get(agent.device, 'model', ''),
+			'User-Agent': uaparser.getUA(),
+			'Ip-Address': req.ip_address,
+			'App-User': user.id || 0,
+			'App-User-Data': JSON.stringify(userData),
 			'App-Environment': process.env.SERVER_ENVIRONMENT,
 			'App-Domain': process.env.SERVER_DOMAIN
 		}, options.headers); 
@@ -141,15 +175,21 @@ module.exports = {
 			
 			result.duration = duration;
 			
-			if (options.result) return _.get(result, options.result);
+			if (options.result) return get(result, options.result);
 			
 			return result;	        
         }
         catch (err) {
+
+	        let error = get(err, 'response.text') || get(err, 'response.body');
 	        
-	        __app.debugger.info('api.helpers.core.api.connect - Error!');
+	        if (typeof error === "string") error = JSON.parse(error);
 	        
-	        return err;
+	        let message = get(error, 'error.message') || get(error, 'message');
+	        
+	        __app.debugger.info('api.helpers.core.api.connect - Error: `%s`!', message);
+	        
+	        return error;
         }
 	}
 }

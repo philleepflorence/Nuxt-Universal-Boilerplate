@@ -10,7 +10,7 @@
  *
  */
 
-import _ from 'lodash';
+import { get, set, size } from 'lodash';
 import bytes from 'bytes';
 import moment from 'moment';
 
@@ -24,13 +24,14 @@ module.exports = {
 		__app.debugger.debug('api.controllers.form.upload');
 		
 		const debug = req.query.debug || req.body.debug;
-		const dateformat = _.get(__app.data, 'configuration.application.format.date') || 'LLLL';
+		const dateformat = get(__app.data, 'configuration.application.format.date') || 'LLLL';
+		
 		let file = req.body.file;
 		let test = await this.test(req, res);
 		
 		if (req.query.debug === 'test' && !file) file = test.body.file;
 				
-		if (!_.size(file)) return res.status(400).send("File is required!");	
+		if (!size(file)) return res.status(400).send("File is required!");	
 		
 		let endpoint = __app.helpers.core.api.endpoint('form.upload');
 		
@@ -47,12 +48,19 @@ module.exports = {
 			result: 'body'
 		}, req);
 		
-		file = _.get(response, 'data');
+		file = get(response, 'data');
 		
-		let date_uploaded = new Date( file.date_uploaded ).getTime();
+		if (!file || response.error) {
+			return res.json({
+				error: true,
+				message: get(response, 'error.message')
+			});
+		}
 		
-		_.set(file, 'formated.size', bytes(file.size));
-		_.set(file, 'formated.uploaded', moment(date_uploaded).format(dateformat));
+		let date_uploaded = new Date( file.uploaded_on ).getTime();
+		
+		set(file, 'formated.size', bytes(file.filesize));
+		set(file, 'formated.uploaded', moment(date_uploaded).format(dateformat));
 	    
         return res.json({
             success: true,
@@ -72,7 +80,7 @@ module.exports = {
 			body: {
 				file: {
 					data: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
-					name: "transparent-image-test.png",
+					filename_download: "transparent-image-test.png",
 					title: "Express Server Controller Unit Test"
 				}
 			},

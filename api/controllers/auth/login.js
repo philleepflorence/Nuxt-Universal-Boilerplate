@@ -28,7 +28,7 @@ module.exports = {
 		let redirect = req.body.redirect || _.get(__app.data, 'redirects.route.authenticated.url');
 		
 		const test = await this.test(req, res);
-		const responses = _.get(__app.data, 'labels.app.form.auth');
+		const responses = _.get(__app.data, 'responses.auth.login');
 		
 		if (admin && !form) form = test.body.form;
 		
@@ -55,12 +55,12 @@ module.exports = {
 			result: 'body'
 		}, req);
 		
-		if (!response.success) return res.json({
+		if (!_.get(response, 'data.id')) return res.json({
 			error: _.get(responses, 'login-error.value'),
-			message: response.error
+			response: response.message
 		}); 
-		
-		const user = await __app.helpers.core.login.user(response.user.id, req, res, response.user);
+
+		const user = await __app.helpers.core.login.user(response.data.id, req, res, response.data);
 		
 		return res.json({
 			success: _.get(responses, 'login-success.value'),

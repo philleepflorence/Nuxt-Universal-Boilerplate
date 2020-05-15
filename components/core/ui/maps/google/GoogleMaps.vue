@@ -48,7 +48,7 @@
 				return this.$store.state.api.icons;
 			},
 			labels () {
-				return this.$store.state.api.labels.app.form.maps;
+				return this.$store.state.api.labels.form.maps;
 			},
 			path () {
 				return this.$route.path;
@@ -103,7 +103,7 @@
 			},
 			clusters (map, bounds) {
 				Page.require([
-					`${ this.cdn }/vendors/markerclustererplus/dist/markerclusterer.min.js`
+					`${ this.cdn }/app/vendors/markerclustererplus/dist/markerclusterer.min.js`
 				], this.$store, () => {
 					map.markerCluster = new MarkerClusterer(map, this.map.markers.markers, {
 			        	averageCenter: true,

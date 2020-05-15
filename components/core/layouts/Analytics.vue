@@ -3,18 +3,19 @@
 </template>
 
 <script>
+	import { cloneDeep, forEach, get, trimEnd } from "lodash";
+	import { stringify } from 'query-string';
+	
 	import Page from "~/helpers/core/page.js";
-	import Handlebars from 'handlebars/dist/handlebars.min.js';
-	import _ from "lodash";
 	
 	export default {
-		name: "Analytics",
+		name: "AnalyticsLayoutComponent",
 		computed: {
 			configuration () {
 				return this.$store.state.api.config.analytics;
 			},
 			downloadtime () {
-				const timing = _.get(window, 'performance.timing');
+				const timing = get(window, 'performance.timing');
 				
 				if (!timing) return null;
 								
@@ -23,7 +24,7 @@
 				return loadtime;
 			},
 			loadtime () {
-				const timing = _.get(window, 'performance.timing');
+				const timing = get(window, 'performance.timing');
 				
 				if (!timing) return null;
 								
@@ -33,24 +34,35 @@
 			},
 			page () {
 				let pages = this.$store.state.api.pages;
-				let page = Page.get(pages, Page.path()) || {};
+				let page = Page.get(pages, Page.path(this.$router.path)) || {};
 				
 				return page;
 			},
 			path () {
-				let pathname = window.location.pathname;
-				let hash = window.location.hash;
+				let pathname = this.$route.path;
+				let hash = this.$route.hash;
+				let query = this.$route.query;
 				
 				if (hash) {
-					pathname = _.trimEnd(pathname, '/');
+					pathname = trimEnd(pathname, '/');
 					
 					return `${ pathname }/${ hash }`;
+				}
+				
+				if (this.source === "pwa") {
+					query = {...query, ...{
+						source: "pwa"
+					}};
+					
+					query = stringify(query);
+					
+					pathname = `${ pathname }?${ query }`;
 				}
 				
 				return pathname;
 			},
 			rendertime () {
-				const timing = _.get(window, 'performance.timing');
+				const timing = get(window, 'performance.timing');
 				
 				if (!timing) return null;
 								
@@ -61,33 +73,42 @@
 		},
 		data () {
 			return {
-				enabled: process.env.GOOGLE_ANALYTICS,
+				enabled: process.env.GOOGLE_ANALYTICS === 'true',
 				loaded: true,
 				timingtimer: 0,
 				time: {
 					incoming: 0,
 					outgoing: 0
-				}
+				},
+				source: null
 			};
 		},
 		methods: {
-			error (e) {				
+			async error (e) {				
+				if (window.DEBUG) console.log("debug - app.components.core.layouts.Analytics.error");
+				
 				let data = {
 					message: e.message,
 					filename: e.filename,
 					url: window.location.href,
-					lineNumber: e.lineno,
-					columnNumber: e.colno,
-					error: _.get(e.error, 'stack'),
-					userAgent: navigator.appVersion
-				}
+					line_number: e.lineno,
+					column_number: e.colno,
+					error: get(e.error, 'stack'),
+					user_agent: navigator.appVersion
+				};
 				
-				Page.post('/app/error', { form: data });
+				let response = await Page.post('/api/app/error', { form: data });
+				
+				if (window.DEBUG) console.log("debug - app.components.core.layouts.Analytics.error.response");
 				
 				if (this.enabled) {
 					this.init(this.path, 'error', {
 						message: `${ data.message } @ Line: ${ data.linenumber } on ${ data.url }`,
-						params: data
+						params: {
+							category: 'Application Error',
+							label: this.page.name,
+							value: get(response, 'data.id')
+						}
 					});					
 				}
 			},
@@ -100,10 +121,10 @@
 				so you can see exactly what data is being tracked.
 				To override, add variable to URL on page init: analytics=debug
 			*/
-			google (path, type, params) {			
+			google (path, type, params = {}) {			
 				const initialize = () => {
-					let UUID = _.get(this.configuration, 'google.id');
-					let debug = _.get(this.configuration, 'google.debug');
+					let UUID = get(this.configuration, 'google.id');
+					let debug = get(this.configuration, 'google.debug');
 						debug = debug || window.location.search.indexOf('analytics=debug') > 0;
 					let urlpath = debug ? 'analytics_debug' : 'analytics';
 					
@@ -134,7 +155,7 @@
 				const track = () => {
 					let result = null;
 		
-					params = params || _.get(this.configuration, `types.${ type }`) || {};
+					params = params || get(this.configuration, `types.${ type }`) || {};
 		
 					switch (type)
 		            {
@@ -203,16 +224,18 @@
 				if (!window.ga) initialize();
 				else if (window.ga && path && type) track();
 			},
-			init (path, type, params) {
-			    let apis = _.get(this.configuration, 'apis');	 
-			    var options = _.get(this.configuration, 'options');
+			init (path, type, params = {}) {
+			    if (window.DEBUG) console.log(`debug - app.components.core.layouts.Analytics.init - Path: ${ path }, Type: ${ type }, Referrer: ${ params.referrer }`);
+			    
+			    let apis = get(this.configuration, 'apis');	 
+			    var options = get(this.configuration, 'options');
 			    			    
-			    if (options && _.get(options, type)) {
+			    if (options && get(options, type)) {
 				    this.send(path, type, params);	
 			    }   
 				
 				if (apis) {
-					_.forEach(apis, (value, api) => {
+					forEach(apis, (value, api) => {
 						if (typeof this[api] === 'function' && typeof api === "string") this[api](path, type, params);
 					});
 				}
@@ -221,36 +244,49 @@
 			initTiming () {
 				clearTimeout(this.timingtimer);
 				
+				if (window.DEBUG) console.log("debug - app.components.core.layouts.Analytics.initTiming");
+				
 				this.timingtimer = setTimeout(() => {
 					this.timing({
 						category: "Application Loaded",
-						value: this.loadtime
+						value: this.loadtime,
+						referrer: this.referrer
 					});
 					
 					this.timing({
 						category: "Application Rendered",
-						value: this.rendertime
+						value: this.rendertime,
+						referrer: this.referrer
 					});
 					
 					this.timing({
 						category: "Application Downloaded",
-						value: this.downloadtime
+						value: this.downloadtime,
+						referrer: this.referrer
 					});					
 				}, 1000);
 			},
-			outbound (element, params) {
+			outbound (element, params = {}) {
 			    let href = e.currentTarget.href;
 			    
 			    params = params || {};
-				params = _.cloneDeep(params, _.get(this.configuration, 'types.link'));
+				params = cloneDeep(params, get(this.configuration, 'types.link'));
 				params.label = params.label || $this.attr('href');
 			
 				this.init(href, 'event', params);
 				
 			},
-			send (path, type, params) {
+			send (path, type, params = {}) {
 				path = (typeof path === "boolean") ? this.path : path;
-		
+				
+				let $params = get(this.page, `analytics.${ type }.page`); 
+				
+				if ($params) params = {...$params, ...params};
+				
+				params.label = params.label || this.page.name;
+				
+				if (window.DEBUG) console.log(`debug - app.components.core.layouts.Analytics.send - Path: ${ path }, Type: ${ type }, Category: ${ params.category }`);
+										
 				switch (type)
 		        {
 					case 'timing':
@@ -264,7 +300,8 @@
 								value: params.value,
 								label: params.label || params.analyticsLabel,
 								url: path,
-								page: params.page || this.page.id
+								page: params.page || this.page.id,
+								referrer: params.referrer
 							}					
 						});
 		
@@ -281,13 +318,32 @@
 								value: params.value || params.analyticsValue,
 								label: params.label || params.analyticsLabel,
 								url: path,
-								page: params.page || this.page.id
+								page: params.page || this.page.id,
+								referrer: params.referrer
 							}						
 						});
 		
 					break;
 		
 					case 'pageview':
+											
+						Page.post('/api/app/analytics', 
+						{
+							analytics: {
+								type: type,
+								category: params.category,
+								action: params.action,
+								value: params.value,
+								label: params.label,
+								url: path,
+								page: params.page || this.page.id,
+								referrer: params.referrer
+							}						
+						});
+		
+					break;
+		
+					case 'pageload':
 					
 						Page.post('/api/app/analytics', 
 						{
@@ -298,7 +354,8 @@
 								value: params.value,
 								label: params.label,
 								url: path,
-								page: params.page || this.page.id
+								page: params.page || this.page.id,
+								referrer: params.referrer
 							}						
 						});
 		
@@ -315,7 +372,8 @@
 								value: params.value || params.analyticsValue,
 								label: params.label,
 								url: path,
-								page: params.page || this.page.id
+								page: params.page || this.page.id,
+								referrer: params.referrer
 							}						
 						});
 		
@@ -327,29 +385,35 @@
 						{
 							analytics: {
 								type: type,
-								category: params.category,
+								category: params.category || 'Application Error',
 								action: 'exception',
 								value: params.value,
+								label: params.label,
 								url: path,
-								page: params.page || this.page.id
+								page: params.page || this.page.id,
+								referrer: params.referrer
 							}						
 						});
 		
 					break;
 				}
 			},
-			timing (params) {
-				params = params || {};
+			timing (params = {}) {
 				params.category = params.category || "Page Loaded";
-				params.label = params.label || document.title;
+				params.label = params.label || this.page.name || document.title;
 				
-				this.init(true, 'timing', params);
+				this.init(this.path, 'timing', params);
 			}
 		},
 		mounted () {
 			this.loaded = this.$store.state.app.loaded;
 			
 			if (window.DEBUG) console.log("debug - app.components.core.layouts.Analytics.mounted");
+			
+			this.source = this.$store.state.app.source;
+			this.referrer = window.document.referrer;
+			
+			if (this.referrer.indexOf(window.location.origin) === 0) this.referrer = this.referrer.replace(window.location.origin, '');
 			
 			if (this.loaded) {
 				this.initTiming();
@@ -377,20 +441,20 @@
 			});		
 			
 			this.$router.afterEach((to, from) => {
+				if (window.DEBUG) console.log("debug - app.components.core.layouts.Analytics.mounted.afterEach", this.referrer);
+				
 				this.time.incoming = Date.now() - this.time.outgoing;
 				
 				setTimeout(() => {
-					this.init(this.path, "pageview");
+					this.init(this.path, "pageview", { referrer: from.path });
 					
 					this.timing({
 						category: "Page Loaded",
-						value: this.time.incoming
+						value: this.time.incoming,
+						referrer: from.path
 					});
 				}, 300);
 			});		
-		},
-		updated () {			
-			if (window.DEBUG) console.log("debug - app.components.core.layouts.Analytics.updated");
 		},
 		beforeDestroy () {
 			if (window.DEBUG) console.log("debug - app.components.core.layouts.Analytics.beforeDestroy");

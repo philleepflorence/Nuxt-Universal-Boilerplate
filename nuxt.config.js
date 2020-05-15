@@ -27,8 +27,8 @@ module.exports = {
 		    total: true
 	    },
 	    https: {
-		    key: process.env.LOCALHOST_KEY === "" ? fs.readFileSync(path.resolve(process.env.LOCALHOST_KEY)) : null,
-			cert: process.env.LOCALHOST_CRT === "" ? fs.readFileSync(path.resolve(process.env.LOCALHOST_CRT)) : null
+		    key: process.env.LOCALHOST_KEY ? fs.readFileSync(path.resolve(process.env.LOCALHOST_KEY)) : null,
+			cert: process.env.LOCALHOST_CRT ? fs.readFileSync(path.resolve(process.env.LOCALHOST_CRT)) : null
 	    }
     },
     
@@ -46,6 +46,59 @@ module.exports = {
 	router: {
 		middleware: 'auth',
 		extendRoutes (routes, resolve) {
+			routes.push({
+				path: '/forms/:form',
+				component: resolve(__dirname, 'pages/forms/form.vue'),
+				name: 'forms-page'
+			});	
+			
+			routes.push({
+				path: '/glossary',
+				component: resolve(__dirname, 'pages/glossary/glossaries.vue'),
+				name: 'glossary-page'
+			});	
+			
+			routes.push({
+				path: '/glossary/:type/:slug',
+				component: resolve(__dirname, 'pages/glossary/glossary.vue'),
+				name: 'glossary-page-item'
+			});
+			
+			routes.push({
+				path: '/help/:category/:slug',
+				component: resolve(__dirname, 'pages/help/index.vue'),
+				name: 'help-page-item'
+			});
+			
+			routes.push({
+				path: '/legal/:slug',
+				component: resolve(__dirname, 'pages/legal/item.vue'),
+				name: 'legal-page-item'
+			});
+			
+			routes.push({
+				path: '/auth/reset/:salt',
+				component: resolve(__dirname, 'pages/auth/reset.vue'),
+				name: 'auth-page-reset'
+			});
+			
+			routes.push({
+				path: '/user/profile/:username',
+				component: resolve(__dirname, 'pages/user/profile.vue'),
+				name: 'user-page-profile-username'
+			});
+			
+			routes.push({
+				path: '/user/profile/account/:section',
+				component: resolve(__dirname, 'pages/user/profile.vue'),
+				name: 'user-page-profile-account'
+			});
+			
+			routes.push({
+				path: '/user/settings/account/:section',
+				component: resolve(__dirname, 'pages/user/settings.vue'),
+				name: 'user-page-account-settings'
+			});
 			/*
 				See api/config/app.js -> routes()
 			*/
@@ -90,24 +143,27 @@ module.exports = {
 	        },
 	        {
 		        rel: 'stylesheet',
-		        href: `${ process.env.CDN_URL }/vendors/material-design-icons/css/materialdesignicons.css`
+		        href: `${ process.env.CDN_URL }/app/vendors/material-design-icons/css/materialdesignicons.css`,
+		        dataSrc: 'https://materialdesignicons.com/'
 	        },
 	        {
 		        rel: 'stylesheet',
-		        href: `${ process.env.CDN_URL }/vendors/animate.css/animate.css`
+		        href: `${ process.env.CDN_URL }/app/vendors/animate.css/animate.css`,
+		        dataSrc: 'https://daneden.github.io/animate.css/'
 	        },
 	        {
 		        rel: 'stylesheet',
-		        href: `${ process.env.CDN_URL }/vendors/overlayscrollbars/css/OverlayScrollbars.min.css`
+		        href: `${ process.env.CDN_URL }/app/vendors/overlayscrollbars/css/OverlayScrollbars.min.css`,
+		        dataSrc: 'https://kingsora.github.io/OverlayScrollbars'
 	        }
         ],
         script: [
 	        {
-		        src: `${ process.env.CDN_URL }/vendors/overlayscrollbars/js/OverlayScrollbars.min.js`,
+		        src: `${ process.env.CDN_URL }/app/vendors/overlayscrollbars/js/OverlayScrollbars.min.js`,
 		        dataSrc: 'https://kingsora.github.io/OverlayScrollbars'
         	},
 	        {
-		        src: `${ process.env.CDN_URL }/vendors/overlayscrollbars/js/Extensions.min.js`,
+		        src: `${ process.env.CDN_URL }/app/vendors/overlayscrollbars/js/Extensions.min.js`,
 		        dataSrc: 'https://github.com/parsisolution/os-scroll-chain'
         	}
         ]
@@ -162,13 +218,22 @@ module.exports = {
         	(session) => {
 	        	
 	        	const RedisStore = require('connect-redis')(session);
+				const redis = require('redis');
+
+				let redisClient = redis.createClient({
+					host: process.env.REDIS_HOST,
+					port: process.env.REDIS_PORT,
+					password: process.env.REDIS_PASSWORD,
+					db: process.env.REDIS_DB
+				});
+				redisClient.unref();
+				redisClient.on('error', console.log);
+				
+				let $store = new RedisStore({ client: redisClient });
 	        	
 	        	return {
 		        	name: 'redis-session-id',
-                    store: new RedisStore({
-                        host: process.env.REDIS_HOST,
-                        port: process.env.REDIS_PORT
-                    }),
+                    store: $store,
                     secret: process.env.REDIS_SECRET,
                     
                     cookie: { 
@@ -198,7 +263,32 @@ module.exports = {
         /*
          ** You can extend webpack config here
          */
-        extend(config, ctx) {},
+        analyze: process.env.BUILD_ANALYZER === 'true',
+	    optimization: {
+		    runtimeChunk: 'single',
+		    splitChunks: {
+		        chunks: 'all',
+			    automaticNameDelimiter: '.',
+			    name: false,
+			    minSize: 10000,
+			    maxSize: 200000,
+			    cacheGroups: {
+				    styles: {
+					    test: /\.s?css$/,
+					    name: 'styles',
+					    enforce: true,
+					    chunks: 'all'
+				    },
+				    vendor: {
+					    test: /[\\/]node_modules[\\/]/,
+					    name(module) {
+						    const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1];					    
+						    return `npm.${packageName.replace('@', '')}`;
+					    }
+				    }
+			    }
+	        }
+	    },
         watch: [],
         extractCSS: {
 	        ignoreOrder: true
@@ -207,6 +297,10 @@ module.exports = {
 	        app: ({ isDev }) => isDev ? 'app.[name].js' : 'app.[chunkhash].js',
 	        chunk: ({ isDev }) => isDev ? 'chunk.[name].js' : 'chunk.[id].[chunkhash].js',
 	        css: ({ isDev }) => isDev ? 'style.[name].css' : 'style.[contenthash].css'
+        },
+        stats: {
+	        colors: true,
+	        logging: 'verbose'
         }
     },
 

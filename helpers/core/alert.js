@@ -7,24 +7,27 @@
  * @dependents 	:: https://ned.im/noty
  * Attributes	::
  *		message - @htmlstring, message to alert,
- *		type - alert, success, error, warning, info, defaults to alert,
+ *		type - alert, success, error, warning, info, defaults to alert (false to close all),
  *		params - @object
  */
  
-import _ from 'lodash';
-import handlebars from 'handlebars/dist/handlebars.min.js';
 import Noty from 'noty';
 
 export default  {
+	close () {
+		Noty.closeAll();
+	},
 	show (message, type, params) {
-		if (typeof message !== 'string') return false;
+		if (typeof message !== 'string') return Noty.closeAll();
+		
+		if (type === false) Noty.closeAll();
 		
 		type = type || 'alert';
 		params = params || {};
 		
-		params.delay = params.delay || 8000;
+		let delay = typeof params === "number" ? params : (params.delay || 8000);
 		
-		if (type === 'error') params.delay = 15000;
+		if (type === 'error') delay = 15000;
 		
 		if (params.list && Array.isArray(params.list)) message = message + " <ol><li>" + params.list.join('</li><li> ') + "</li></ol>";
 		
@@ -33,7 +36,7 @@ export default  {
 			type: type,
 			text: message,
 			layout: params.position || 'bottomRight',
-			timeout: params.delay,
+			timeout: delay,
 			animation: {
 				open: 'animated fadeInUp',
 				close: 'animated fadeOutUp'

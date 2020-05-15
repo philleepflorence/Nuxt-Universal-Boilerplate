@@ -36,9 +36,11 @@ module.exports = function (input, mode, req) {
 		]
 	};
 	    
-    /* Set user privilege and permission! */
+    /*
+	    Set user privilege and permission!
+    */
     
-    let permission = _.get(input, 'privilege.data.id', _.get(input, 'privilege'));
+    let permission = _.get(input, 'privilege.id', _.get(input, 'privilege'));
     
     user.privilege = permission;
     
@@ -50,7 +52,9 @@ module.exports = function (input, mode, req) {
     	    
     switch (mode)
 	{
-		/* Build User Session Object */
+		/*
+			Build User Session Object
+		*/
 		
 		case 'session':
 			
@@ -64,7 +68,9 @@ module.exports = function (input, mode, req) {
 		
 		break;
 		
-		/* Sanitize User Account Object - Remove or encrypt sensitive fields */
+		/*
+			Sanitize User Account Object - Remove or encrypt sensitive fields
+		*/
 		
 		case 'account':
 		
@@ -77,50 +83,80 @@ module.exports = function (input, mode, req) {
 				if (_.get(user, field)) _.set(user, field, null);
 			}
 			
-			/* Set User Permissions - using permissions:row */
+			/*
+				Set User Permissions - granular privileges
+			*/
 			
-			let permissions = _.get(input, 'permissions.data') || _.get(input, 'permissions');
+			let permissions = _.get(input, 'permissions');
 				temp = {};
 			
 			if (Array.isArray(permissions))
 			{
 				permissions.forEach(function (row)
 				{
-					_.setWith(temp, row.id, row);
+					_.setWith(temp, row.id, row.privilege);
 				});
 			}
 			
 			user.permissions = temp;
 	
-			/* Set User Initials, Notifications, Dates, and Images */
+			/*
+				Set User Notifications
+			*/
 			
-			if (_.get(input, 'notifications.data'))
+			let notifications = _.get(input, 'notifications');
+				temp = {};
+			
+			if (Array.isArray(notifications))
 			{
-				let notifications = _.get(input, 'notifications.data');
-				let junction = _.get(input, 'notifications.junction.data');
-				
-				_.forEach(junction, function (row, index)
+				notifications.forEach(function (row)
 				{
-					row.name = _.get(notifications[index], "name");
-					row.description = _.get(notifications[index], "description");
-					row.slug = _.get(notifications[index], "slug");
+					let keys = `${ row.notification.slug }.${ row.notification.mode }`.toLowerCase();
+					
+					_.setWith(temp, keys, row.notification);
 				});
-				
-				_.set(user, 'notifications', junction);
 			}
+			
+			user.notifications = temp;
+	
+			/*
+				Set User Form Submissions
+			*/
+			
+			let forms = _.get(input, 'forms');
+				temp = {};
+			
+			if (Array.isArray(forms))
+			{
+				forms.forEach(function (row)
+				{
+					row.user = null;
+					row.form = row.form.slug;
+					
+					let keys = `${ row.created }.${ row.key }`.toLowerCase();
+					
+					_.setWith(temp, keys, row);
+				});
+			}
+			
+			user.forms = temp;
 		
 		break;
 	}
 			
-	/* Set User Metadata - using key:value */
+	/*
+		Set User Metadata - using key:value
+	*/
 	
-	let metadata = _.get(input, 'metadata.data');
+	let metadata = _.get(input, 'metadata');
 		temp = {};
 	
 	if (Array.isArray(metadata))
 	{
 		metadata.forEach(function (row)
 		{
+			row.user = null;
+			
 			_.set(temp, row.key, row.value);
 		});
 	}
@@ -138,20 +174,27 @@ module.exports = function (input, mode, req) {
 	if (_.get(user, 'updated')) _.set(user, 'formatted.updated', ( moment(_.get(user, 'updated')).format(dateformat) ));
 	
 	if (_.get(user, 'last_login')) _.set(user, 'formatted.login', ( moment(_.get(user, 'last_login')).format(dateformat) ));
-	
-	if (_.get(user, 'image.data')) _.set(user, 'image', ( _.get(user, 'image.data') ));
-	
+		
 	user.privilege = _.get(user, 'permission.privilege', user.privilege);
 	
-	if (!user.image) user.image = {
-		url: __app.helpers.core.gravatar({
-			size: 960,
-			email: user.image
-		}, req),
-		thumbnail_url: __app.helpers.core.gravatar({
-			size: 320,
-			email: user.image
-		}, req)
+	if (!_.get(user, 'image.id')) 
+	{
+		user.image = {
+			url: __app.helpers.core.gravatar({
+				size: 960,
+				email: user.email
+			}, req),
+			thumbnail_url: __app.helpers.core.gravatar({
+				size: 320,
+				email: user.email
+			}, req)
+		}
+	}
+	else if (user.image) {
+		user.image = {
+			name: _.get(user, 'image.filename_disk'),
+			url: _.get(user, 'image.data.url')
+		};
 	}
 			
     return user;

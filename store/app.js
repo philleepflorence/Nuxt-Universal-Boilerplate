@@ -7,7 +7,7 @@
  *
  */
  
-import _ from 'lodash';
+import { get, set } from 'lodash';
 
 export const state = () => ({
 	endpoints: {
@@ -15,7 +15,8 @@ export const state = () => ({
 			login: '/api/auth/login',
 			register: '/api/auth/register',
 			reset: '/api/auth/reset',
-			credentials: '/api/auth/credentials'
+			credentials: '/api/auth/credentials',
+			user: '/api/auth/user'
 		},
 		form: {
 			submit: '/api/auth/submit',
@@ -57,10 +58,27 @@ export const state = () => ({
 		iOS: /(CriOS|iPad|iPhone)/
 	},
 	routes: {
+		host: process.env.SERVER_DOMAIN,
 		parent: null,
 		history: []
 	}
 });
+
+export const getters = {
+	GET: (state) => (key) => {
+		let value = get(state, key);
+		
+		if (typeof value !== "undefined") return value;
+		
+		if (typeof window === "object") {
+			value = window.localStorage.getItem(key);
+			
+			if (typeof value !== "undefined") return JSON.parse(value);			
+		}
+		
+		return value;
+	}
+};
 
 export const mutations = {
 	CONTENT (state, payload) {
@@ -78,7 +96,7 @@ export const mutations = {
 	},
 	METADATA (state, payload) {
 		if (typeof payload.key === 'string') {
-			_.set(state.metadata, payload.key, payload.data);			
+			set(state.metadata, payload.key, payload.data);			
 		}
 	},
 	ROUTES (state, payload) {
@@ -86,9 +104,22 @@ export const mutations = {
 			state.routes.history.push(payload);			
 		}
 	},
+	REMOVE (state, payload) {
+		if (typeof payload.key === 'string') {
+			set(state, payload.key, null);
+			
+			if (payload.storage === true && typeof window === "object") {
+				window.localStorage.removeItem(payload.key);
+			}			
+		}
+	},
 	SET (state, payload) {
 		if (typeof payload.key === 'string') {
-			_.set(state, payload.key, payload.data);			
+			set(state, payload.key, payload.data);
+			
+			if (payload.storage === true && typeof window === "object") {
+				window.localStorage.setItem(payload.key, JSON.stringify(payload.data));
+			}			
 		}
 	}
 };

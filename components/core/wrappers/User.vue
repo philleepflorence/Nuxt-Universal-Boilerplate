@@ -94,20 +94,9 @@
 				this.keys.element = Page.utils.rand();
 			},
 			render () {
-				if (this.page.mode) {
-					clearTimeout(this.timer);
-					
-					this.timer = setTimeout(() => {
-						document.body.setAttribute('data-mode', this.page.mode);
-					}, 300);
-				}
-				else {
-					clearTimeout(this.timer);
-					
-					this.timer = setTimeout(() => {
-						document.body.removeAttribute('data-mode');
-					}, 300);
-				}
+				if (window.DEBUG) console.log("debug - app.components.core.wrappers.User.render");
+				
+				if (this.page) Page.color(this.page.mode);
 			}
 		},
 		data () {

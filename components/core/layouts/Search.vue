@@ -1,24 +1,26 @@
 <template>
-	<div id="search" class="options-overlay position-fixed position-full bg-dark bg-overlay off" role="app search" v-bind:key="keys.element">
+	<div id="search" class="options-overlay position-fixed position-full bg-overlay off" role="app search" v-bind:key="keys.element">
 		<div class="search-overlay-container position-absolute position-full">
-			<CustomScroll name="search">
+			
+			<app-component-ui-custom-scroll name="search">
 				<a href="#" class="position-fixed position-full pointer-events-auto" v-on:click.prevent.stop="close"></a>
 				<div class="page-search-container position-relative vh-100 vh-fixed d-flex pointer-events-none">
 					<div class="page-search-content page-search-form pointer-events-auto max-w-640px w-90 spacer mx-auto transition t-delay">
+						
 						<header class="page-search-contents-header spacer t-delay search-animation">
 							<span 
 								class="d-flex align-items-center justify-content-center bg-white text-secondary h-70px w-70px mx-auto rounded-circle" 
-								v-html="labels.app.button.options.search.icon.icon">
+								v-html="form.icon.icon">
 							</span>
 						</header>
 						
-						<p class="page-search-hint p lead text-white text-center">{{ input.hint }}</p>
+						<div class="page-search-hint p lead text-white text-center" v-html="form.content"></div>
 						
 						<div class="page-search-inline position-relative text-center spacer font-weight-book" v-if="modes">
 							<b-form-group>
 								<b-form-radio-group 
 									id="page-search-search-options"
-									v-model="form.mode"
+									v-model="model.mode"
 									v-bind:options="modes"
 									name="page-search-search-options">
 								</b-form-radio-group>
@@ -29,7 +31,7 @@
 							<b-form-input 
 								class="page-search-input page-inline-input position-relative text-dark text-left lead bg-white-80 h-50px w-100 font-weight-book"
 								type="text" 
-								v-bind:placeholder="input.plaintext"
+								v-bind:placeholder="input.value"
 								name="query" 
 								v-bind:value="search.query"
 								autocomplete="off"
@@ -38,103 +40,131 @@
 							</b-form-input>
 							<button 
 								class="page-search-button page-inline-button plain bg-primary rounded-circle position-absolute position-right position-top text-white shadow-sm" 
-								v-html="icons.settings.complete.icon.icon" 
+								v-html="icons.form.submit.icon.icon" 
 								v-on:click.prevent.stop="onsearch">
 							</button>					
 						</div>
 						
-						<div class="page-search-form-row position-relative pt-4 text-white animated fadeIn a-delay" v-if="total">
-							<div class="p lead bg-white-10 px-3 py-3" v-html="information"></div>				
+						<div class="position-relative p-letterbox sm" v-show="loading">
+							<app-component-page-loader></app-component-page-loader>
 						</div>
 						
-						<div class="page-search-form-row position-relative pt-4 text-white animated fadeIn a-delay" v-if="suggestions">
-							<div class="bg-white-10 px-3 py-3">
-								<div class="lead p" v-html="labels.app.content['search-overlay'].suggestions.value"></div>
-								<nav class="pt-4 text-capitalize">
-									<button class="plain text-primary mr-4 mb-2 p-0 d-inline-block text-capitalize font-weight-book" v-for="(row, index) in meta.suggestions" v-bind:key="`${ index }-suggestions`" v-on:click.stop.prevent="suggestion">{{ row.name }}</button>
-								</nav>
-							</div>				
-						</div>
-						
-						<div class="page-search-form-row position-relative pt-4 pb-6 animated fadeIn a-delay" v-if="results">
-							<nuxt-link class="text-white mb-1 d-block bg-white-10 px-3 py-2 animated fadeInUpSmall a-delay" v-bind:to="`/${ row.slug }`" v-for="(row, index) in results" v-bind:key="`${ row.slug }-${ index }-row`">
-								<p class="p lead sm mb-1 text-capitalize" v-html="row.title"></p>
-								<p class="p mb-0 empty opacity-70" v-html="row.description"></p>
-								<small class="font-weight-book opacity-50">{{ row.category }}</small>
-							</nuxt-link>												
-						</div>
-						
-						<div class="page-search-form-row position-relative pt-4 pb-6 text-white animated fadeIn a-delay" v-else-if="empty">
-							<div class="p lead bg-white-10 px-3 py-3" v-html="labels.app.content['search-overlay'].empty.value"></div>				
-						</div>
+						<div class="position-relative" v-show="!loading">
+							
+							<div class="page-search-form-row position-relative pt-4 text-white animated fadeIn a-delay" v-if="total">
+								<div class="p lead bg-white-10 px-3 py-3" v-html="information"></div>				
+							</div>
+							
+							<div class="page-search-form-row position-relative pt-4 text-white animated fadeIn a-delay" v-if="suggestions">
+								<div class="bg-white-10 px-3 py-3">
+									<div class="lead p" v-html="content('suggestions').value"></div>
+									<nav class="pt-4 text-capitalize">
+										<button class="plain text-primary mr-4 mb-2 p-0 d-inline-block text-capitalize font-weight-book" v-for="(row, index) in meta.suggestions" v-bind:key="`${ index }-suggestions`" v-on:click.stop.prevent="suggestion">{{ row.name }}</button>
+									</nav>
+								</div>				
+							</div>
+							
+							<div class="page-search-form-row position-relative pt-4 pb-6 animated fadeIn a-delay" v-if="results">
+								<nuxt-link class="text-white mb-1 d-block bg-white-10 px-3 py-2 animated fadeInUpSmall a-delay" v-bind:to="row.slug" v-for="(row, index) in results" v-bind:key="`${ row.slug }-${ index }-row`">
+									<p class="p lead sm mb-1 text-capitalize" v-html="row.title"></p>
+									<p class="p mb-0 empty opacity-70" v-html="row.description"></p>
+									<small class="font-weight-book opacity-50">{{ row.category }}</small>
+								</nuxt-link>												
+							</div>
+							
+							<div class="page-search-form-row position-relative pt-4 pb-6 text-white animated fadeIn a-delay" v-else-if="empty">
+								<div class="p lead bg-white-10 px-3 py-3" v-html="content('empty').value"></div>				
+							</div>
+							
+						</div>					
 						
 					</div>
 				</div>
-			</CustomScroll>
+			</app-component-ui-custom-scroll>
+			
 		</div>
 	</div>
 </template>
 
-<script>
+<script>	
+	import { forEach, get, trimEnd } from "lodash";
+	
+	import ComponentUICustomScroll from "~/components/core/ui/CustomScroll.vue";
+	import ComponentPageLoader from "~/components/core/pages/Loader.vue";
+	
 	import Page from "~/helpers/core/page.js";
-	import CustomScroll from "~/components/core/ui/CustomScroll.vue";
-	import Handlebars from 'handlebars/dist/handlebars.min.js';	
-	import PageListGroup from "~/components/core/pages/ListGroup.vue";	
-	import _ from "lodash";
 	
 	export default {
 		name: "SearchOverlay",
 		components: {
-			CustomScroll,
-			PageListGroup
+			'app-component-ui-custom-scroll': ComponentUICustomScroll,
+			'app-component-page-loader': ComponentPageLoader
 		},
 		computed: {
 			basepath () {
 				return this.$store.state.api.config.application.search.base;
 			},
-			dropdowns () {
-				return this.$store.state.api.dropdowns;
+			form () {
+				return this.$store.state.api.forms.search;
 			},
 			icons () {
 				return this.$store.state.api.icons;
 			},
 			information () {
-				let string = this.labels.app.content['search-overlay'].results.value;
-				
-				return string.replace("{{ query }}", this.form.query).replace("{{ total }}", this.meta.total).replace("{{ loaded }}", this.loaded);
+				return this.content('results').value.replace("{{ query }}", this.model.query).replace("{{ total }}", this.meta.total).replace("{{ loaded }}", this.loaded);
 			},
 			input () {
-				return this.$store.state.api.labels.app.form['search-overlay'].search;
+				let input;
+				
+				forEach(this.form.inputs, (row) => {
+					if (row.form_type === 'input' && row.input_type === 'search') input = row;
+				});
+				
+				return input;
 			},
 			labels () {
 				return this.$store.state.api.labels;
 			},
 			modes () {
-				let dropdowns = _.get(this.dropdowns, 'search.mode');
+				let tags = get(this.pages.app.tags, 'search-mode');
 				
-				if (!dropdowns) return null;
+				if (!tags) return null;
 				
-				_.forEach(dropdowns, (dropdown) => {
-					if (!this.form.mode && dropdown.default === 1) this.form.mode = dropdown.value;
+				let dropdowns = [];
+				
+				forEach(tags, (tag) => {
+					if (!this.model.mode && tag.default) this.model.mode = get(tag, 'synonyms.0');
+					
+					let value = tag.synonyms[0];
+					
+					if (tag.default) this.model.mode = value;
+					
+					dropdowns.push({
+						text: tag.name,
+						value: value
+					});
 				});
 				
 				return dropdowns;
 			},
+			pages () {
+				return this.$store.state.api.pages;
+			},
 			suggestions () {
-				let suggestions = _.get(this.meta, 'suggestions');
+				let suggestions = get(this.meta, 'suggestions');
 				
 				if (!suggestions || !suggestions.length) return null;
 				
 				return suggestions;
 			},
 			total () {
-				return _.get(this.meta, 'total');
+				return get(this.meta, 'total');
 			}
 		},
 		data () {
 			return {
 				empty: false,
-				form: {
+				model: {
 					mode: null,
 					query: null
 				},
@@ -153,6 +183,15 @@
 			close (e) {
 				this.$emit('close', 'search');
 			},
+			content (slug, section = 'content') {
+				let input;
+				
+				forEach(this.form.inputs, (row) => {
+					if (row.slug === slug && row.section === section) input = row;
+				});
+				
+				return input;
+			},
 			count (rows) {
 				return Array.isArray(rows) ? rows.length : 0;
 			},
@@ -170,8 +209,8 @@
 					url: `/api/app/search`,
 					collection: 'search',
 					query: {
-						mode: this.form.mode,
-						query: this.form.query
+						mode: this.model.mode,
+						query: this.model.query
 					}
 				});
 				
@@ -181,7 +220,7 @@
 				
 				if (window.DEBUG) console.log("debug - app.components.core.layouts.Search.loaded", content);
 				
-				if (!_.get(content, 'meta.total')) {
+				if (!get(content, 'meta.total')) {
 					this.empty = true;
 					this.meta = null;
 					this.results = null;
@@ -191,8 +230,8 @@
 						this.$store.commit('event/SET', ['content:loaded', 'search']);
 					}, 100);
 					
-					this.meta = _.get(content, 'meta');
-					this.results = _.get(content, 'data');
+					this.meta = get(content, 'meta');
+					this.results = get(content, 'data');
 				}
 				
 				if (window.DEBUG) console.log("debug - app.components.core.layouts.Search.loaded");					
@@ -224,15 +263,15 @@
 				}
 			},
 			run (query) {
-				let path = _.trimEnd(this.basepath, '/');
+				let path = trimEnd(this.basepath, '/');
 				
-				this.form.query = query;
+				this.model.query = query;
 				
 				if (window.DEBUG) console.log("debug - app.components.core.layouts.Search.run", query, path);				
 				
 				if (query.length) {
 					query = query.replace(/\s/g, '+');
-					query = this.form.mode ? `/${ this.form.mode }/${ query }` : query;
+					query = this.model.mode ? `/${ this.model.mode }/${ query }` : query;
 					
 					if (this.overlay) {
 						this.load();
